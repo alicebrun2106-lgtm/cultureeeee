@@ -320,6 +320,7 @@
   let session = {};
   let masteryAtSessionStart = 0;
 
+  window.startFlashcardSession = function (packId) { return startFlashcardSession(packId); };
   function startFlashcardSession(packId) {
     const pack = FLASHCARD_PACKS.find((p) => p.id === packId);
     if (!pack) return;
@@ -527,7 +528,10 @@
     showScreen("flashcard-result");
   }
 
-  window.backToFlashcards = function () { window.initFlashcards(); };
+  window.backToFlashcards = function () {
+    if (typeof goToTab === "function") goToTab("explorer");
+    else window.initFlashcards();
+  };
 
   document.addEventListener("keydown", function (e) {
     const fcScreen = document.getElementById("screen-flashcard-session");
