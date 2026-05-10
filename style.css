@@ -3394,3 +3394,95 @@ body {
   .today-lesson-body { font-size: 13px; }
   .ts-done-stats { grid-template-columns: 1fr; gap: 8px; }
 }
+
+
+/* ===========================================================
+   PACK SECTIONS — À faire / Fait aujourd'hui / Maîtrisés
+   =========================================================== */
+.pack-section { margin-bottom: 22px; }
+.pack-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 6px 12px 6px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-dim);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.pack-section-title { display: inline-flex; align-items: center; gap: 6px; }
+.pack-section-count {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text-dim);
+  padding: 2px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0;
+}
+.pack-section-collapsible { cursor: pointer; }
+.pack-section-collapsible::after {
+  content: "▾";
+  margin-left: 6px;
+  transition: transform 0.2s ease;
+  display: inline-block;
+}
+.pack-section-collapsed .pack-section-collapsible::after {
+  transform: rotate(-90deg);
+}
+.pack-section-collapsed .pack-list { display: none; }
+
+/* "Fait aujourd'hui" section accent */
+.pack-section-done-today .pack-section-title { color: #2ecc71; }
+.pack-section-done-today .pack-section-count {
+  background: rgba(46, 204, 113, 0.15);
+  color: #2ecc71;
+}
+
+/* Pack-row "done today" visual state */
+.pack-row-done-today {
+  background: linear-gradient(135deg, rgba(46, 204, 113, 0.12), rgba(46, 204, 113, 0.04));
+  border-color: rgba(46, 204, 113, 0.35) !important;
+  position: relative;
+}
+.pack-row-done-today::before {
+  content: "";
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 3px;
+  background: #2ecc71;
+  border-radius: 16px 0 0 16px;
+}
+.pack-row-done-today .pack-row-cta { color: #2ecc71; }
+.pack-row-check {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px; height: 18px;
+  background: #2ecc71;
+  color: #0a0e27;
+  border-radius: 50%;
+  font-size: 11px;
+  font-weight: 800;
+  margin-left: 6px;
+}
+
+/* Pack-row "mastered" state */
+.pack-row-mastered-state {
+  background: linear-gradient(135deg, rgba(240, 192, 64, 0.1), rgba(240, 192, 64, 0.03));
+  border-color: rgba(240, 192, 64, 0.3) !important;
+}
+.pack-row-star { font-size: 13px; margin-left: 6px; }
+
+/* "Fait aujourd'hui" inline tag */
+.pack-row-today-tag {
+  font-size: 10px;
+  font-weight: 700;
+  color: #2ecc71;
+  background: rgba(46, 204, 113, 0.15);
+  padding: 2px 8px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}

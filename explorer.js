@@ -20,6 +20,41 @@
     return started;
   }
 
+  // Returns { due, newCards }: due = cards needing review NOW, newCards = unseen cards
+  function getPackDue(packId, totalCards) {
+    const data = SRS.getData(SRS_KEY) || {};
+    let due = 0, newCards = 0;
+    const now = Date.now();
+    for (let i = 0; i < totalCards; i++) {
+      const st = data[getCardKey(packId, i)];
+      if (!st) newCards++;
+      else if ((st.next || 0) <= now) due++;
+    }
+    return { due, newCards };
+  }
+
+  // Get last activity timestamp for this pack (from tracking module)
+  function getPackLastPlayed(packId) {
+    try {
+      const tracking = JSON.parse(localStorage.getItem("qpuc-tracking")) || {};
+      return tracking[packId] && tracking[packId].lastPlayed ? tracking[packId].lastPlayed : 0;
+    } catch { return 0; }
+  }
+
+  function isToday(ts) {
+    if (!ts) return false;
+    const start = new Date(); start.setHours(0, 0, 0, 0);
+    return ts >= start.getTime();
+  }
+
+  // A pack is "done today" if : already reviewed today AND no due cards left right now
+  function isPackDoneToday(pack) {
+    const total = pack.cards.length;
+    const { due } = getPackDue(pack.id, total);
+    if (due > 0) return false;
+    return isToday(getPackLastPlayed(pack.id));
+  }
+
   // ---------- INIT ----------
   window.initExplorer = function () {
     const container = document.getElementById("explorer-content");
@@ -93,7 +128,7 @@
     const allPacks = (typeof FLASHCARD_PACKS !== "undefined" ? FLASHCARD_PACKS : []);
     const packs = allPacks.filter((p) => cat.packIds.includes(p.id));
 
-    // Sort by difficulty (debutant first), then by mastery
+    // Sort by difficulty (debutant first)
     const order = { debutant: 0, intermediaire: 1, expert: 2 };
     packs.sort((a, b) => {
       const da = order[a.difficulty] ?? 1, db = order[b.difficulty] ?? 1;
@@ -101,16 +136,47 @@
       return a.name.localeCompare(b.name, "fr");
     });
 
-    const list = document.createElement("div");
-    list.className = "pack-list";
-    packs.forEach((p) => list.appendChild(buildPackRow(p)));
-    container.appendChild(list);
+    // Split: à faire / fait aujourd'hui / maîtrisés
+    const todo = [], doneToday = [], mastered = [];
+    packs.forEach((p) => {
+      if (getMastery(p.id, p.cards.length) >= 100) mastered.push(p);
+      else if (isPackDoneToday(p)) doneToday.push(p);
+      else todo.push(p);
+    });
+
+    addPackSection(container, "À faire", "📚", todo, false);
+    addPackSection(container, "Fait aujourd'hui", "✅", doneToday, false, { todayDone: true });
+    addPackSection(container, "Maîtrisés", "⭐", mastered, mastered.length > 4);
   }
 
-  function buildPackRow(pack) {
+  function addPackSection(container, title, icon, packs, collapsed, opts = {}) {
+    if (packs.length === 0) return;
+    const section = document.createElement("div");
+    section.className = "pack-section" + (opts.todayDone ? " pack-section-done-today" : "");
+    const header = document.createElement("div");
+    header.className = "pack-section-header";
+    header.innerHTML = `<span class="pack-section-title">${icon} ${title}</span><span class="pack-section-count">${packs.length}</span>`;
+    if (collapsed) {
+      header.classList.add("pack-section-collapsible");
+      header.onclick = () => {
+        section.classList.toggle("pack-section-collapsed");
+        header.classList.toggle("pack-section-open");
+      };
+      section.classList.add("pack-section-collapsed");
+    }
+    section.appendChild(header);
+    const list = document.createElement("div");
+    list.className = "pack-list";
+    packs.forEach((p) => list.appendChild(buildPackRow(p, opts)));
+    section.appendChild(list);
+    container.appendChild(section);
+  }
+
+  function buildPackRow(pack, opts = {}) {
     const total = pack.cards.length;
     const mastery = getMastery(pack.id, total);
     const started = getStarted(pack.id);
+    const doneToday = isPackDoneToday(pack);
 
     const diffLabels = { debutant: "Débutant", intermediaire: "Intermédiaire", expert: "Avancé" };
     const diffColors = { debutant: "#2ecc71", intermediaire: "#f0c040", expert: "#e74c3c" };
@@ -119,14 +185,19 @@
 
     const row = document.createElement("button");
     row.className = "pack-row";
+    if (mastery >= 100) row.classList.add("pack-row-mastered-state");
+    else if (doneToday) row.classList.add("pack-row-done-today");
     row.onclick = () => {
       if (typeof startFlashcardSession === "function") {
         startFlashcardSession(pack.id);
       }
     };
 
-    const badge = mastery >= 100 ? '<span class="pack-row-mastered">⭐</span>' : "";
-    const label = mastery >= 100 ? "Maîtrisé" : started ? "Continuer" : "Apprendre";
+    let badge = "";
+    let cta = "Apprendre →";
+    if (mastery >= 100) { badge = '<span class="pack-row-star">⭐</span>'; cta = "Refaire →"; }
+    else if (doneToday) { badge = '<span class="pack-row-check">✓</span>'; cta = "Refaire →"; }
+    else if (started) cta = "Continuer →";
 
     row.innerHTML = `
       <div class="pack-row-icon">${pack.icon || "📚"}</div>
@@ -135,10 +206,11 @@
         <div class="pack-row-meta">
           <span class="pack-row-diff" style="background:${dColor}33;color:${dColor}">${dLabel}</span>
           <span class="pack-row-cards">${total} cartes</span>
+          ${doneToday && mastery < 100 ? '<span class="pack-row-today-tag">Fait aujourd\'hui</span>' : ""}
         </div>
         <div class="pack-row-progress"><div class="pack-row-progress-fill" style="width:${mastery}%"></div></div>
       </div>
-      <div class="pack-row-cta">${label} →</div>
+      <div class="pack-row-cta">${cta}</div>
     `;
     return row;
   }
