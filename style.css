@@ -3486,3 +3486,74 @@ body {
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }
+
+
+/* ===========================================================
+   TOUT RÉVISER — bloc sous la session du jour
+   =========================================================== */
+.today-review-all-card {
+  margin-top: 14px;
+  padding: 16px 18px;
+  background: var(--bg-card);
+  border: 1px solid rgba(155, 89, 182, 0.25);
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  position: relative;
+  overflow: hidden;
+}
+.today-review-all-card::before {
+  content: "";
+  position: absolute;
+  top: -30px; right: -30px;
+  width: 120px; height: 120px;
+  background: radial-gradient(circle, rgba(155, 89, 182, 0.15), transparent 70%);
+  pointer-events: none;
+}
+.review-all-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.review-all-icon {
+  font-size: 30px;
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  background: rgba(155, 89, 182, 0.12);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.review-all-info {
+  flex: 1;
+  min-width: 0;
+}
+.review-all-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 2px;
+}
+.review-all-sub {
+  font-size: 13px;
+  color: var(--text-dim);
+  line-height: 1.4;
+}
+.btn-review-all {
+  width: 100%;
+  background: linear-gradient(135deg, #b07ad9, #7a5fa3);
+  color: white;
+  border: none;
+  padding: 14px 20px;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  transition: transform 0.1s, box-shadow 0.2s;
+}
+.btn-review-all:hover { box-shadow: 0 6px 20px rgba(155, 89, 182, 0.35); }
+.btn-review-all:active { transform: scale(0.98); }

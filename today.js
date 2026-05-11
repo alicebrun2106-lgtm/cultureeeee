@@ -181,7 +181,64 @@
       sessionBlock.querySelector("#btn-session-start").onclick = startDailySession;
     }
     container.appendChild(sessionBlock);
+
+    // 4. "Tout réviser" — mix all touched cards
+    const touched = getAllTouchedCards();
+    if (touched.length > 0) {
+      const reviewAll = document.createElement("div");
+      reviewAll.className = "today-review-all-card";
+      reviewAll.innerHTML = `
+        <div class="review-all-header">
+          <div class="review-all-icon">🔀</div>
+          <div class="review-all-info">
+            <div class="review-all-title">Tout réviser</div>
+            <div class="review-all-sub">${touched.length} carte${touched.length > 1 ? "s" : ""} déjà vue${touched.length > 1 ? "s" : ""}, tous paquets mélangés</div>
+          </div>
+        </div>
+        <button class="btn-review-all" id="btn-review-all">Mélanger et réviser</button>
+      `;
+      reviewAll.querySelector("#btn-review-all").onclick = startReviewAll;
+      container.appendChild(reviewAll);
+    }
   };
+
+  // Get all cards across all packs that have been seen at least once
+  function getAllTouchedCards() {
+    if (typeof FLASHCARD_PACKS === "undefined") return [];
+    const srsData = SRS.getData(SRS_KEY) || {};
+    const out = [];
+    FLASHCARD_PACKS.forEach((pack) => {
+      pack.cards.forEach((card, idx) => {
+        const key = pack.id + ":" + idx;
+        const st = srsData[key];
+        if (st && (st.reps || 0) >= 1) {
+          out.push({ pack, card, idx, key });
+        }
+      });
+    });
+    return out;
+  }
+
+  // Launch a global review of all touched cards, shuffled, no quiz at the end
+  function startReviewAll() {
+    const touched = getAllTouchedCards();
+    if (touched.length === 0) return;
+    const shuffled = touched.slice();
+    shuffle(shuffled);
+    const queueSize = Math.min(25, shuffled.length);
+    sess = {
+      flashcards: shuffled.slice(0, queueSize),
+      quiz: [],
+      step: "flashcards",
+      fcIndex: 0, fcResults: { again: 0, hard: 0, good: 0, easy: 0 }, fcFlipped: false,
+      quizIndex: 0, quizCorrect: 0, quizAnswered: false,
+      isReviewAll: true,
+      totalTouched: touched.length,
+    };
+    showScreen("today-session");
+    runFlashcardStep();
+  }
+  window.startReviewAll = startReviewAll;
 
   // ---------- SESSION FLOW ----------
   let sess = {};
@@ -265,10 +322,18 @@
     else if (quality === 4) sess.fcResults.good++;
     else sess.fcResults.easy++;
 
-    // Track today progress
-    const p = getTodayProgress();
-    p.flashcardsDone = Math.max(p.flashcardsDone, sess.fcIndex + 1);
-    saveTodayProgress(p);
+    // Track today progress (only for the daily session, not "Tout réviser")
+    if (!sess.isReviewAll) {
+      const p = getTodayProgress();
+      p.flashcardsDone = Math.max(p.flashcardsDone, sess.fcIndex + 1);
+      saveTodayProgress(p);
+    }
+
+    // Bail-out if user requeued an "Again" — re-show same card
+    if (quality <= 1) {
+      // For review-all, requeue at end so it comes back
+      if (sess.isReviewAll) sess.flashcards.push(item);
+    }
 
     sess.fcIndex++;
     runFlashcardStep();
@@ -351,9 +416,12 @@
   }
 
   function finishSession() {
-    const p = getTodayProgress();
-    p.sessionCompleted = true;
-    saveTodayProgress(p);
+    // Mark daily session done only if it WAS the daily session (not Tout réviser)
+    if (!sess.isReviewAll) {
+      const p = getTodayProgress();
+      p.sessionCompleted = true;
+      saveTodayProgress(p);
+    }
 
     // Celebrate!
     GAM.fireConfetti();
@@ -362,6 +430,24 @@
     if (!root) return;
     const xpEarned = (sess.fcResults.hard * 1 + sess.fcResults.good * 2 + sess.fcResults.easy * 3) + sess.quizCorrect * 2;
     const streak = GAM.getStreakStatus();
+    const totalCardsReviewed = sess.fcResults.again + sess.fcResults.hard + sess.fcResults.good + sess.fcResults.easy;
+
+    if (sess.isReviewAll) {
+      root.innerHTML = `
+        <div class="ts-done-block">
+          <div class="ts-done-icon">🔀</div>
+          <h2 class="ts-done-title">Révision mélangée terminée !</h2>
+          <div class="ts-done-stats">
+            <div class="ts-done-stat"><span class="ts-done-num">${totalCardsReviewed}</span><span class="ts-done-lbl">cartes révisées</span></div>
+            <div class="ts-done-stat"><span class="ts-done-num">+${xpEarned}</span><span class="ts-done-lbl">XP gagnés</span></div>
+            <div class="ts-done-stat"><span class="ts-done-num">🔥 ${streak.current}</span><span class="ts-done-lbl">jour${streak.current > 1 ? "s" : ""} d'affilée</span></div>
+          </div>
+          <p class="ts-done-message">Bien joué — tu peux relancer un mix dès maintenant.</p>
+          <button class="btn-session-primary" onclick="goToTab('today')">Retour à l'accueil</button>
+        </div>
+      `;
+      return;
+    }
     root.innerHTML = `
       <div class="ts-done-block">
         <div class="ts-done-icon">🎉</div>
