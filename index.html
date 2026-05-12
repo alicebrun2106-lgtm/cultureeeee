@@ -1,423 +1,313 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CULTURE!!! — Un peu de culture chaque jour</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=VT323&family=Press+Start+2P&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=13">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CULTURE!!!</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=VT323&family=Press+Start+2P&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css?v=14">
 </head>
 <body>
-  <div id="app">
-    <!-- ===== TAB: AUJOURD'HUI ===== -->
-    <div id="screen-today" class="screen active tab-screen">
-      <div class="tab-content" id="today-content"></div>
+
+<!-- ─── TOP NAV ─── -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="#" class="logo" onclick="goToTab('trouver'); return false;">CULTURE<span>!!!</span></a>
+    <div class="nav-links">
+      <a href="#" data-tab="trouver" class="active" onclick="goToTab('trouver'); return false;">TROUVER</a>
+      <a href="#" data-tab="mes-paquets" onclick="goToTab('mes-paquets'); return false;">MES PAQUETS</a>
+      <a href="#" data-tab="cartes" onclick="goToTab('cartes'); return false;">CARTES</a>
     </div>
-
-    <!-- Daily session in progress -->
-    <div id="screen-today-session" class="screen tab-screen">
-      <div class="game-header">
-        <button class="btn-back" onclick="goToTab('today')">← Retour</button>
-        <h2>Session du jour</h2>
-        <div></div>
-      </div>
-      <div class="ts-container" id="today-session-content"></div>
-    </div>
-
-    <!-- ===== TAB: EXPLORER ===== -->
-    <div id="screen-explorer" class="screen tab-screen">
-      <div class="tab-content" id="explorer-content"></div>
-    </div>
-
-    <!-- ===== TAB: CARTES ===== -->
-    <div id="screen-cartes" class="screen tab-screen">
-      <div class="tab-content">
-        <div class="explorer-header">
-          <h1 class="explorer-title">Cartes</h1>
-          <p class="explorer-sub">Mémorise géographie & territoires en cliquant sur la carte.</p>
-        </div>
-        <div class="cartes-grid">
-          <button class="carte-mode-btn" onclick="initCarte()">
-            <div class="carte-mode-icon">🗺️</div>
-            <div class="carte-mode-name">Carte de France</div>
-            <div class="carte-mode-desc">Régions, départements, fleuves</div>
-          </button>
-          <button class="carte-mode-btn" onclick="initSchemas()">
-            <div class="carte-mode-icon">📊</div>
-            <div class="carte-mode-name">Schémas</div>
-            <div class="carte-mode-desc">Ve République, UE, ONU en visuel</div>
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- HOME (legacy, kept hidden but reachable for backward compat) -->
-    <div id="screen-home" class="screen">
-      <div class="home-container">
-        <div class="logo">
-          <div class="logo-q">CULTURE</div>
-          <div class="logo-text">
-            <span class="logo-champion" style="color:var(--pink-d)">!!!</span>
-          </div>
-        </div>
-        <p class="home-subtitle">Un peu de culture chaque jour</p>
-
-        <div class="mode-cards">
-          <button class="mode-card" onclick="initQuiz12Coups()">
-            <div class="mode-icon">⚡</div>
-            <div class="mode-title">Quiz 12 Coups</div>
-            <div class="mode-desc">QCM à choix multiples.</div>
-          </button>
-
-          <button class="mode-card" onclick="initProgramme()">
-            <div class="mode-icon">📅</div>
-            <div class="mode-title">Programme</div>
-            <div class="mode-desc">3 semaines progressives.</div>
-          </button>
-
-          <button class="mode-card" onclick="initRevisions()" id="mode-card-revisions">
-            <div class="mode-icon">🔁</div>
-            <div class="mode-title">Révisions du jour</div>
-            <div class="mode-desc">Cartes dues.</div>
-            <span class="rev-home-badge" id="rev-home-badge" style="display:none">0</span>
-          </button>
-        </div>
-
-        <div class="stats-bar">
-          <div class="stat"><span class="stat-label">Quiz joués</span><span class="stat-value" id="stat-games">0</span></div>
-          <div class="stat"><span class="stat-label">Bonnes réponses</span><span class="stat-value" id="stat-correct">0</span></div>
-          <div class="stat"><span class="stat-label">Taux</span><span class="stat-value" id="stat-rate">-</span></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- QUIZ 12 COUPS — Mode selection -->
-    <div id="screen-quiz" class="screen">
-      <div class="game-header">
-        <button class="btn-back" onclick="goHome()">← Retour</button>
-        <h2>Quiz 12 Coups</h2>
-        <div></div>
-      </div>
-      <div class="mode-cards" id="quiz-mode-list"></div>
-    </div>
-
-    <!-- QUIZ 12 COUPS — Session QCM -->
-    <div id="screen-quiz-session" class="screen">
-      <div class="game-header">
-        <button class="btn-back" onclick="backToQuizModes()">← Retour</button>
-        <h2 id="quiz-session-title">Quiz</h2>
-        <div class="quiz-header-right">
-          <span id="quiz-progress">1 / 15</span>
-          <span id="quiz-score-display">Score : 0</span>
-        </div>
-      </div>
-
-      <div class="quiz-timer-bar">
-        <div class="quiz-timer-fill" id="quiz-timer-fill"></div>
-      </div>
-      <div class="quiz-timer-text" id="quiz-timer-text">20s</div>
-
-      <div class="quiz-badges">
-        <span class="diff-badge" id="quiz-diff-badge"></span>
-        <span class="quiz-theme-label" id="quiz-theme-badge"></span>
-      </div>
-
-      <div class="quiz-question-box">
-        <div class="quiz-question-text" id="quiz-question-text"></div>
-      </div>
-
-      <div class="quiz-choices" id="quiz-choices"></div>
-
-      <div class="quiz-feedback" id="quiz-feedback"></div>
-
-      <button class="btn-quiz-next" id="quiz-next-btn" onclick="nextQuizQuestion()" style="display:none">
-        Question suivante →
-      </button>
-    </div>
-
-    <!-- QUIZ 12 COUPS — Résultat -->
-    <div id="screen-quiz-result" class="screen">
-      <div class="result-container">
-        <div class="result-icon">⭐</div>
-        <h2 class="result-title" id="quiz-result-msg">Résultat</h2>
-        <div class="quiz-result-score">
-          <span class="quiz-result-big" id="quiz-result-score">0 / 0</span>
-          <span class="quiz-result-pct" id="quiz-result-pct">0%</span>
-        </div>
-        <div class="quiz-result-review" id="quiz-result-review"></div>
-        <div class="result-buttons">
-          <button class="btn-replay" onclick="replayQuiz()">Rejouer</button>
-          <button class="btn-home" onclick="goHome()">Accueil</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- FLASHCARDS — Sélection du pack -->
-    <div id="screen-flashcards" class="screen">
-      <div class="game-header">
-        <button class="btn-back" onclick="goHome()">← Retour</button>
-        <h2>Flashcards</h2>
-        <div></div>
-      </div>
-      <div class="packs-container" id="flashcard-packs"></div>
-    </div>
-
-    <!-- FLASHCARD SESSION -->
-    <div id="screen-flashcard-session" class="screen">
-      <div class="game-header">
-        <button class="btn-back" onclick="backToFlashcards()">← Retour</button>
-        <h2 id="fc-session-title">Pack</h2>
-        <div class="fc-progress" id="fc-progress-text">0 / 0</div>
-      </div>
-      <div class="fc-card-wrapper">
-        <div class="fc-card" id="fc-card" onclick="flipFlashcard()">
-          <div class="fc-card-face fc-front">
-            <div class="fc-card-label">Question</div>
-            <div class="fc-card-text" id="fc-card-front"></div>
-          </div>
-          <div class="fc-card-face fc-back">
-            <div class="fc-card-label">Réponse</div>
-            <div class="fc-card-text" id="fc-card-back"></div>
-            <div class="fc-memo-tip" id="fc-memo-tip"></div>
-          </div>
-        </div>
-      </div>
-      <button class="btn-flip" id="fc-flip-btn" onclick="flipFlashcard()">Voir la réponse</button>
-      <div class="fc-quality-buttons" id="fc-quality-buttons">
-        <button class="btn-quality btn-again" onclick="rateFlashcard(1)"><span class="quality-key">1</span> À revoir</button>
-        <button class="btn-quality btn-hard" onclick="rateFlashcard(3)"><span class="quality-key">2</span> Difficile</button>
-        <button class="btn-quality btn-good" onclick="rateFlashcard(4)"><span class="quality-key">3</span> Bien</button>
-        <button class="btn-quality btn-easy" onclick="rateFlashcard(5)"><span class="quality-key">4</span> Facile</button>
-      </div>
-    </div>
-
-    <!-- FLASHCARD RÉSULTAT -->
-    <div id="screen-flashcard-result" class="screen">
-      <div class="result-container">
-        <div class="result-icon">🃏</div>
-        <h2 class="result-title" id="fc-result-title">Session terminée</h2>
-        <div class="fc-result-stats">
-          <div class="fc-result-row"><span>Cartes révisées</span><span class="fc-result-val" id="fc-result-total">0</span></div>
-          <div class="fc-result-row again"><span>À revoir</span><span class="fc-result-val" id="fc-result-again">0</span></div>
-          <div class="fc-result-row hard"><span>Difficile</span><span class="fc-result-val" id="fc-result-hard">0</span></div>
-          <div class="fc-result-row good"><span>Bien</span><span class="fc-result-val" id="fc-result-good">0</span></div>
-          <div class="fc-result-row easy"><span>Facile</span><span class="fc-result-val" id="fc-result-easy">0</span></div>
-        </div>
-        <div class="result-buttons">
-          <button class="btn-replay" onclick="backToFlashcards()">Autre pack</button>
-          <button class="btn-home" onclick="goHome()">Accueil</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- CARTE DE FRANCE -->
-    <div id="screen-carte" class="screen"></div>
-
-    <!-- SCHEMAS -->
-    <div id="screen-schemas" class="screen"></div>
-
-    <!-- PROGRAMME — Sélection semaine -->
-    <div id="screen-programme" class="screen">
-      <div class="game-header">
-        <button class="btn-back" onclick="goHome()">← Retour</button>
-        <h2>Programme</h2>
-        <div></div>
-      </div>
-      <div class="programme-container" id="programme-weeks"></div>
-    </div>
-
-    <!-- PROGRAMME — Vue semaine -->
-    <div id="screen-programme-week" class="screen">
-      <div class="game-header">
-        <button class="btn-back" onclick="backToProgramme()">← Retour</button>
-        <h2 id="prog-week-title">Semaine</h2>
-        <div></div>
-      </div>
-      <div class="prog-week-progress" id="prog-week-progress"></div>
-      <div class="prog-days-grid" id="prog-days-grid"></div>
-    </div>
-
-    <!-- PROGRAMME — Tâches du jour -->
-    <div id="screen-programme-day" class="screen">
-      <div class="game-header">
-        <button class="btn-back" onclick="backToWeek()">← Retour</button>
-        <h2 id="prog-day-title">Jour</h2>
-        <div class="prog-day-progress-small" id="prog-day-progress-small"></div>
-      </div>
-      <p class="prog-objectif" id="prog-day-objectif"></p>
-      <div class="prog-task-list" id="prog-task-list"></div>
-    </div>
-
-    <!-- PROGRAMME — Vidéo -->
-    <div id="screen-programme-lecture" class="screen">
-      <div class="game-header">
-        <button class="btn-back" onclick="backToDay()">← Retour</button>
-        <h2 id="prog-lecture-title">Vidéo</h2>
-        <div></div>
-      </div>
-      <div class="prog-lecture-card">
-        <p class="prog-lecture-subtitle" id="prog-lecture-subtitle"></p>
-        <a class="prog-lecture-link-big" id="prog-lecture-url" href="#" target="_blank" rel="noopener">
-          <span class="prog-lecture-link-icon">🎬</span>
-          <span>Regarder la vidéo</span>
-          <span class="prog-lecture-dur" id="prog-lecture-dur"></span>
-        </a>
-        <p class="prog-lecture-tip">Regarde la vidéo puis reviens marquer comme fait.</p>
-        <button class="btn-task-done" onclick="markTaskDone()">J'ai regardé ✓</button>
-      </div>
-    </div>
-
-    <!-- PROGRAMME — Fiche -->
-    <div id="screen-programme-fiche" class="screen">
-      <div class="game-header">
-        <button class="btn-back" onclick="backToDay()">← Retour</button>
-        <h2 id="prog-fiche-title">Fiche</h2>
-        <div></div>
-      </div>
-      <p class="prog-fiche-intro">Lis bien chaque point, puis teste-toi 👇</p>
-      <div class="prog-fiche-items" id="prog-fiche-items"></div>
-      <button class="btn-task-done" onclick="startFicheFlashcards()" id="btn-fiche-next">Tester ma mémoire 🧠</button>
-    </div>
-
-    <!-- PROGRAMME — Fiche Flashcards -->
-    <div id="screen-programme-fiche-fc" class="screen">
-      <div class="game-header">
-        <button class="btn-back" onclick="backToFicheRead()">← Relire</button>
-        <h2 id="prog-fiche-fc-title">Flashcards</h2>
-        <div class="fc-progress"><span id="prog-fc-num">1</span> / <span id="prog-fc-total">0</span></div>
-      </div>
-      <div class="prog-fc-card-container">
-        <div class="prog-fc-prompt" id="prog-fc-prompt">Question</div>
-        <div class="prog-fc-fact" id="prog-fc-fact"></div>
-        <div class="prog-fc-reveal" id="prog-fc-reveal"></div>
-        <div class="fc-memo-tip" id="prog-fc-memo-tip"></div>
-      </div>
-      <div class="prog-fc-buttons" id="prog-fc-buttons">
-        <button class="btn-task-done" onclick="revealFicheCard()" id="btn-fc-reveal">Voir la réponse</button>
-      </div>
-      <div class="prog-fc-rate" id="prog-fc-rate" style="display:none">
-        <button class="btn-quality btn-again" onclick="rateFicheCard(1)"><span class="quality-key">1</span> À revoir</button>
-        <button class="btn-quality btn-hard" onclick="rateFicheCard(3)"><span class="quality-key">2</span> Difficile</button>
-        <button class="btn-quality btn-good" onclick="rateFicheCard(4)"><span class="quality-key">3</span> Bien</button>
-        <button class="btn-quality btn-easy" onclick="rateFicheCard(5)"><span class="quality-key">4</span> Facile</button>
-      </div>
-    </div>
-
-    <!-- PROGRAMME — Quiz QCM -->
-    <div id="screen-programme-quiz" class="screen">
-      <div class="game-header">
-        <button class="btn-back" onclick="backToDay()">← Retour</button>
-        <h2 id="prog-quiz-title">Quiz</h2>
-        <div class="fc-progress"><span id="prog-quiz-num">1</span> / <span id="prog-quiz-total">0</span></div>
-      </div>
-      <div class="quiz-question-box">
-        <div class="quiz-question-text" id="prog-quiz-question"></div>
-      </div>
-      <div class="quiz-choices" id="prog-quiz-choices"></div>
-      <div class="quiz-feedback" id="prog-quiz-feedback"></div>
-      <button class="btn-quiz-next" id="prog-quiz-next-btn" onclick="nextProgQuizQuestion()" style="display:none">
-        Question suivante →
-      </button>
-    </div>
-
-    <!-- PROGRAMME — Résultat quiz -->
-    <div id="screen-programme-quiz-result" class="screen">
-      <div class="result-container">
-        <div class="result-icon" id="prog-result-icon">📝</div>
-        <h2 class="result-title" id="prog-result-title">Quiz terminé</h2>
-        <div class="result-stats" id="prog-result-stats"></div>
-        <div class="result-buttons">
-          <button class="btn-replay" onclick="backToDay()">Continuer</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- RÉVISIONS DASHBOARD -->
-    <div id="screen-revisions" class="screen">
-      <div class="game-header">
-        <button class="btn-back" onclick="goHome()">← Retour</button>
-        <h2>Révisions du jour</h2>
-        <div class="rev-due-badge" id="rev-due-badge">0</div>
-      </div>
-      <div class="rev-summary" id="rev-summary"></div>
-      <button class="btn-task-done" id="btn-start-revisions" onclick="startRevisionSession()" style="display:none">Commencer la révision 🧠</button>
-      <div class="rev-sections">
-        <div class="rev-section">
-          <h3 class="rev-section-title rev-due-title">📌 À revoir aujourd'hui</h3>
-          <div class="rev-packs-list" id="rev-due-list"></div>
-        </div>
-        <div class="rev-section">
-          <h3 class="rev-section-title rev-mastered-title">✅ Déjà révisé</h3>
-          <div class="rev-packs-list" id="rev-mastered-list"></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- RÉVISION SESSION -->
-    <div id="screen-revision-session" class="screen">
-      <div class="game-header">
-        <button class="btn-back" onclick="backToRevisions()">← Retour</button>
-        <h2>Révision</h2>
-        <div class="fc-progress"><span id="rev-fc-num">1</span> / <span id="rev-fc-total">0</span></div>
-      </div>
-      <div class="prog-fc-card-container">
-        <div class="prog-fc-prompt" id="rev-fc-prompt">Question</div>
-        <div class="prog-fc-fact" id="rev-fc-fact"></div>
-        <div class="prog-fc-reveal" id="rev-fc-reveal"></div>
-      </div>
-      <div class="prog-fc-buttons" id="rev-fc-buttons">
-        <button class="btn-task-done" onclick="revealRevisionCard()">Voir la réponse</button>
-      </div>
-      <div class="prog-fc-rate" id="rev-fc-rate" style="display:none">
-        <button class="btn-quality btn-again" onclick="rateRevisionCard(1)"><span class="quality-key">1</span> À revoir</button>
-        <button class="btn-quality btn-hard" onclick="rateRevisionCard(3)"><span class="quality-key">2</span> Difficile</button>
-        <button class="btn-quality btn-good" onclick="rateRevisionCard(4)"><span class="quality-key">3</span> Bien</button>
-        <button class="btn-quality btn-easy" onclick="rateRevisionCard(5)"><span class="quality-key">4</span> Facile</button>
-      </div>
-    </div>
-
-    <!-- ===== BOTTOM NAV ===== -->
-    <nav class="bottom-nav" id="bottom-nav">
-      <button class="bottom-nav-btn active" data-tab="today" onclick="goToTab('today')">
-        <span class="bn-icon">🔥</span>
-        <span class="bn-label">Aujourd'hui</span>
-      </button>
-      <button class="bottom-nav-btn" data-tab="explorer" onclick="goToTab('explorer')">
-        <span class="bn-icon">🧭</span>
-        <span class="bn-label">Explorer</span>
-      </button>
-      <button class="bottom-nav-btn" data-tab="cartes" onclick="goToTab('cartes')">
-        <span class="bn-icon">🗺️</span>
-        <span class="bn-label">Cartes</span>
-      </button>
-    </nav>
+    <span class="fig" id="nav-stats">— PAQUETS</span>
   </div>
+</nav>
 
-  <!-- Scripts -->
-  <script src="flashcards-data.js?v=13"></script>
-  <script src="funfacts-data.js?v=13"></script>
-  <script>
-    if (typeof FUNFACTS_PACKS !== "undefined") {
-      FUNFACTS_PACKS.forEach(function(p) { FLASHCARD_PACKS.push(p); });
-    }
-  </script>
-  <script src="programme-data.js?v=13"></script>
-  <script src="daily-lessons.js?v=13"></script>
-  <script src="memo.js?v=13"></script>
-  <script src="srs.js?v=13"></script>
-  <script src="gamification.js?v=13"></script>
-  <script src="chapters.js?v=13"></script>
-  <script src="categories.js?v=13"></script>
-  <script src="app.js?v=13"></script>
-  <script src="today.js?v=13"></script>
-  <script src="explorer.js?v=13"></script>
-  <script src="flashcards.js?v=13"></script>
-  <script src="quiz-12coups.js?v=13"></script>
-  <script src="revisions.js?v=13"></script>
-  <script src="programme.js?v=13"></script>
-  <script src="carte.js?v=13"></script>
-  <script src="schemas.js?v=13"></script>
+
+<!-- ============================================================
+     PAGE: TROUVER
+============================================================ -->
+<section id="page-trouver" class="page-section active">
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="container">
+      <div class="frame-thick">
+        <div class="masthead">
+          <h1>CULTURE<span style="color:var(--pink-d);">!!!</span></h1>
+        </div>
+
+        <div class="hero-grid">
+          <div class="hero-left">
+            <div class="hero-eyebrow">UN PEU DE CULTURE CHAQUE JOUR</div>
+            <h2 class="hero-h">RÉVISE TA <em>CULTURE GÉNÉRALE</em><br>EN 5 MIN PAR JOUR</h2>
+            <p class="hero-p">Pas de pub. Pas de notif anxiogène. Juste des paquets de flashcards que tu picore avant le café. La répétition espacée fait le reste.</p>
+            <div class="hero-cta-row">
+              <a href="#trouver" class="btn btn-y btn-big" onclick="document.getElementById('section-trouver').scrollIntoView({behavior:'smooth'}); return false;">EXPLORER LES PAQUETS</a>
+              <a href="#" class="btn btn-l btn-big" onclick="goToTab('mes-paquets'); return false;">MES PAQUETS</a>
+            </div>
+          </div>
+
+          <div class="hero-right">
+            <div class="hero-fig-tag fig">[fig.1.1] — TROU NOIR</div>
+            <svg viewBox="0 0 600 460" preserveAspectRatio="xMidYMid slice" shape-rendering="crispEdges" style="width:100%; height:100%; display:block;">
+              <rect width="600" height="460" fill="#0a0a0a"/>
+              <g fill="#fff">
+                <rect x="40" y="40" width="3" height="3"/><rect x="120" y="22" width="2" height="2"/><rect x="220" y="58" width="2" height="2"/><rect x="360" y="44" width="3" height="3"/><rect x="480" y="78" width="2" height="2"/><rect x="550" y="36" width="3" height="3"/><rect x="80" y="160" width="2" height="2"/><rect x="500" y="180" width="3" height="3"/><rect x="60" y="290" width="2" height="2"/><rect x="160" y="350" width="3" height="3"/><rect x="260" y="410" width="2" height="2"/><rect x="420" y="370" width="2" height="2"/><rect x="520" y="320" width="3" height="3"/><rect x="580" y="240" width="2" height="2"/><rect x="320" y="40" width="2" height="2"/><rect x="20" y="220" width="2" height="2"/><rect x="540" y="420" width="2" height="2"/>
+              </g>
+              <g transform="translate(300 240)">
+                <ellipse rx="220" ry="58" fill="none" stroke="#ffd84a" stroke-width="6"/>
+                <ellipse rx="200" ry="42" fill="none" stroke="#ff8fb0" stroke-width="4"/>
+                <ellipse rx="180" ry="30" fill="none" stroke="#c8e85b" stroke-width="2"/>
+                <ellipse rx="110" ry="110" fill="#0a0a0a" stroke="#fff" stroke-width="2"/>
+              </g>
+              <g shape-rendering="crispEdges">
+                <rect x="430" y="120" width="120" height="4" fill="#ffd84a"/>
+                <rect x="430" y="120" width="4" height="60" fill="#ffd84a"/>
+                <rect x="426" y="180" width="12" height="4" fill="#ffd84a"/>
+              </g>
+              <g font-family="Space Mono, monospace" fill="#fff" font-size="12">
+                <text x="438" y="112">SINGULARITÉ →</text>
+              </g>
+            </svg>
+            <div class="hero-caption">
+              <strong>fig.1.1</strong> &nbsp;·&nbsp; Trou noir supermassif · l'horizon piège même la lumière.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TROUVER DES PAQUETS -->
+  <section class="container" id="section-trouver">
+    <div class="section-banner">
+      <h2>TROUVER DES PAQUETS</h2>
+      <div class="bar"></div>
+      <span class="fig" id="banner-count-trouver">— PAQUETS</span>
+    </div>
+
+    <div class="filter-bar" id="filter-bar"></div>
+
+    <div class="deck-grid" id="deck-grid-all"></div>
+
+    <div style="margin: 28px 0 60px; display:flex; justify-content:center;">
+      <button class="btn btn-big" id="btn-show-more" style="display:none;">VOIR PLUS DE PAQUETS</button>
+    </div>
+  </section>
+
+</section>
+
+
+<!-- ============================================================
+     PAGE: MES PAQUETS
+============================================================ -->
+<section id="page-mes-paquets" class="page-section">
+  <section class="container">
+    <div class="section-banner">
+      <h2>MES PAQUETS</h2>
+      <div class="bar"></div>
+      <span class="fig" id="banner-count-mine">— EN COURS</span>
+    </div>
+    <div id="mes-paquets-container"></div>
+  </section>
+</section>
+
+
+<!-- ============================================================
+     PAGE: CARTES (carte de France & schémas)
+============================================================ -->
+<section id="page-cartes" class="page-section">
+  <section class="container">
+    <div class="section-banner">
+      <h2>CARTES</h2>
+      <div class="bar"></div>
+      <span class="fig">GÉO INTERACTIVE</span>
+    </div>
+    <div class="deck-grid">
+      <div class="deck m" onclick="initCarte()" style="cursor:pointer;">
+        <div class="deck-img"><div class="deck-emoji">🗺️</div></div>
+        <div class="deck-body">
+          <div class="deck-cat">FRANCE</div>
+          <div class="deck-title">CARTE<br>INTERACTIVE</div>
+          <div class="deck-foot"><span>RÉGIONS · DPTS</span><span>→</span></div>
+        </div>
+      </div>
+      <div class="deck v" onclick="initSchemas()" style="cursor:pointer;">
+        <div class="deck-img"><div class="deck-emoji">📊</div></div>
+        <div class="deck-body">
+          <div class="deck-cat">INSTITUTIONS</div>
+          <div class="deck-title">SCHÉMAS<br>VE RÉP · UE</div>
+          <div class="deck-foot"><span>3 DIAGRAMMES</span><span>→</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+</section>
+
+
+<!-- ============================================================
+     PAGE: SESSION FLASHCARD
+============================================================ -->
+<section id="page-session" class="page-section">
+  <div class="session-wrap">
+    <button class="btn" id="btn-session-back">← RETOUR</button>
+    <div class="session-top" style="margin-top:18px;">
+      <div class="session-title" id="session-title">Pack</div>
+      <div class="session-progress" id="session-progress">1 / 1</div>
+    </div>
+
+    <div class="session-card" id="session-card">
+      <div class="session-card-label" id="session-card-label">QUESTION</div>
+      <div class="session-card-text" id="session-card-text">…</div>
+      <div class="session-card-answer" id="session-card-answer" hidden></div>
+      <div class="session-card-memo" id="session-card-memo" hidden></div>
+    </div>
+
+    <div class="session-actions" id="session-actions">
+      <button class="btn btn-y btn-big" id="btn-reveal" onclick="flipFlashcard()">VOIR LA RÉPONSE</button>
+    </div>
+
+    <div class="session-quality" id="session-quality" hidden>
+      <button class="btn-q btn-q-again" onclick="rateFlashcard(1)"><span class="q-num">1</span>À REVOIR</button>
+      <button class="btn-q btn-q-hard" onclick="rateFlashcard(3)"><span class="q-num">2</span>DIFFICILE</button>
+      <button class="btn-q btn-q-good" onclick="rateFlashcard(4)"><span class="q-num">3</span>BIEN</button>
+      <button class="btn-q btn-q-easy" onclick="rateFlashcard(5)"><span class="q-num">4</span>FACILE</button>
+    </div>
+  </div>
+</section>
+
+
+<!-- ============================================================
+     PAGE: RESULT
+============================================================ -->
+<section id="page-result" class="page-section">
+  <div class="result-wrap">
+    <div class="result-emoji" id="result-emoji">🎉</div>
+    <div class="result-title" id="result-title">Session terminée !</div>
+    <div class="result-stats">
+      <div class="result-stat"><div class="result-stat-n" id="result-total">0</div><div class="result-stat-l">Cartes vues</div></div>
+      <div class="result-stat"><div class="result-stat-n" id="result-good">0</div><div class="result-stat-l">Bien / Facile</div></div>
+      <div class="result-stat"><div class="result-stat-n" id="result-mastery">0%</div><div class="result-stat-l">Maîtrise</div></div>
+      <div class="result-stat"><div class="result-stat-n" id="result-xp">+0</div><div class="result-stat-l">XP gagnés</div></div>
+    </div>
+    <button class="btn btn-y btn-big" onclick="goToTab('mes-paquets')">CONTINUER →</button>
+  </div>
+</section>
+
+
+<!-- ============================================================
+     LEGACY HIDDEN SCREENS (used by carte.js + schemas.js)
+============================================================ -->
+<div id="screen-quiz" class="screen"></div>
+<div id="screen-quiz-session" class="screen"></div>
+<div id="screen-quiz-result" class="screen"></div>
+<div id="screen-flashcards" class="screen"><div id="flashcard-packs"></div></div>
+<div id="screen-flashcard-session" class="screen">
+  <button class="btn-back" onclick="backToFlashcards()">←</button>
+  <h2 id="fc-session-title"></h2>
+  <div class="fc-progress" id="fc-progress-text"></div>
+  <div class="fc-card" id="fc-card"></div>
+  <div id="fc-card-front"></div>
+  <div id="fc-card-back"></div>
+  <div id="fc-memo-tip"></div>
+  <button id="fc-flip-btn"></button>
+  <div id="fc-quality-buttons"></div>
+</div>
+<div id="screen-flashcard-result" class="screen">
+  <div id="fc-result-title"></div>
+  <div class="fc-result-stats"></div>
+  <div id="fc-result-total"></div><div id="fc-result-again"></div><div id="fc-result-hard"></div><div id="fc-result-good"></div><div id="fc-result-easy"></div>
+</div>
+<div id="screen-programme" class="screen"></div>
+<div id="screen-programme-task" class="screen"></div>
+<div id="screen-programme-fc" class="screen"></div>
+<div id="screen-revisions" class="screen">
+  <div id="rev-summary"></div>
+  <div id="rev-due-list"></div>
+  <div id="rev-mastered-list"></div>
+  <button id="btn-start-revisions"></button>
+  <span id="rev-due-badge"></span>
+</div>
+<div id="screen-revision-session" class="screen">
+  <span id="rev-fc-num"></span><span id="rev-fc-total"></span>
+  <div id="rev-fc-prompt"></div><div id="rev-fc-fact"></div><div id="rev-fc-reveal"></div>
+  <div id="rev-fc-buttons"></div><div id="rev-fc-rate"></div>
+</div>
+<div id="screen-carte" class="screen"></div>
+<div id="screen-schemas" class="screen"></div>
+<div id="screen-home" class="screen"></div>
+<div id="screen-today" class="screen"></div>
+<div id="screen-today-session" class="screen"></div>
+<div id="screen-explorer" class="screen"></div>
+<div id="screen-cartes" class="screen"></div>
+
+
+<footer>
+  <div class="footer-inner">
+    <div class="footer-col">
+      <h4>CULTURE!!!</h4>
+      <p style="font-family:'Space Mono', monospace; font-style:italic; font-size:13px; line-height:1.6; margin:0;">
+        Un zine quotidien qui se prend pour une app. Imprimé en pixels.
+      </p>
+    </div>
+    <div class="footer-col">
+      <h4>APP</h4>
+      <ul>
+        <li><a href="#" onclick="goToTab('trouver'); return false;">Trouver</a></li>
+        <li><a href="#" onclick="goToTab('mes-paquets'); return false;">Mes paquets</a></li>
+        <li><a href="#" onclick="goToTab('cartes'); return false;">Cartes</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>À PROPOS</h4>
+      <ul>
+        <li><a href="#">Manifeste</a></li>
+        <li><a href="#">Journal</a></li>
+        <li><a href="#">Contact</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>LÉGAL</h4>
+      <ul>
+        <li><a href="#">Conditions</a></li>
+        <li><a href="#">Confidentialité</a></li>
+        <li><a href="#">Cookies</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-inner colophon">
+    <span>© 2026 CULTURE!!! · ISSUE Nº 142</span>
+    <span>★ MADE WITH PIXELS IN PARIS ★</span>
+  </div>
+</footer>
+
+
+<!-- Scripts -->
+<script src="flashcards-data.js?v=14"></script>
+<script src="funfacts-data.js?v=14"></script>
+<script>
+  if (typeof FUNFACTS_PACKS !== "undefined") {
+    FUNFACTS_PACKS.forEach(function(p) { FLASHCARD_PACKS.push(p); });
+  }
+</script>
+<script src="programme-data.js?v=14"></script>
+<script src="daily-lessons.js?v=14"></script>
+<script src="memo.js?v=14"></script>
+<script src="srs.js?v=14"></script>
+<script src="gamification.js?v=14"></script>
+<script src="chapters.js?v=14"></script>
+<script src="categories.js?v=14"></script>
+<script src="app.js?v=14"></script>
+<script src="today.js?v=14"></script>
+<script src="explorer.js?v=14"></script>
+<script src="flashcards.js?v=14"></script>
+<script src="quiz-12coups.js?v=14"></script>
+<script src="revisions.js?v=14"></script>
+<script src="programme.js?v=14"></script>
+<script src="carte.js?v=14"></script>
+<script src="schemas.js?v=14"></script>
+<script src="culture-app.js?v=14"></script>
 </body>
 </html>
