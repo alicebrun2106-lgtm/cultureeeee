@@ -169,6 +169,49 @@
     return "Divers";
   }
 
+  // ─── COLLECTION : packs ajoutés à "Mes paquets" ───
+  const ADDED_KEY = "qpuc-added-packs";
+  function getAddedPacks() {
+    try {
+      const arr = JSON.parse(localStorage.getItem(ADDED_KEY));
+      return Array.isArray(arr) ? arr : null;
+    } catch { return null; }
+  }
+  function saveAddedPacks(arr) {
+    localStorage.setItem(ADDED_KEY, JSON.stringify(arr));
+  }
+  // Migration : si pas encore initialisé, ajoute auto tous les packs déjà commencés
+  function ensureAddedPacksInit() {
+    if (getAddedPacks() !== null) return;
+    if (typeof FLASHCARD_PACKS === "undefined") return;
+    const auto = FLASHCARD_PACKS.filter((p) => getStarted(p.id)).map((p) => p.id);
+    saveAddedPacks(auto);
+  }
+  function isPackAdded(packId) {
+    const arr = getAddedPacks();
+    if (arr === null) {
+      // Fallback : tant que non initialisé, on considère "ajouté" si démarré
+      return getStarted(packId);
+    }
+    return arr.includes(packId);
+  }
+  function addPack(packId) {
+    ensureAddedPacksInit();
+    const arr = getAddedPacks() || [];
+    if (!arr.includes(packId)) {
+      arr.push(packId);
+      saveAddedPacks(arr);
+    }
+  }
+  function removePack(packId) {
+    ensureAddedPacksInit();
+    const arr = (getAddedPacks() || []).filter((id) => id !== packId);
+    saveAddedPacks(arr);
+  }
+  window.isPackAdded = isPackAdded;
+  window.addPack = addPack;
+  window.removePack = removePack;
+
   // ─── NAVIGATION ───
   window.goToTab = function (tab) {
     // tabs: trouver / mes-paquets / cartes / session / result
@@ -208,7 +251,10 @@
   };
 
   // ─── BUILD DECK CARD ───
-  function buildDeck(pack) {
+  function buildDeck(pack, opts) {
+    opts = opts || {};
+    const showAddBtn = !!opts.showAddBtn; // visible sur Trouver
+    const added = isPackAdded(pack.id);
     const m = window.getPackMastery(pack.id);
     const cat = getPackChapter(pack.id).toUpperCase();
     const style = deckStyleFor(pack.id);
@@ -245,10 +291,22 @@
     div.className = "deck " + color;
     if (m.isDoneForToday) div.classList.add("deck-done-today");
     if (mastery >= 90) div.classList.add("deck-mastered");
-    div.onclick = () => startFlashcardSession(pack.id);
+    if (added) div.classList.add("deck-added");
+
+    div.onclick = (e) => {
+      // Ignore le clic si on a tapé sur le bouton AJOUTER
+      if (e.target.closest(".deck-add-btn")) return;
+      startFlashcardSession(pack.id);
+    };
 
     // Done overlay badge
     const doneBadge = m.isDoneForToday ? '<div class="deck-done-overlay">✓ DONE</div>' : "";
+    // Add button (only on Trouver tab)
+    const addBtnHtml = showAddBtn
+      ? (added
+        ? '<div class="deck-add-btn deck-added-check" title="Dans tes paquets">✓ AJOUTÉ</div>'
+        : '<div class="deck-add-btn" title="Ajouter à mes paquets">+ AJOUTER</div>')
+      : "";
 
     // Status pill (only when started)
     const statusPill = m.isStarted
@@ -266,6 +324,7 @@
 
     div.innerHTML = `
       ${doneBadge}
+      ${addBtnHtml}
       <div class="deck-img">
         <span class="fig" ${figStyle}>[${figNum}]</span>
         <span class="dot-circ" ${dotStyle}></span>
@@ -281,7 +340,54 @@
         <div class="deck-foot"><span>NIV.${niv}</span><span>${footRight}</span></div>
       </div>
     `;
+
+    // Wire add button
+    if (showAddBtn && !added) {
+      const addBtn = div.querySelector(".deck-add-btn");
+      if (addBtn) {
+        addBtn.onclick = (e) => {
+          e.stopPropagation();
+          addPack(pack.id);
+          // Animation
+          div.classList.add("deck-just-added");
+          addBtn.textContent = "✓ AJOUTÉ";
+          addBtn.classList.add("deck-added-check");
+          // Confetti mini
+          spawnAddBurst(div);
+          setTimeout(() => {
+            div.classList.remove("deck-just-added");
+            // Re-render the deck card in place to update all visuals
+            const replacement = buildDeck(pack, { showAddBtn: true });
+            replacement.classList.add("deck-fade-in");
+            div.replaceWith(replacement);
+          }, 900);
+        };
+      }
+    }
     return div;
+  }
+
+  // Petite explosion d'étoiles à côté du deck ajouté
+  function spawnAddBurst(deckEl) {
+    const rect = deckEl.getBoundingClientRect();
+    const burst = document.createElement("div");
+    burst.className = "add-burst";
+    burst.style.left = (rect.left + rect.width / 2) + "px";
+    burst.style.top = (rect.top + 20) + "px";
+    const emojis = ["✨", "⭐", "🦆", "✓", "★"];
+    for (let i = 0; i < 8; i++) {
+      const s = document.createElement("span");
+      s.className = "add-burst-piece";
+      s.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+      const angle = (i / 8) * Math.PI * 2 + Math.random() * 0.5;
+      const dist = 40 + Math.random() * 40;
+      s.style.setProperty("--dx", Math.cos(angle) * dist + "px");
+      s.style.setProperty("--dy", Math.sin(angle) * dist + "px");
+      s.style.animationDelay = (Math.random() * 0.1) + "s";
+      burst.appendChild(s);
+    }
+    document.body.appendChild(burst);
+    setTimeout(() => burst.remove(), 1200);
   }
 
   function slugify(s) {
@@ -291,6 +397,9 @@
   // ─── TROUVER PAGE ───
   let currentFilter = "all";
   let visibleCount = 24;
+  // Seed pour ordonner aléatoirement mais de façon stable pendant la session
+  let trouverSeed = Math.floor(Math.random() * 100000) + 1;
+  window.shuffleTrouver = function () { trouverSeed = Math.floor(Math.random() * 100000) + 1; visibleCount = 24; renderTrouver(); };
 
   function renderTrouver() {
     const grid = document.getElementById("deck-grid-all");
@@ -306,16 +415,18 @@
       if (ch) packs = packs.filter((p) => ch.packIds.includes(p.id));
     }
 
-    // Order : in-progress first, then mastered, then new
+    // Order : non-ajoutés en premier (variety), puis ajoutés à la fin
+    // À l'intérieur de chaque groupe : ordre stable par hash du pack id (variété par session)
+    const seed = trouverSeed; // stable seed during this session of Trouver browsing
+    function pseudoHash(id) {
+      let h = seed;
+      for (let i = 0; i < id.length; i++) h = ((h * 31 + id.charCodeAt(i)) | 0);
+      return Math.abs(h);
+    }
     packs.sort((a, b) => {
-      const ma = getMastery(a.id, a.cards.length);
-      const mb = getMastery(b.id, b.cards.length);
-      const sa = getStarted(a.id), sb = getStarted(b.id);
-      // priority: started+notMastered > new > mastered
-      const score = (st, m) => (st && m < 100) ? 0 : (!st ? 1 : 2);
-      const s = score(sa, ma) - score(sb, mb);
-      if (s !== 0) return s;
-      return a.name.localeCompare(b.name, "fr");
+      const aa = isPackAdded(a.id), bb = isPackAdded(b.id);
+      if (aa !== bb) return aa ? 1 : -1; // non-ajoutés d'abord
+      return pseudoHash(a.id) - pseudoHash(b.id);
     });
 
     const total = packs.length;
@@ -323,7 +434,7 @@
     document.getElementById("nav-stats").textContent = FLASHCARD_PACKS.length + " PAQUETS";
 
     const slice = packs.slice(0, visibleCount);
-    slice.forEach((p) => grid.appendChild(buildDeck(p)));
+    slice.forEach((p) => grid.appendChild(buildDeck(p, { showAddBtn: true })));
 
     const btnMore = document.getElementById("btn-show-more");
     if (slice.length < total) {
@@ -358,16 +469,17 @@
     if (!container) return;
     container.innerHTML = "";
 
-    const mine = FLASHCARD_PACKS.filter((p) => getStarted(p.id));
+    ensureAddedPacksInit();
+    const mine = FLASHCARD_PACKS.filter((p) => isPackAdded(p.id));
     document.getElementById("banner-count-mine").textContent =
-      mine.length + " PAQUET" + (mine.length > 1 ? "S" : "") + " EN COURS";
+      mine.length + " PAQUET" + (mine.length > 1 ? "S" : "") + " DANS TA COLLECTION";
 
     if (mine.length === 0) {
       container.innerHTML = `
         <div class="frame" style="padding: 40px; text-align: center;">
           <div style="font-size: 56px; margin-bottom: 16px;">📭</div>
-          <h3 class="pixel" style="font-size:16px; margin-bottom:14px;">PAS ENCORE DE PAQUET</h3>
-          <p class="mono" style="font-size:14px; margin-bottom:20px; font-style:italic;">Lance ton premier paquet depuis l'onglet TROUVER.</p>
+          <h3 class="pixel" style="font-size:16px; margin-bottom:14px;">TA COLLECTION EST VIDE</h3>
+          <p class="mono" style="font-size:14px; margin-bottom:20px; font-style:italic;">Ajoute tes premiers paquets depuis l'onglet TROUVER.</p>
           <a href="#" class="btn btn-y" onclick="goToTab('trouver'); return false;">EXPLORER LES PAQUETS</a>
         </div>
       `;
