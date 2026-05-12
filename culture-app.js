@@ -6,13 +6,67 @@
 (function () {
   const SRS_KEY = "qpuc-srs";
 
-  // ─── COULEURS DECK ───
+  // ─── DECK SVG ILLUSTRATIONS — du design CULTURE!!! ───
+  const SVG_DESIGNS = {
+    // Colonnes grecques (Histoire / France ancienne)
+    columns: '<g fill="#0a0a0a"><rect x="32" y="14" width="36" height="6"/><rect x="28" y="20" width="44" height="6"/><rect x="38" y="26" width="6" height="40"/><rect x="56" y="26" width="6" height="40"/><rect x="28" y="66" width="44" height="6"/><rect x="32" y="72" width="36" height="6"/></g>',
+    // Livres empilés (Histoire / Révolutions)
+    books: '<g fill="#0a0a0a"><rect x="20" y="30" width="60" height="4"/><rect x="20" y="44" width="60" height="4"/><rect x="20" y="58" width="60" height="4"/><rect x="26" y="34" width="10" height="10"/><rect x="46" y="34" width="10" height="10"/><rect x="66" y="34" width="10" height="10"/><rect x="36" y="48" width="10" height="10"/><rect x="56" y="48" width="10" height="10"/></g>',
+    // Globe / boussole (Géographie)
+    globe: '<circle cx="50" cy="45" r="30" fill="none" stroke="#0a0a0a" stroke-width="3"/><path d="M20 45 H80 M50 15 V75 M28 28 L72 62 M28 62 L72 28" stroke="#0a0a0a" stroke-width="2" fill="none"/>',
+    // Atomes / orbites (Sciences)
+    atoms: '<g fill="none" stroke="#0a0a0a" stroke-width="3"><ellipse cx="50" cy="45" rx="32" ry="14"/><ellipse cx="50" cy="45" rx="32" ry="14" transform="rotate(60 50 45)"/><ellipse cx="50" cy="45" rx="32" ry="14" transform="rotate(-60 50 45)"/></g><rect x="46" y="41" width="8" height="8" fill="#0a0a0a"/>',
+    // Cadre peinture (Arts)
+    frame: '<g fill="#0a0a0a"><rect x="20" y="22" width="60" height="46" fill="none" stroke="#0a0a0a" stroke-width="3"/><rect x="26" y="28" width="10" height="10"/><rect x="40" y="28" width="10" height="10"/><rect x="54" y="28" width="10" height="10"/><rect x="68" y="28" width="6" height="10"/><rect x="28" y="48" width="40" height="14"/></g>',
+    // Livre ouvert (Littérature)
+    book: '<g fill="#0a0a0a"><rect x="30" y="20" width="40" height="50" fill="none" stroke="#0a0a0a" stroke-width="3"/><rect x="36" y="28" width="28" height="2"/><rect x="36" y="36" width="28" height="2"/><rect x="36" y="44" width="22" height="2"/><rect x="36" y="52" width="28" height="2"/><rect x="36" y="60" width="18" height="2"/></g>',
+    // Bar chart / equalizer (Sport / Musique / Économie)
+    bars: '<g fill="#0a0a0a"><rect x="22" y="56" width="6" height="14"/><rect x="34" y="46" width="6" height="24"/><rect x="46" y="34" width="6" height="36"/><rect x="58" y="22" width="6" height="48"/><rect x="70" y="14" width="6" height="56"/><rect x="20" y="74" width="60" height="3"/></g>',
+    // Temple noir (Philosophie / Mythologie) — version k blanche sur noir
+    temple: '<g><rect x="40" y="22" width="20" height="4"/><rect x="36" y="26" width="28" height="4"/><rect x="32" y="30" width="36" height="4"/><rect x="28" y="34" width="44" height="4"/><rect x="44" y="38" width="12" height="32"/></g>',
+    // Ancre (Maritime)
+    anchor: '<g fill="none" stroke="#0a0a0a" stroke-width="3"><circle cx="50" cy="22" r="6"/><line x1="50" y1="28" x2="50" y2="72"/><line x1="36" y1="44" x2="64" y2="44"/><path d="M22 60 Q28 76 50 76 Q72 76 78 60"/></g>',
+    // Étoile / TV (12 Coups / culture pop)
+    star: '<g fill="#0a0a0a"><polygon points="50,14 58,38 84,38 63,52 71,76 50,62 29,76 37,52 16,38 42,38"/></g>',
+    // Dés (Trivia)
+    dice: '<g><rect x="22" y="22" width="38" height="38" fill="none" stroke="#0a0a0a" stroke-width="3"/><rect x="42" y="42" width="38" height="38" fill="none" stroke="#0a0a0a" stroke-width="3"/><circle cx="32" cy="32" r="3" fill="#0a0a0a"/><circle cx="50" cy="50" r="3" fill="#0a0a0a"/><circle cx="52" cy="62" r="2.5" fill="#0a0a0a"/><circle cx="70" cy="62" r="2.5" fill="#0a0a0a"/><circle cx="52" cy="70" r="2.5" fill="#0a0a0a"/><circle cx="70" cy="70" r="2.5" fill="#0a0a0a"/></g>',
+    // Microphone / note (Musique)
+    music: '<g fill="#0a0a0a"><circle cx="34" cy="60" r="10"/><circle cx="68" cy="52" r="10"/><line x1="44" y1="60" x2="44" y2="20" stroke="#0a0a0a" stroke-width="4"/><line x1="78" y1="52" x2="78" y2="16" stroke="#0a0a0a" stroke-width="4"/><line x1="44" y1="20" x2="78" y2="16" stroke="#0a0a0a" stroke-width="4"/></g>',
+    // Pellicule cinéma (Cinéma)
+    film: '<g fill="#0a0a0a"><rect x="18" y="22" width="64" height="46" fill="none" stroke="#0a0a0a" stroke-width="3"/><rect x="22" y="26" width="6" height="6"/><rect x="22" y="36" width="6" height="6"/><rect x="22" y="46" width="6" height="6"/><rect x="22" y="56" width="6" height="6"/><rect x="72" y="26" width="6" height="6"/><rect x="72" y="36" width="6" height="6"/><rect x="72" y="46" width="6" height="6"/><rect x="72" y="56" width="6" height="6"/><circle cx="50" cy="45" r="10" fill="none" stroke="#0a0a0a" stroke-width="3"/></g>',
+    // Trophée (Sport)
+    trophy: '<g fill="none" stroke="#0a0a0a" stroke-width="3"><path d="M34 18 H66 V40 Q66 56 50 56 Q34 56 34 40 Z"/><path d="M34 26 L22 26 L22 34 L34 38"/><path d="M66 26 L78 26 L78 34 L66 38"/><line x1="44" y1="56" x2="44" y2="68"/><line x1="56" y1="56" x2="56" y2="68"/><rect x="36" y="68" width="28" height="6"/></g>',
+    // Cœur anatomique (Sciences/Corps)
+    heart: '<g fill="#0a0a0a"><path d="M50 76 L24 50 Q14 36 26 26 Q36 18 50 32 Q64 18 74 26 Q86 36 76 50 Z"/></g>',
+    // Journal / actu
+    news: '<g fill="#0a0a0a"><rect x="20" y="22" width="60" height="50" fill="none" stroke="#0a0a0a" stroke-width="3"/><rect x="26" y="28" width="20" height="14"/><rect x="50" y="30" width="24" height="3"/><rect x="50" y="36" width="24" height="3"/><rect x="26" y="46" width="48" height="3"/><rect x="26" y="52" width="48" height="3"/><rect x="26" y="58" width="34" height="3"/></g>',
+  };
+
+  // ─── COULEURS + DESIGN PAR CHAPITRE ───
   // Palette du design : y, l, m, v, p, w, g, k
-  const DECK_COLORS = ["y", "l", "m", "v", "p", "w", "g", "k"];
-  function deckColor(packId) {
+  const CHAPTER_STYLE = {
+    france: { svg: "columns", colors: ["y", "w", "l"] },
+    monde: { svg: "globe", colors: ["m", "v", "w"] },
+    sciences: { svg: "atoms", colors: ["v", "m", "p"] },
+    musique: { svg: "music", colors: ["p", "l", "y"] },
+    cinema: { svg: "film", colors: ["k", "p", "v"] },
+    sport: { svg: "trophy", colors: ["y", "m", "l"] },
+    "arts-litt": { svg: "frame", colors: ["p", "v", "w"] },
+    langue: { svg: "book", colors: ["w", "y", "m"] },
+    "philo-mytho": { svg: "temple", colors: ["k", "k", "k"] },
+    maritime: { svg: "anchor", colors: ["m", "v", "w"] },
+    trivia: { svg: "dice", colors: ["g", "y", "p"] },
+    "douze-coups": { svg: "star", colors: ["y", "p", "l"] },
+  };
+
+  function deckStyleFor(packId) {
+    const chId = (typeof PACK_TO_CHAPTER !== "undefined" && PACK_TO_CHAPTER[packId]) || "trivia";
+    const style = CHAPTER_STYLE[chId] || CHAPTER_STYLE.trivia;
+    // Pick a color variant based on hash of pack id
     let h = 0;
     for (let i = 0; i < packId.length; i++) h = (h * 31 + packId.charCodeAt(i)) | 0;
-    return DECK_COLORS[Math.abs(h) % DECK_COLORS.length];
+    const color = style.colors[Math.abs(h) % style.colors.length];
+    return { color, svg: style.svg };
   }
 
   // ─── HELPERS DATA ───
@@ -107,7 +161,9 @@
     const started = getStarted(pack.id);
     const doneToday = isPackDoneToday(pack);
     const cat = getPackChapter(pack.id).toUpperCase();
-    const color = deckColor(pack.id);
+    const style = deckStyleFor(pack.id);
+    const color = style.color;
+    const svg = SVG_DESIGNS[style.svg] || SVG_DESIGNS.book;
     // Mastery in 10 segments
     const segs = Math.round(mastery / 10);
     let metaHtml = "";
@@ -122,16 +178,29 @@
 
     // Make pack name in compact 2-line
     const name = pack.name.toUpperCase();
-    const titleHtml = name.length > 18 ? name.split(/[ —–-]/).join("<br>") : name;
+    const titleHtml = name.length > 18 ? name.split(/[ —–-]/).slice(0, 3).join("<br>") : name;
+
+    // For the .k (ink) variant, SVG strokes/fills need to be white
+    const isInk = color === "k";
+    const svgFill = isInk ? svg.replace(/#0a0a0a/g, "#ffffff") : svg;
+    const figStyle = isInk ? 'style="background:#0a0a0a; color:#fff; border-color:#fff;"' : '';
+    const dotStyle = isInk ? 'style="background:#0a0a0a; border-color:#fff;"' : '';
+
+    // Generate a small fig number from pack id hash
+    let h = 0;
+    for (let i = 0; i < pack.id.length; i++) h = (h * 31 + pack.id.charCodeAt(i)) | 0;
+    const figNum = "fig." + (Math.abs(h) % 9 + 1) + "." + (Math.abs(h >> 8) % 9 + 1);
 
     const div = document.createElement("button");
     div.className = "deck " + color + (doneToday ? " deck-done-today" : "");
     div.onclick = () => startFlashcardSession(pack.id);
     div.innerHTML = `
       <div class="deck-img">
-        <span class="fig">[${pack.id.substring(0, 6)}]</span>
-        <span class="dot-circ"></span>
-        <div class="deck-emoji">${pack.icon || "📚"}</div>
+        <span class="fig" ${figStyle}>[${figNum}]</span>
+        <span class="dot-circ" ${dotStyle}></span>
+        <svg viewBox="0 0 100 90" style="position:absolute; inset:0; width:100%; height:100%;" shape-rendering="crispEdges">
+          ${svgFill}
+        </svg>
       </div>
       <div class="deck-body">
         <div class="deck-cat">${cat}</div>
