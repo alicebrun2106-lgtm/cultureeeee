@@ -6,57 +6,41 @@
 (function () {
   const SRS_KEY = "qpuc-srs";
 
-  // ─── DECK SVG ILLUSTRATIONS — du design CULTURE!!! ───
+  // ─── DECK SVG ILLUSTRATIONS — 8 designs EXACTS du zip Claude Design ───
   const SVG_DESIGNS = {
-    // Colonnes grecques (Histoire / France ancienne)
+    // [fig.2.1] Colonnes — Histoire / Antiquité
     columns: '<g fill="#0a0a0a"><rect x="32" y="14" width="36" height="6"/><rect x="28" y="20" width="44" height="6"/><rect x="38" y="26" width="6" height="40"/><rect x="56" y="26" width="6" height="40"/><rect x="28" y="66" width="44" height="6"/><rect x="32" y="72" width="36" height="6"/></g>',
-    // Livres empilés (Histoire / Révolutions)
-    books: '<g fill="#0a0a0a"><rect x="20" y="30" width="60" height="4"/><rect x="20" y="44" width="60" height="4"/><rect x="20" y="58" width="60" height="4"/><rect x="26" y="34" width="10" height="10"/><rect x="46" y="34" width="10" height="10"/><rect x="66" y="34" width="10" height="10"/><rect x="36" y="48" width="10" height="10"/><rect x="56" y="48" width="10" height="10"/></g>',
-    // Globe / boussole (Géographie)
+    // [fig.2.2] Livres empilés — Histoire / Révolutions
+    books: '<g fill="#0a0a0a" stroke="none"><rect x="20" y="30" width="60" height="4"/><rect x="20" y="44" width="60" height="4"/><rect x="20" y="58" width="60" height="4"/><rect x="26" y="34" width="10" height="10"/><rect x="46" y="34" width="10" height="10"/><rect x="66" y="34" width="10" height="10"/><rect x="36" y="48" width="10" height="10"/><rect x="56" y="48" width="10" height="10"/></g>',
+    // [fig.2.3] Globe boussole — Géographie
     globe: '<circle cx="50" cy="45" r="30" fill="none" stroke="#0a0a0a" stroke-width="3"/><path d="M20 45 H80 M50 15 V75 M28 28 L72 62 M28 62 L72 28" stroke="#0a0a0a" stroke-width="2" fill="none"/>',
-    // Atomes / orbites (Sciences)
+    // [fig.2.4] Atomes orbites — Sciences / Trous noirs
     atoms: '<g fill="none" stroke="#0a0a0a" stroke-width="3"><ellipse cx="50" cy="45" rx="32" ry="14"/><ellipse cx="50" cy="45" rx="32" ry="14" transform="rotate(60 50 45)"/><ellipse cx="50" cy="45" rx="32" ry="14" transform="rotate(-60 50 45)"/></g><rect x="46" y="41" width="8" height="8" fill="#0a0a0a"/>',
-    // Cadre peinture (Arts)
+    // [fig.2.5] Cadre peinture — Arts / Cinéma
     frame: '<g fill="#0a0a0a"><rect x="20" y="22" width="60" height="46" fill="none" stroke="#0a0a0a" stroke-width="3"/><rect x="26" y="28" width="10" height="10"/><rect x="40" y="28" width="10" height="10"/><rect x="54" y="28" width="10" height="10"/><rect x="68" y="28" width="6" height="10"/><rect x="28" y="48" width="40" height="14"/></g>',
-    // Livre ouvert (Littérature)
+    // [fig.2.6] Livre ouvert avec lignes — Littérature / Langue
     book: '<g fill="#0a0a0a"><rect x="30" y="20" width="40" height="50" fill="none" stroke="#0a0a0a" stroke-width="3"/><rect x="36" y="28" width="28" height="2"/><rect x="36" y="36" width="28" height="2"/><rect x="36" y="44" width="22" height="2"/><rect x="36" y="52" width="28" height="2"/><rect x="36" y="60" width="18" height="2"/></g>',
-    // Bar chart / equalizer (Sport / Musique / Économie)
+    // [fig.2.7] Bar chart — Économie / Sport / Trivia / Musique
     bars: '<g fill="#0a0a0a"><rect x="22" y="56" width="6" height="14"/><rect x="34" y="46" width="6" height="24"/><rect x="46" y="34" width="6" height="36"/><rect x="58" y="22" width="6" height="48"/><rect x="70" y="14" width="6" height="56"/><rect x="20" y="74" width="60" height="3"/></g>',
-    // Temple noir (Philosophie / Mythologie) — version k blanche sur noir
-    temple: '<g><rect x="40" y="22" width="20" height="4"/><rect x="36" y="26" width="28" height="4"/><rect x="32" y="30" width="36" height="4"/><rect x="28" y="34" width="44" height="4"/><rect x="44" y="38" width="12" height="32"/></g>',
-    // Ancre (Maritime)
-    anchor: '<g fill="none" stroke="#0a0a0a" stroke-width="3"><circle cx="50" cy="22" r="6"/><line x1="50" y1="28" x2="50" y2="72"/><line x1="36" y1="44" x2="64" y2="44"/><path d="M22 60 Q28 76 50 76 Q72 76 78 60"/></g>',
-    // Étoile / TV (12 Coups / culture pop)
-    star: '<g fill="#0a0a0a"><polygon points="50,14 58,38 84,38 63,52 71,76 50,62 29,76 37,52 16,38 42,38"/></g>',
-    // Dés (Trivia)
-    dice: '<g><rect x="22" y="22" width="38" height="38" fill="none" stroke="#0a0a0a" stroke-width="3"/><rect x="42" y="42" width="38" height="38" fill="none" stroke="#0a0a0a" stroke-width="3"/><circle cx="32" cy="32" r="3" fill="#0a0a0a"/><circle cx="50" cy="50" r="3" fill="#0a0a0a"/><circle cx="52" cy="62" r="2.5" fill="#0a0a0a"/><circle cx="70" cy="62" r="2.5" fill="#0a0a0a"/><circle cx="52" cy="70" r="2.5" fill="#0a0a0a"/><circle cx="70" cy="70" r="2.5" fill="#0a0a0a"/></g>',
-    // Microphone / note (Musique)
-    music: '<g fill="#0a0a0a"><circle cx="34" cy="60" r="10"/><circle cx="68" cy="52" r="10"/><line x1="44" y1="60" x2="44" y2="20" stroke="#0a0a0a" stroke-width="4"/><line x1="78" y1="52" x2="78" y2="16" stroke="#0a0a0a" stroke-width="4"/><line x1="44" y1="20" x2="78" y2="16" stroke="#0a0a0a" stroke-width="4"/></g>',
-    // Pellicule cinéma (Cinéma)
-    film: '<g fill="#0a0a0a"><rect x="18" y="22" width="64" height="46" fill="none" stroke="#0a0a0a" stroke-width="3"/><rect x="22" y="26" width="6" height="6"/><rect x="22" y="36" width="6" height="6"/><rect x="22" y="46" width="6" height="6"/><rect x="22" y="56" width="6" height="6"/><rect x="72" y="26" width="6" height="6"/><rect x="72" y="36" width="6" height="6"/><rect x="72" y="46" width="6" height="6"/><rect x="72" y="56" width="6" height="6"/><circle cx="50" cy="45" r="10" fill="none" stroke="#0a0a0a" stroke-width="3"/></g>',
-    // Trophée (Sport)
-    trophy: '<g fill="none" stroke="#0a0a0a" stroke-width="3"><path d="M34 18 H66 V40 Q66 56 50 56 Q34 56 34 40 Z"/><path d="M34 26 L22 26 L22 34 L34 38"/><path d="M66 26 L78 26 L78 34 L66 38"/><line x1="44" y1="56" x2="44" y2="68"/><line x1="56" y1="56" x2="56" y2="68"/><rect x="36" y="68" width="28" height="6"/></g>',
-    // Cœur anatomique (Sciences/Corps)
-    heart: '<g fill="#0a0a0a"><path d="M50 76 L24 50 Q14 36 26 26 Q36 18 50 32 Q64 18 74 26 Q86 36 76 50 Z"/></g>',
-    // Journal / actu
-    news: '<g fill="#0a0a0a"><rect x="20" y="22" width="60" height="50" fill="none" stroke="#0a0a0a" stroke-width="3"/><rect x="26" y="28" width="20" height="14"/><rect x="50" y="30" width="24" height="3"/><rect x="50" y="36" width="24" height="3"/><rect x="26" y="46" width="48" height="3"/><rect x="26" y="52" width="48" height="3"/><rect x="26" y="58" width="34" height="3"/></g>',
+    // [fig.2.8] Temple noir — Philosophie (variante k, blanche sur noir)
+    temple: '<g fill="#fff"><rect x="40" y="22" width="20" height="4"/><rect x="36" y="26" width="28" height="4"/><rect x="32" y="30" width="36" height="4"/><rect x="28" y="34" width="44" height="4"/><rect x="44" y="38" width="12" height="32"/></g>',
   };
 
-  // ─── COULEURS + DESIGN PAR CHAPITRE ───
-  // Palette du design : y, l, m, v, p, w, g, k
+  // ─── MAPPING CHAPITRE → SVG + COULEURS ───
+  // Toujours sur les 8 designs originaux
   const CHAPTER_STYLE = {
     france: { svg: "columns", colors: ["y", "w", "l"] },
     monde: { svg: "globe", colors: ["m", "v", "w"] },
     sciences: { svg: "atoms", colors: ["v", "m", "p"] },
-    musique: { svg: "music", colors: ["p", "l", "y"] },
-    cinema: { svg: "film", colors: ["k", "p", "v"] },
-    sport: { svg: "trophy", colors: ["y", "m", "l"] },
+    musique: { svg: "bars", colors: ["p", "l", "y"] },
+    cinema: { svg: "frame", colors: ["p", "k", "v"] },
+    sport: { svg: "bars", colors: ["y", "m", "l"] },
     "arts-litt": { svg: "frame", colors: ["p", "v", "w"] },
     langue: { svg: "book", colors: ["w", "y", "m"] },
     "philo-mytho": { svg: "temple", colors: ["k", "k", "k"] },
-    maritime: { svg: "anchor", colors: ["m", "v", "w"] },
-    trivia: { svg: "dice", colors: ["g", "y", "p"] },
-    "douze-coups": { svg: "star", colors: ["y", "p", "l"] },
+    maritime: { svg: "globe", colors: ["m", "v", "w"] },
+    trivia: { svg: "bars", colors: ["g", "y", "p"] },
+    "douze-coups": { svg: "books", colors: ["y", "p", "l"] },
   };
 
   function deckStyleFor(packId) {
