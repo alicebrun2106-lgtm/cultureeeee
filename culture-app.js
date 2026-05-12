@@ -55,20 +55,7 @@
 
   // ─── HELPERS DATA ───
   function getCardKey(pid, idx) { return pid + ":" + idx; }
-  function getMastery(packId, total) {
-    const data = SRS.getData(SRS_KEY) || {};
-    let m = 0;
-    for (let i = 0; i < total; i++) {
-      const st = data[getCardKey(packId, i)];
-      if (st && st.reps >= 3) m++;
-    }
-    return total > 0 ? Math.round(m / total * 100) : 0;
-  }
-  function getStarted(packId) {
-    const data = SRS.getData(SRS_KEY) || {};
-    for (const k in data) if (k.startsWith(packId + ":")) return true;
-    return false;
-  }
+
   function getPackLastPlayed(packId) {
     try {
       const tracking = JSON.parse(localStorage.getItem("qpuc-tracking")) || {};
@@ -80,16 +67,98 @@
     const start = new Date(); start.setHours(0, 0, 0, 0);
     return ts >= start.getTime();
   }
-  function isPackDoneToday(pack) {
+
+  /**
+   * Source unique de vérité pour la maîtrise d'un pack.
+   * Retourne :
+   *   - totalCards    : nb total de cartes
+   *   - seenCards     : cartes vues au moins une fois
+   *   - newCards      : cartes jamais vues
+   *   - dueToday      : cartes vues + due maintenant (à réviser)
+   *   - masteredCards : cartes solides (reps ≥ 3 et pas due)
+   *   - weakCards     : cartes vues mais faibles (reps < 2 ou ef bas) — souvent dues
+   *   - masteryPercent: score 0-100 (moyenne pondérée)
+   *   - statusLabel   : "Nouveau" / "En cours" / "À consolider" / "Solide" / "Maîtrisé"
+   *   - isDoneForToday: true si pas de cartes dues + activité aujourd'hui
+   *   - lastPlayed    : timestamp dernière session
+   */
+  window.getPackMastery = function (packId) {
+    const pack = (typeof FLASHCARD_PACKS !== "undefined") ? FLASHCARD_PACKS.find((p) => p.id === packId) : null;
+    if (!pack) return null;
     const total = pack.cards.length;
     const srs = SRS.getData(SRS_KEY) || {};
-    let due = 0;
+    const now = Date.now();
+    let seen = 0, due = 0, mastered = 0, weak = 0;
+    let scoreSum = 0;
     for (let i = 0; i < total; i++) {
-      const st = srs[getCardKey(pack.id, i)];
-      if (st && (st.next || 0) <= Date.now()) due++;
+      const st = srs[getCardKey(packId, i)];
+      if (!st) continue; // never seen
+      seen++;
+      const isDue = (st.next || 0) <= now;
+      if (isDue) due++;
+      // Per-card mastery score (0-100) :
+      // reps=0 et vu → ~10 ; reps=1 → 30 ; reps=2 → 55 ; reps=3 → 80 ; reps≥4 → 95
+      // bonus si ef élevé (jusqu'à +5), malus si due maintenant (-15)
+      let cardScore = 0;
+      if (st.reps >= 4) cardScore = 95;
+      else if (st.reps === 3) cardScore = 80;
+      else if (st.reps === 2) cardScore = 55;
+      else if (st.reps === 1) cardScore = 30;
+      else cardScore = 10; // reps 0 mais vue
+      const efBonus = Math.max(0, Math.min(5, (st.ef - 2.5) * 5));
+      cardScore += efBonus;
+      if (isDue) cardScore -= 15;
+      cardScore = Math.max(0, Math.min(100, Math.round(cardScore)));
+      scoreSum += cardScore;
+      // Master / weak
+      if (st.reps >= 3 && !isDue) mastered++;
+      if (st.reps < 2 || (st.ef && st.ef < 2.0)) weak++;
     }
-    if (due > 0) return false;
-    return isToday(getPackLastPlayed(pack.id));
+    const newCards = total - seen;
+    // Mastery percent : moyenne des scores cartes + pénalité pour les non-vues
+    const seenAvg = seen > 0 ? scoreSum / seen : 0;
+    const coverage = total > 0 ? seen / total : 0;
+    // mastery = avg des cartes vues * coverage (les non-vues comptent 0)
+    const masteryPercent = Math.round(seenAvg * coverage);
+
+    // Status label
+    let statusLabel;
+    if (seen === 0) statusLabel = "Nouveau";
+    else if (masteryPercent >= 90) statusLabel = "Maîtrisé";
+    else if (masteryPercent >= 65) statusLabel = "Solide";
+    else if (masteryPercent >= 30) statusLabel = "À consolider";
+    else statusLabel = "En cours";
+
+    const lastPlayed = getPackLastPlayed(packId);
+    const isDoneForToday = (seen > 0 && due === 0 && isToday(lastPlayed));
+
+    return {
+      totalCards: total,
+      seenCards: seen,
+      newCards,
+      dueToday: due,
+      masteredCards: mastered,
+      weakCards: weak,
+      masteryPercent,
+      statusLabel,
+      isDoneForToday,
+      lastPlayed,
+      isStarted: seen > 0,
+    };
+  };
+
+  // Compat wrappers (utilisés par d'autres modules)
+  function getMastery(packId, total) {
+    const m = window.getPackMastery(packId);
+    return m ? m.masteryPercent : 0;
+  }
+  function getStarted(packId) {
+    const m = window.getPackMastery(packId);
+    return m ? m.isStarted : false;
+  }
+  function isPackDoneToday(pack) {
+    const m = window.getPackMastery(pack.id);
+    return m ? m.isDoneForToday : false;
   }
   function getPackChapter(packId) {
     if (typeof PACK_TO_CHAPTER !== "undefined" && PACK_TO_CHAPTER[packId]) {
@@ -140,45 +209,63 @@
 
   // ─── BUILD DECK CARD ───
   function buildDeck(pack) {
-    const total = pack.cards.length;
-    const mastery = getMastery(pack.id, total);
-    const started = getStarted(pack.id);
-    const doneToday = isPackDoneToday(pack);
+    const m = window.getPackMastery(pack.id);
     const cat = getPackChapter(pack.id).toUpperCase();
     const style = deckStyleFor(pack.id);
     const color = style.color;
     const svg = SVG_DESIGNS[style.svg] || SVG_DESIGNS.book;
+    const mastery = m.masteryPercent;
     // Mastery in 10 segments
     const segs = Math.round(mastery / 10);
     let metaHtml = "";
     for (let i = 0; i < 10; i++) metaHtml += `<span class="seg${i < segs ? " on" : ""}"></span>`;
-    // Foot text
+
+    // Foot right : status with smart label
     let footRight;
-    if (mastery >= 100) footRight = "✓ MAÎTRISÉ";
-    else if (!started) footRight = "NOUVEAU";
+    if (m.isDoneForToday) footRight = "✓ DONE";
+    else if (m.dueToday > 0) footRight = m.dueToday + " À REVOIR";
+    else if (m.statusLabel === "Maîtrisé") footRight = "✓ MAÎTRISÉ";
+    else if (m.statusLabel === "Nouveau") footRight = "NOUVEAU";
     else footRight = mastery + "%";
 
-    const niv = Math.min(5, 1 + Math.floor(mastery / 25));
-
-    // Make pack name in compact 2-line
+    const niv = Math.min(5, 1 + Math.floor(mastery / 20));
     const name = pack.name.toUpperCase();
     const titleHtml = name.length > 18 ? name.split(/[ —–-]/).slice(0, 3).join("<br>") : name;
 
-    // For the .k (ink) variant, SVG strokes/fills need to be white
     const isInk = color === "k";
     const svgFill = isInk ? svg.replace(/#0a0a0a/g, "#ffffff") : svg;
     const figStyle = isInk ? 'style="background:#0a0a0a; color:#fff; border-color:#fff;"' : '';
     const dotStyle = isInk ? 'style="background:#0a0a0a; border-color:#fff;"' : '';
 
-    // Generate a small fig number from pack id hash
     let h = 0;
     for (let i = 0; i < pack.id.length; i++) h = (h * 31 + pack.id.charCodeAt(i)) | 0;
     const figNum = "fig." + (Math.abs(h) % 9 + 1) + "." + (Math.abs(h >> 8) % 9 + 1);
 
     const div = document.createElement("button");
-    div.className = "deck " + color + (doneToday ? " deck-done-today" : "");
+    div.className = "deck " + color;
+    if (m.isDoneForToday) div.classList.add("deck-done-today");
+    if (mastery >= 90) div.classList.add("deck-mastered");
     div.onclick = () => startFlashcardSession(pack.id);
+
+    // Done overlay badge
+    const doneBadge = m.isDoneForToday ? '<div class="deck-done-overlay">✓ DONE</div>' : "";
+
+    // Status pill (only when started)
+    const statusPill = m.isStarted
+      ? `<span class="deck-status deck-status-${slugify(m.statusLabel)}">${m.statusLabel}</span>`
+      : "";
+
+    // Mini stats line (only when started)
+    const miniStats = m.isStarted
+      ? `<div class="deck-mini-stats">
+           <span>👁 ${m.seenCards}/${m.totalCards}</span>
+           ${m.dueToday > 0 ? `<span class="deck-mini-due">🔁 ${m.dueToday}</span>` : ""}
+           ${m.masteredCards > 0 ? `<span class="deck-mini-mastered">⭐ ${m.masteredCards}</span>` : ""}
+         </div>`
+      : `<div class="deck-mini-stats"><span>${m.totalCards} cartes</span></div>`;
+
     div.innerHTML = `
+      ${doneBadge}
       <div class="deck-img">
         <span class="fig" ${figStyle}>[${figNum}]</span>
         <span class="dot-circ" ${dotStyle}></span>
@@ -187,13 +274,18 @@
         </svg>
       </div>
       <div class="deck-body">
-        <div class="deck-cat">${cat}</div>
+        <div class="deck-cat">${cat}${statusPill}</div>
         <div class="deck-title">${titleHtml}</div>
         <div class="deck-meta">${metaHtml}</div>
+        ${miniStats}
         <div class="deck-foot"><span>NIV.${niv}</span><span>${footRight}</span></div>
       </div>
     `;
     return div;
+  }
+
+  function slugify(s) {
+    return s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9]+/g, "-");
   }
 
   // ─── TROUVER PAGE ───
@@ -282,43 +374,180 @@
       return;
     }
 
-    // Group by chapter
-    const byChapter = {};
-    mine.forEach((p) => {
-      const chId = (typeof PACK_TO_CHAPTER !== "undefined" && PACK_TO_CHAPTER[p.id]) || "autres";
-      if (!byChapter[chId]) byChapter[chId] = [];
-      byChapter[chId].push(p);
-    });
+    // Compute mastery for all my packs
+    const enriched = mine.map((p) => ({ pack: p, m: window.getPackMastery(p.id) })).filter((x) => x.m);
 
-    let idx = 0;
-    if (typeof CHAPTERS !== "undefined") {
-      CHAPTERS.forEach((ch) => {
-        if (!byChapter[ch.id] || byChapter[ch.id].length === 0) return;
-        idx++;
-        const row = document.createElement("div");
-        row.className = "theme-row";
-        const num = String(idx).padStart(2, "0");
-        const themeColor = ["var(--yellow)", "var(--mint)", "var(--lavender)", "var(--lime)", "var(--pink-d)"][(idx-1) % 5];
-        row.innerHTML = `
-          <div class="theme-label">
-            <span class="theme-num" style="background:${themeColor};">${num}</span>
-            <h3>${ch.icon} ${ch.name.toUpperCase()}</h3>
-            <span class="fig">${byChapter[ch.id].length} paquet${byChapter[ch.id].length > 1 ? "s" : ""}</span>
-          </div>
-          <div class="deck-grid four"></div>
-        `;
-        const grid = row.querySelector(".deck-grid");
-        byChapter[ch.id].forEach((p) => grid.appendChild(buildDeck(p)));
-        container.appendChild(row);
-      });
+    // ── DAILY REVIEW BLOCK (top, very visible) ──
+    const totalDue = enriched.reduce((s, x) => s + x.m.dueToday, 0);
+    const dailyBlock = document.createElement("div");
+    dailyBlock.className = "daily-review-block";
+    if (totalDue > 0) {
+      dailyBlock.innerHTML = `
+        <div class="daily-review-left">
+          <div class="daily-review-eyebrow">RÉVISION DU JOUR</div>
+          <div class="daily-review-title">${totalDue} CARTE${totalDue > 1 ? "S" : ""}<br>À REVOIR</div>
+          <div class="daily-review-sub">Toutes les cartes dues, mélangées entre paquets</div>
+        </div>
+        <button class="btn btn-y btn-big" id="btn-daily-review">▶ COMMENCER</button>
+      `;
     } else {
-      // Fallback: just all in grid
-      const grid = document.createElement("div");
-      grid.className = "deck-grid";
-      mine.forEach((p) => grid.appendChild(buildDeck(p)));
-      container.appendChild(grid);
+      dailyBlock.innerHTML = `
+        <div class="daily-review-left">
+          <div class="daily-review-eyebrow">✓ TOUT EST FAIT</div>
+          <div class="daily-review-title">PAS DE CARTES<br>EN ATTENTE</div>
+          <div class="daily-review-sub">Tu peux explorer un nouveau paquet ou revenir demain</div>
+        </div>
+        <a href="#" class="btn btn-l" onclick="goToTab('trouver'); return false;">EXPLORER →</a>
+      `;
+    }
+    container.appendChild(dailyBlock);
+    if (totalDue > 0) {
+      setTimeout(() => {
+        const b = document.getElementById("btn-daily-review");
+        if (b) b.onclick = startDailyMixedReview;
+      }, 0);
+    }
+
+    // ── DASHBOARD INTELLIGENT ──
+    renderDashboard(container, enriched);
+
+    // ── SECTIONS À FAIRE / DONE ──
+    const todo = enriched.filter((x) => !x.m.isDoneForToday);
+    const done = enriched.filter((x) => x.m.isDoneForToday);
+
+    // Sort todo : dueToday desc, then mastery asc (priorité aux plus en retard / faibles)
+    todo.sort((a, b) => {
+      if (a.m.dueToday !== b.m.dueToday) return b.m.dueToday - a.m.dueToday;
+      return a.m.masteryPercent - b.m.masteryPercent;
+    });
+    // Sort done : most recently played first
+    done.sort((a, b) => b.m.lastPlayed - a.m.lastPlayed);
+
+    // À faire section
+    if (todo.length > 0) {
+      const section = document.createElement("div");
+      section.className = "pack-section";
+      section.innerHTML = `
+        <div class="section-banner pack-section-banner">
+          <h2>À FAIRE AUJOURD'HUI</h2>
+          <div class="bar"></div>
+          <span class="fig fig-todo">${todo.length} PAQUET${todo.length > 1 ? "S" : ""}</span>
+        </div>
+        <div class="deck-grid four"></div>
+      `;
+      const grid = section.querySelector(".deck-grid");
+      todo.forEach((x) => grid.appendChild(buildDeck(x.pack)));
+      container.appendChild(section);
+    }
+
+    // Done section
+    if (done.length > 0) {
+      const section = document.createElement("div");
+      section.className = "pack-section pack-section-done";
+      section.innerHTML = `
+        <div class="section-banner pack-section-banner">
+          <h2>✓ TERMINÉ AUJOURD'HUI</h2>
+          <div class="bar"></div>
+          <span class="fig fig-done">${done.length} ✓</span>
+        </div>
+        <div class="deck-grid four done-grid"></div>
+      `;
+      const grid = section.querySelector(".deck-grid");
+      done.forEach((x) => grid.appendChild(buildDeck(x.pack)));
+      container.appendChild(section);
     }
   }
+
+  // ── DASHBOARD : Top packs / À bosser / Presque maîtrisé ──
+  function renderDashboard(container, enriched) {
+    // Top packs : mastery >= 60, sorted desc
+    const top = enriched.filter((x) => x.m.masteryPercent >= 60)
+      .sort((a, b) => b.m.masteryPercent - a.m.masteryPercent)
+      .slice(0, 3);
+    // À bosser : packs avec le plus de cartes faibles + dues
+    const work = enriched.filter((x) => x.m.weakCards > 0 || x.m.dueToday > 0)
+      .sort((a, b) => (b.m.weakCards + b.m.dueToday) - (a.m.weakCards + a.m.dueToday))
+      .slice(0, 3);
+    // Presque maîtrisé : 70-90%
+    const almost = enriched.filter((x) => x.m.masteryPercent >= 70 && x.m.masteryPercent < 95)
+      .sort((a, b) => b.m.masteryPercent - a.m.masteryPercent)
+      .slice(0, 3);
+
+    if (top.length === 0 && work.length === 0 && almost.length === 0) return;
+
+    const dash = document.createElement("div");
+    dash.className = "dashboard-block";
+    let html = `<div class="dashboard-row">`;
+
+    if (top.length > 0) {
+      html += `<div class="dashboard-col"><div class="dash-title">⭐ TES MEILLEURS</div><ul class="dash-list">`;
+      top.forEach((x) => {
+        html += `<li onclick="startFlashcardSession('${x.pack.id}')"><span class="dash-pack-name">${x.pack.name}</span><span class="dash-pack-pct">${x.m.masteryPercent}%</span></li>`;
+      });
+      html += `</ul></div>`;
+    }
+    if (work.length > 0) {
+      html += `<div class="dashboard-col dash-col-work"><div class="dash-title">🔥 À BOSSER</div><ul class="dash-list">`;
+      work.forEach((x) => {
+        html += `<li onclick="startFlashcardSession('${x.pack.id}')"><span class="dash-pack-name">${x.pack.name}</span><span class="dash-pack-due">${x.m.dueToday > 0 ? x.m.dueToday + " due" : x.m.weakCards + " faibles"}</span></li>`;
+      });
+      html += `</ul></div>`;
+    }
+    if (almost.length > 0) {
+      html += `<div class="dashboard-col dash-col-almost"><div class="dash-title">🎯 PRESQUE MAÎTRISÉ</div><ul class="dash-list">`;
+      almost.forEach((x) => {
+        html += `<li onclick="startFlashcardSession('${x.pack.id}')"><span class="dash-pack-name">${x.pack.name}</span><span class="dash-pack-pct">${x.m.masteryPercent}%</span></li>`;
+      });
+      html += `</ul></div>`;
+    }
+    html += `</div>`;
+    dash.innerHTML = html;
+    container.appendChild(dash);
+  }
+
+  // ── DAILY MIXED REVIEW SESSION ──
+  // Mélange toutes les cartes dues aujourd'hui, à travers tous les paquets,
+  // qui ont été vues au moins une fois. Exclut les cartes totalement nouvelles.
+  function startDailyMixedReview() {
+    if (typeof FLASHCARD_PACKS === "undefined") return;
+    const srsData = SRS.getData(SRS_KEY) || {};
+    const now = Date.now();
+    const due = [];
+    FLASHCARD_PACKS.forEach((pack) => {
+      pack.cards.forEach((card, idx) => {
+        const key = pack.id + ":" + idx;
+        const st = srsData[key];
+        if (!st) return; // jamais vue → exclue
+        if ((st.next || 0) <= now) {
+          due.push({
+            front: card.front, back: card.back, memo: card.memo || null,
+            srsKey: key, cardIdx: idx,
+            pack, packId: pack.id,
+          });
+        }
+      });
+    });
+    if (due.length === 0) return;
+    shuffle(due);
+
+    session = {
+      pack: null,           // multi-pack
+      packId: "__daily__",
+      isDailyReview: true,
+      allCards: due,
+      queue: due.map((_, i) => i),
+      index: 0,
+      flipped: false,
+      results: { again: 0, hard: 0, good: 0, easy: 0 },
+      masteryStart: 0,
+    };
+    if (typeof GAM !== "undefined" && GAM.resetCombo) GAM.resetCombo();
+
+    document.getElementById("session-title").textContent = "RÉVISION DU JOUR";
+    goToTab("session");
+    showCard();
+  }
+  window.startDailyMixedReview = startDailyMixedReview;
 
   // ─── SESSION FLASHCARD ───
   let session = null;
@@ -375,6 +604,22 @@
     session.flipped = false;
     document.getElementById("session-actions").hidden = false;
     document.getElementById("session-quality").hidden = true;
+
+    // Pack badge for daily mixed review
+    let badge = document.getElementById("session-pack-badge");
+    if (!badge) {
+      badge = document.createElement("div");
+      badge.id = "session-pack-badge";
+      badge.className = "session-pack-badge";
+      const card = document.getElementById("session-card");
+      if (card) card.insertBefore(badge, card.firstChild);
+    }
+    if (session.isDailyReview && c.pack) {
+      badge.textContent = c.pack.name;
+      badge.style.display = "";
+    } else {
+      badge.style.display = "none";
+    }
   }
 
   window.flipFlashcard = function () {
@@ -403,11 +648,12 @@
     const state = SRS.getState(SRS_KEY, c.srsKey);
     const newState = SRS.update(state, quality);
     SRS.save(SRS_KEY, c.srsKey, newState);
-    // Track
+    // Track : pour daily review, on track sur le packId réel de la carte
+    const trackPackId = session.isDailyReview ? c.packId : session.packId;
     try {
       const tracking = JSON.parse(localStorage.getItem("qpuc-tracking") || "{}");
-      if (!tracking[session.packId]) tracking[session.packId] = { attempts: 0, correct: 0, wrong: 0, cards: {}, lastPlayed: 0 };
-      const tp = tracking[session.packId];
+      if (!tracking[trackPackId]) tracking[trackPackId] = { attempts: 0, correct: 0, wrong: 0, cards: {}, lastPlayed: 0 };
+      const tp = tracking[trackPackId];
       tp.attempts++;
       if (quality >= 3) tp.correct++; else tp.wrong++;
       tp.lastPlayed = Date.now();
@@ -437,13 +683,15 @@
     else if (quality === 4) session.results.good++;
     else session.results.easy++;
 
-    // Check mastery jump
-    const newMastery = getMastery(session.packId, session.pack.cards.length);
-    if (session.masteryStart < 100 && newMastery >= 100 && typeof GAM !== "undefined") {
-      if (GAM.recordMastery(session.packId) && GAM.celebratePackMastered) {
-        GAM.celebratePackMastered(session.pack.name);
+    // Check mastery jump (only for single-pack sessions)
+    if (!session.isDailyReview && session.pack) {
+      const newMastery = getMastery(session.packId, session.pack.cards.length);
+      if (session.masteryStart < 100 && newMastery >= 100 && typeof GAM !== "undefined") {
+        if (GAM.recordMastery(session.packId) && GAM.celebratePackMastered) {
+          GAM.celebratePackMastered(session.pack.name);
+        }
+        session.masteryStart = 100;
       }
-      session.masteryStart = 100;
     }
 
     session.index++;
@@ -454,14 +702,21 @@
   function showResult() {
     const r = session.results;
     const total = r.again + r.hard + r.good + r.easy;
-    const mastery = getMastery(session.packId, session.pack.cards.length);
     const xp = r.hard * 1 + r.good * 2 + r.easy * 3;
     document.getElementById("result-total").textContent = total;
     document.getElementById("result-good").textContent = r.good + r.easy;
-    document.getElementById("result-mastery").textContent = mastery + "%";
     document.getElementById("result-xp").textContent = "+" + xp;
-    document.getElementById("result-emoji").textContent = mastery >= 100 ? "⭐" : (r.again === 0 ? "🎉" : "👍");
-    document.getElementById("result-title").textContent = mastery >= 100 ? "Pack maîtrisé !" : "Session terminée !";
+
+    if (session.isDailyReview) {
+      document.getElementById("result-mastery").textContent = "MIX";
+      document.getElementById("result-emoji").textContent = r.again === 0 ? "🔥" : "👍";
+      document.getElementById("result-title").textContent = "Révision du jour terminée !";
+    } else {
+      const mastery = getMastery(session.packId, session.pack.cards.length);
+      document.getElementById("result-mastery").textContent = mastery + "%";
+      document.getElementById("result-emoji").textContent = mastery >= 100 ? "⭐" : (r.again === 0 ? "🎉" : "👍");
+      document.getElementById("result-title").textContent = mastery >= 100 ? "Pack maîtrisé !" : "Session terminée !";
+    }
     goToTab("result");
   }
 

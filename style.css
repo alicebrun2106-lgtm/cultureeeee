@@ -867,3 +867,192 @@
   #session-card-answer[hidden], #session-card-memo[hidden] {
     display: none !important;
   }
+
+  /* ─── RÉVISION DU JOUR — BLOC TOP DE MES PAQUETS ─── */
+  .daily-review-block {
+    background: var(--yellow);
+    border: 4px solid var(--ink);
+    box-shadow: 8px 8px 0 var(--ink);
+    padding: 22px 26px;
+    margin: 26px 0 30px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+  .daily-review-left { flex: 1; min-width: 200px; }
+  .daily-review-eyebrow {
+    font-family: 'Space Mono', monospace;
+    font-weight: 700;
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    margin-bottom: 8px;
+  }
+  .daily-review-title {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 22px;
+    line-height: 1.15;
+    margin: 0 0 8px;
+  }
+  .daily-review-sub {
+    font-family: 'Space Mono', monospace;
+    font-style: italic;
+    font-size: 13px;
+  }
+  #btn-daily-review {
+    background: var(--ink);
+    color: #fff;
+    border-color: var(--ink);
+    box-shadow: 4px 4px 0 var(--pink-d);
+  }
+  #btn-daily-review:hover { box-shadow: 2px 2px 0 var(--pink-d); }
+
+  /* ─── DASHBOARD ─── */
+  .dashboard-block { margin-bottom: 30px; }
+  .dashboard-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+  .dashboard-col {
+    background: #fff;
+    border: 3px solid var(--ink);
+    box-shadow: 4px 4px 0 var(--ink);
+    padding: 14px;
+  }
+  .dashboard-col.dash-col-work { background: var(--pink); }
+  .dashboard-col.dash-col-almost { background: var(--mint); }
+  .dash-title {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 11px;
+    margin-bottom: 10px;
+    padding-bottom: 8px;
+    border-bottom: 2px dashed var(--ink);
+  }
+  .dash-list { list-style: none; padding: 0; margin: 0; }
+  .dash-list li {
+    font-family: 'Space Mono', monospace;
+    font-weight: 700;
+    font-size: 12px;
+    padding: 6px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    border-bottom: 1px solid rgba(10,10,10,0.1);
+  }
+  .dash-list li:last-child { border-bottom: none; }
+  .dash-list li:hover .dash-pack-name { text-decoration: underline; }
+  .dash-pack-name {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .dash-pack-pct, .dash-pack-due {
+    background: var(--ink);
+    color: #fff;
+    padding: 2px 8px 1px;
+    font-size: 10px;
+    flex-shrink: 0;
+  }
+  .dash-pack-pct { background: var(--ink); }
+  .dash-col-work .dash-pack-due { background: var(--pink-d); color: var(--ink); }
+  .dash-col-almost .dash-pack-pct { background: var(--lime); color: var(--ink); }
+
+  /* ─── SECTIONS (À faire / Done) ─── */
+  .pack-section { margin-bottom: 36px; }
+  .pack-section-banner {
+    margin: 30px 0 18px;
+  }
+  .fig-todo { background: var(--yellow); }
+  .fig-done { background: var(--lime); }
+  .pack-section-done .deck-grid {
+    opacity: 0.85;
+  }
+  .pack-section-done .section-banner h2 {
+    background: var(--lime);
+  }
+
+  /* ─── DECK : Status pill + done overlay + mini stats ─── */
+  .deck-status {
+    display: inline-block;
+    margin-left: 6px;
+    background: var(--ink);
+    color: #fff;
+    font-family: 'Space Mono', monospace;
+    font-weight: 700;
+    font-size: 9px;
+    letter-spacing: 0.06em;
+    padding: 2px 6px 1px;
+    text-transform: uppercase;
+    vertical-align: middle;
+  }
+  .deck-status-nouveau { background: var(--gray); }
+  .deck-status-en-cours { background: var(--pink-d); color: var(--ink); }
+  .deck-status-a-consolider { background: var(--yellow); color: var(--ink); }
+  .deck-status-solide { background: var(--mint); color: var(--ink); }
+  .deck-status-maitrise { background: var(--lime); color: var(--ink); }
+
+  .deck-mini-stats {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    font-family: 'Space Mono', monospace;
+    font-weight: 700;
+    font-size: 10px;
+    margin: 6px 0 8px;
+    color: var(--ink);
+  }
+  .deck-mini-stats span { white-space: nowrap; }
+  .deck-mini-due { color: var(--pink-d); }
+  .deck-mini-mastered { color: #2a7a2a; }
+
+  /* Done deck overlay */
+  .deck-done-overlay {
+    position: absolute;
+    top: 8px; right: 8px;
+    background: var(--lime);
+    color: var(--ink);
+    border: 2px solid var(--ink);
+    box-shadow: 2px 2px 0 var(--ink);
+    font-family: 'Press Start 2P', monospace;
+    font-size: 9px;
+    padding: 3px 7px 2px;
+    z-index: 3;
+    animation: doneBadgePop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .deck-done-today {
+    position: relative;
+  }
+  .deck-mastered { border-color: var(--ink); }
+  @keyframes doneBadgePop {
+    0% { transform: scale(0) rotate(-10deg); opacity: 0; }
+    100% { transform: scale(1) rotate(0); opacity: 1; }
+  }
+
+  /* Pack badge inside session card (daily review) */
+  .session-pack-badge {
+    display: inline-block;
+    background: var(--lavender);
+    color: var(--ink);
+    border: 2px solid var(--ink);
+    box-shadow: 2px 2px 0 var(--ink);
+    font-family: 'Space Mono', monospace;
+    font-weight: 700;
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 4px 9px 3px;
+    margin: 0 auto 12px;
+    align-self: center;
+  }
+
+  @media (max-width: 760px) {
+    .dashboard-row { grid-template-columns: 1fr; }
+    .daily-review-title { font-size: 18px; }
+    .daily-review-block { padding: 18px; }
+    .pack-section-banner h2 { font-size: 14px; }
+  }
