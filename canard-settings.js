@@ -2,6 +2,17 @@
 // Bouton "Je veux le canard sur mon écran" + tous les contrôles (skin, taille, timer, visibilité)
 
 (function () {
+  // Déclencheur fiable du protocole canard:// — l'iframe est bloquée par
+  // certains navigateurs depuis HTTPS, donc on clique sur un <a> caché.
+  function triggerCanard(url) {
+    const a = document.createElement("a");
+    a.href = url;
+    a.style.display = "none";
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => a.remove(), 500);
+  }
+
   function refresh() {
     if (typeof Duck === "undefined") return;
     const s = Duck.getState();
@@ -73,12 +84,7 @@
       b.onclick = () => {
         Duck.update({ size: b.dataset.size });
         Duck.render();
-        // Propagation vers l'app desktop : canard://size-sm|md|lg
-        const iframe = document.createElement("iframe");
-        iframe.style.display = "none";
-        iframe.src = "canard://size-" + b.dataset.size;
-        document.body.appendChild(iframe);
-        setTimeout(() => iframe.remove(), 1000);
+        triggerCanard("canard://size-" + b.dataset.size);
         refresh();
       };
     });
@@ -90,12 +96,7 @@
       b.onclick = () => {
         Duck.update({ intervalMin: val });
         Duck.render();
-        // Propagation vers l'app desktop : canard://interval-5|15|30|60 (ou 0 = pause)
-        const iframe = document.createElement("iframe");
-        iframe.style.display = "none";
-        iframe.src = "canard://interval-" + val;
-        document.body.appendChild(iframe);
-        setTimeout(() => iframe.remove(), 1000);
+        triggerCanard("canard://interval-" + val);
         refresh();
       };
     });
@@ -120,14 +121,8 @@
     if (resetBtn) {
       resetBtn.onclick = () => {
         if (!confirm("Reset le score à 0 ? (web + bureau)")) return;
-        // Reset web
         Duck.resetScore();
-        // Reset desktop via protocole
-        const iframe = document.createElement("iframe");
-        iframe.style.display = "none";
-        iframe.src = "canard://reset-score";
-        document.body.appendChild(iframe);
-        setTimeout(() => iframe.remove(), 1000);
+        triggerCanard("canard://reset-score");
         refresh();
       };
     }
@@ -137,16 +132,9 @@
     if (deactivateBtn) {
       deactivateBtn.onclick = () => {
         if (!confirm("Désactiver le canard ? (ferme l'app desktop)")) return;
-        // Cache le canard web
         Duck.update({ enabled: false });
         Duck.render();
-        // Demande à l'app desktop de quitter
-        const iframe = document.createElement("iframe");
-        iframe.style.display = "none";
-        iframe.src = "canard://quit";
-        document.body.appendChild(iframe);
-        setTimeout(() => iframe.remove(), 1000);
-        // Reset flag desktop-active
+        triggerCanard("canard://quit");
         localStorage.removeItem("qpuc-desktop-active");
         // Reset bouton launch
         const launchBtn = document.getElementById("btn-launch-desktop-duck");
@@ -178,12 +166,7 @@
     if (!btn) return;
     btn.onclick = () => {
       const hint = document.getElementById("duck-launch-hint");
-      // Lance via protocole canard://
-      const iframe = document.createElement("iframe");
-      iframe.style.display = "none";
-      iframe.src = "canard://launch";
-      document.body.appendChild(iframe);
-      setTimeout(() => iframe.remove(), 1000);
+      triggerCanard("canard://launch");
       // Cache le canard web (le desktop prend le relais)
       if (typeof Duck !== "undefined") {
         Duck.update({ enabled: false });
