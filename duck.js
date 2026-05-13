@@ -13,7 +13,7 @@
 
   // ─── ÉTAT PERSISTÉ ───
   const DEFAULTS = {
-    enabled: true,
+    enabled: false, // Canard sur le site désactivé par défaut — un seul canard = le desktop
     forcedLevel: null,   // null = auto (selon score), sinon 1-4
     size: "md",          // sm / md / lg
     intervalMin: 30,     // 0 = off, 5/15/30/60
@@ -428,11 +428,22 @@
   };
 
   // ─── INIT ───
+  // Force la désactivation au premier chargement de cette version :
+  // l'utilisateur veut UN SEUL canard, celui de l'app desktop.
+  // On marque qu'on a fait le force-disable pour ne pas le refaire en boucle.
+  function forceDisableOnce() {
+    const FORCE_FLAG = "qpuc-duck-disabled-v1";
+    if (localStorage.getItem(FORCE_FLAG) === "done") return;
+    update({ enabled: false });
+    localStorage.setItem(FORCE_FLAG, "done");
+  }
+
   function init() {
     if (typeof FLASHCARD_PACKS === "undefined") {
       setTimeout(init, 200);
       return;
     }
+    forceDisableOnce();
     render();
   }
   if (document.readyState === "loading") {
