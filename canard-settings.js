@@ -70,7 +70,17 @@
     // Size
     document.querySelectorAll(".duck-size-btn").forEach((b) => {
       b.classList.toggle("on", b.dataset.size === s.size);
-      b.onclick = () => { Duck.update({ size: b.dataset.size }); Duck.render(); refresh(); };
+      b.onclick = () => {
+        Duck.update({ size: b.dataset.size });
+        Duck.render();
+        // Propagation vers l'app desktop : canard://size-sm|md|lg
+        const iframe = document.createElement("iframe");
+        iframe.style.display = "none";
+        iframe.src = "canard://size-" + b.dataset.size;
+        document.body.appendChild(iframe);
+        setTimeout(() => iframe.remove(), 1000);
+        refresh();
+      };
     });
 
     // Interval
