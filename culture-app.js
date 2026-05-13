@@ -947,12 +947,12 @@
         if (!session.flipped) flipFlashcard();
       } else if (session.flipped) {
         const k = e.key.toLowerCase();
-        // Raccourcis : Q = À revoir, S = Difficile, F = Bien, D = Facile
+        // Raccourcis : Q = À revoir, S = Difficile, D = Bien (good), F = Facile (easy)
         // Aussi : chiffres 1/2/3/4
         if (k === "q" || e.key === "1") rateFlashcard(1);
         else if (k === "s" || e.key === "2") rateFlashcard(3);
-        else if (k === "f" || e.key === "3") rateFlashcard(4);
-        else if (k === "d" || e.key === "4") rateFlashcard(5);
+        else if (k === "d" || e.key === "3") rateFlashcard(4);
+        else if (k === "f" || e.key === "4") rateFlashcard(5);
       }
     });
   });
