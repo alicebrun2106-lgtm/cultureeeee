@@ -820,11 +820,37 @@
     }
   }
 
+  // Détecte les noms propres / mots-clés dans une réponse et les rend cliquables
+  // pour ouvrir une popover Wikipedia.
+  function highlightKeywords(text) {
+    if (!text) return "";
+    // 1) Échapper le HTML
+    let safe = String(text)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;");
+    // 2) Mots à NE PAS traiter comme mots-clés
+    const STOP = new Set(["Le","La","Les","Un","Une","Des","Du","De","Au","Aux","En","Et","Ou","Mais","Ce","Cette","Cet","Ces","Il","Elle","Ils","Elles","On","Tu","Je","Nous","Vous","Mon","Ma","Mes","Ton","Ta","Tes","Son","Sa","Ses","Notre","Votre","Leur","Pas","Plus","Très","Sans","Avec","Sur","Sous","Dans","Pour","Par","Vers","Chez","Quel","Quelle","Quels","Quelles","Qui","Que","Quoi","Comment","Combien","Où","Quand","Avant","Après","Pendant","Aussi","Donc","Alors","Si","Oui","Non","Tout","Tous","Toute","Toutes","Bien","Beaucoup","Peu","Trop","Comme","Cela","Ceci","Ça"]);
+    // 3) Capturer un nom propre = 1 mot capitalisé, ou plusieurs joints par " ", " de ", " du ", " d' ", " et ", " la ", " le ".
+    //    Exclure les mots seuls qui sont dans la stop list ou trop courts.
+    const NAME_RE = /([A-ZÀ-ÖØ-Ý][a-zà-öø-ÿ]+(?:[\s'’]?(?:de|du|d'|la|le|et|des)[\s'’])?(?:[A-ZÀ-ÖØ-Ý][a-zà-öø-ÿ]+)?(?:\s+[A-ZÀ-ÖØ-Ý][a-zà-öø-ÿ]+){0,3})/g;
+    return safe.replace(NAME_RE, (match) => {
+      const trimmed = match.trim();
+      // Si c'est juste un mot de la stop list, ignorer
+      if (STOP.has(trimmed)) return match;
+      // Si trop court
+      if (trimmed.length < 4) return match;
+      // OK : on wrap
+      const enc = encodeURIComponent(trimmed.replace(/\s+/g, "_"));
+      return `<span class="kw" data-kw="${enc}" data-label="${trimmed.replace(/"/g, "&quot;")}">${match}</span>`;
+    });
+  }
+
   window.flipFlashcard = function () {
     if (!session || session.flipped) return;
     session.flipped = true;
     const c = session.allCards[session.queue[session.index]];
-    document.getElementById("session-card-answer").textContent = c.back;
+    document.getElementById("session-card-answer").innerHTML = highlightKeywords(c.back);
     document.getElementById("session-card-answer").hidden = false;
     document.getElementById("session-card-text").style.opacity = "0.45";
     document.getElementById("session-card-text").style.fontSize = "15px";
@@ -928,6 +954,65 @@
     goToTab("result");
   }
 
+  // ─── KEYWORD POPOVER (Wikipedia mini) ───
+  let kwPopoverEl = null;
+  let kwHideTimer = null;
+  function wireKeywordPopover() {
+    if (kwPopoverEl) return;
+    kwPopoverEl = document.createElement("div");
+    kwPopoverEl.className = "kw-popover";
+    kwPopoverEl.style.display = "none";
+    document.body.appendChild(kwPopoverEl);
+    // Show on hover (delegation sur tout le doc)
+    document.body.addEventListener("mouseover", (e) => {
+      const t = e.target.closest(".kw");
+      if (!t) return;
+      if (kwHideTimer) { clearTimeout(kwHideTimer); kwHideTimer = null; }
+      showKeywordPopover(t);
+    });
+    document.body.addEventListener("mouseout", (e) => {
+      const t = e.target.closest(".kw");
+      if (!t) return;
+      // Delay hide pour pouvoir aller sur le popover sans qu'il se ferme
+      kwHideTimer = setTimeout(() => {
+        if (!kwPopoverEl.matches(":hover")) kwPopoverEl.style.display = "none";
+      }, 200);
+    });
+    kwPopoverEl.addEventListener("mouseenter", () => {
+      if (kwHideTimer) { clearTimeout(kwHideTimer); kwHideTimer = null; }
+    });
+    kwPopoverEl.addEventListener("mouseleave", () => {
+      kwHideTimer = setTimeout(() => { kwPopoverEl.style.display = "none"; }, 200);
+    });
+  }
+
+  function showKeywordPopover(el) {
+    const label = el.dataset.label || el.textContent;
+    const enc = el.dataset.kw || encodeURIComponent(label);
+    const wikiUrl = "https://fr.wikipedia.org/wiki/" + enc;
+    const searchUrl = "https://www.google.com/search?q=" + enc;
+    kwPopoverEl.innerHTML = `
+      <div class="kw-pop-title">${label}</div>
+      <div class="kw-pop-actions">
+        <a href="${wikiUrl}" target="_blank" rel="noopener" class="kw-pop-btn kw-pop-wiki">📖 Wikipédia →</a>
+        <a href="${searchUrl}" target="_blank" rel="noopener" class="kw-pop-btn kw-pop-search">🔍 Rechercher</a>
+      </div>
+    `;
+    // Position above the keyword
+    const rect = el.getBoundingClientRect();
+    kwPopoverEl.style.display = "block";
+    // Forcer un reflow pour mesurer
+    const pw = kwPopoverEl.offsetWidth || 220;
+    const ph = kwPopoverEl.offsetHeight || 80;
+    let left = rect.left + rect.width / 2 - pw / 2;
+    let top = rect.top - ph - 10;
+    if (left < 8) left = 8;
+    if (left + pw > window.innerWidth - 8) left = window.innerWidth - pw - 8;
+    if (top < 8) top = rect.bottom + 10;
+    kwPopoverEl.style.left = left + "px";
+    kwPopoverEl.style.top = top + "px";
+  }
+
   // Back button on session screen
   document.addEventListener("DOMContentLoaded", function () {
     const back = document.getElementById("btn-session-back");
@@ -935,6 +1020,8 @@
     // Wire delete button
     const delBtn = document.getElementById("card-delete-btn");
     if (delBtn) delBtn.onclick = (e) => { e.stopPropagation(); window.deleteCurrentCard(); };
+    // Wire keyword popover
+    wireKeywordPopover();
     // Keyboard shortcuts
     document.addEventListener("keydown", function (e) {
       const sess = document.getElementById("page-session");
