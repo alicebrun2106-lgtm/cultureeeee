@@ -1,104 +1,94 @@
 // canard-settings.js — UI de la page "🦆 CANARD"
-// Synchronise les contrôles avec window.Duck
+// Branche les contrôles UI sur window.Duck
 
 (function () {
   function refresh() {
     if (typeof Duck === "undefined") return;
     const s = Duck.getState();
-    const SKINS = Duck.SKINS;
+    const LEVEL = Duck.LEVEL_INFO;
+    const currentLvl = Duck.currentLevel();
+    const autoLvl = Duck.levelFromScore(s.score);
 
     // Score display
     const scoreEl = document.getElementById("duck-score-display");
     if (scoreEl) scoreEl.textContent = "SCORE " + s.score;
 
-    // Preview
-    const skin = SKINS[s.skin] || SKINS[1];
-    const previewEmoji = document.querySelector("#duck-preview-big .duck-emoji-big");
-    const previewAcc = document.querySelector("#duck-preview-big .duck-accessory-big");
-    if (previewEmoji) previewEmoji.textContent = skin.duck;
-    if (previewAcc) previewAcc.textContent = skin.accessory;
+    // Preview image
+    const previewImg = document.getElementById("duck-preview-img");
+    if (previewImg) {
+      // Essayer WebP animé, sinon PNG
+      previewImg.onerror = function () {
+        if (previewImg.src.endsWith(".webp")) {
+          previewImg.src = "assets/duck-" + currentLvl + ".png";
+        }
+      };
+      previewImg.src = "assets/duck-" + currentLvl + ".webp";
+    }
     const labelEl = document.getElementById("duck-skin-label");
-    if (labelEl) labelEl.textContent = skin.label;
+    if (labelEl && LEVEL[currentLvl]) labelEl.textContent = LEVEL[currentLvl].label;
 
-    // Skin grid
-    const skinRow = document.getElementById("duck-skin-row");
-    if (skinRow) {
-      skinRow.innerHTML = "";
-      const autoMax = s.autoUnlock ? Duck.autoSkinFromScore(s.score) : 5;
-      for (let i = 1; i <= 5; i++) {
-        const sk = SKINS[i];
-        const btn = document.createElement("button");
-        const locked = s.autoUnlock && i > autoMax;
-        btn.className = "duck-skin-card" + (s.skin === i ? " on" : "") + (locked ? " locked" : "");
-        const thresholds = [0, 10, 25, 50, 100];
-        btn.innerHTML = `
-          <div class="duck-skin-mini">
-            <div class="duck-mini-emoji">${sk.duck}</div>
-            <div class="duck-mini-acc">${sk.accessory}</div>
-          </div>
-          <div class="duck-skin-lbl">${sk.label}</div>
-          <div class="duck-skin-thresh">${locked ? "🔒 " + thresholds[i-1] + " pts" : "✓"}</div>
+    // Grille de niveaux (4 niveaux)
+    const row = document.getElementById("duck-skin-row");
+    if (row) {
+      row.innerHTML = "";
+      for (let i = 1; i <= 4; i++) {
+        const info = LEVEL[i];
+        const locked = i > autoLvl && i !== s.forcedLevel;
+        const card = document.createElement("button");
+        card.className = "duck-level-card" + (currentLvl === i ? " on" : "") + (locked ? " locked" : "");
+        card.innerHTML = `
+          <img class="duck-level-mini-img" src="assets/duck-${i}.png" alt="Niveau ${i}">
+          <div class="duck-level-lbl">${info.label}</div>
+          <div class="duck-level-thresh">${i === 1 ? "✓" : (locked ? "🔒 " + info.min + " pts" : "✓ Débloqué")}</div>
         `;
-        btn.onclick = () => {
+        card.onclick = () => {
           if (locked) return;
-          Duck.update({ skin: i });
+          Duck.update({ forcedLevel: i });
           Duck.render();
           refresh();
         };
-        skinRow.appendChild(btn);
+        row.appendChild(card);
       }
     }
 
-    // Auto unlock checkbox
+    // Auto unlock = on remet en auto (forcedLevel=null)
     const autoEl = document.getElementById("duck-auto-unlock");
     if (autoEl) {
-      autoEl.checked = !!s.autoUnlock;
+      autoEl.checked = !s.forcedLevel;
       autoEl.onchange = () => {
-        Duck.update({ autoUnlock: autoEl.checked });
+        if (autoEl.checked) Duck.update({ forcedLevel: null });
+        Duck.render();
         refresh();
       };
     }
 
-    // Size buttons
+    // Size
     document.querySelectorAll(".duck-size-btn").forEach((b) => {
       b.classList.toggle("on", b.dataset.size === s.size);
-      b.onclick = () => {
-        Duck.update({ size: b.dataset.size });
-        Duck.render();
-        refresh();
-      };
+      b.onclick = () => { Duck.update({ size: b.dataset.size }); Duck.render(); refresh(); };
     });
 
-    // Interval buttons
+    // Interval
     document.querySelectorAll(".duck-interval-btn").forEach((b) => {
       const val = parseInt(b.dataset.interval, 10);
       b.classList.toggle("on", val === s.intervalMin);
-      b.onclick = () => {
-        Duck.update({ intervalMin: val });
-        Duck.render();
-        refresh();
-      };
+      b.onclick = () => { Duck.update({ intervalMin: val }); Duck.render(); refresh(); };
     });
 
-    // Enabled toggle
+    // Enabled
     const enEl = document.getElementById("duck-enabled");
     if (enEl) {
       enEl.checked = !!s.enabled;
-      enEl.onchange = () => {
-        Duck.update({ enabled: enEl.checked });
-        Duck.render();
-        refresh();
-      };
+      enEl.onchange = () => { Duck.update({ enabled: enEl.checked }); Duck.render(); refresh(); };
     }
   }
 
   window.refreshDuckUI = refresh;
 
-  // Hook into goToTab so when CANARD is shown, we refresh
+  // Hook sur goToTab pour gérer l'onglet "canard"
   const origGoTab = window.goToTab;
   window.goToTab = function (tab) {
     if (typeof origGoTab === "function") origGoTab(tab);
-    // Also handle "canard" tab here (not in culture-app map)
     if (tab === "canard") {
       document.querySelectorAll(".page-section").forEach((s) => s.classList.remove("active"));
       const el = document.getElementById("page-canard");
@@ -111,7 +101,6 @@
     }
   };
 
-  // Initial refresh
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", () => setTimeout(refresh, 200));
   } else {

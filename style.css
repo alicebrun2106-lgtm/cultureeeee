@@ -1058,293 +1058,6 @@
   }
 
   /* ============================================================
-     🦆 CANARD
-     ============================================================ */
-
-  /* Le canard flottant (toujours visible quand activé) */
-  #duck {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    z-index: 9990;
-    user-select: none;
-    cursor: grab;
-    transition: transform 0.15s ease;
-  }
-  #duck.duck-dragging { cursor: grabbing; transition: none; }
-  .duck-body {
-    width: 76px; height: 76px;
-    background: var(--paper);
-    border: 3px solid var(--ink);
-    border-radius: 50%;
-    box-shadow: 4px 4px 0 var(--ink);
-    position: relative;
-    display: flex; align-items: center; justify-content: center;
-    transition: transform 0.2s;
-  }
-  #duck:hover .duck-body { transform: scale(1.05); }
-  #duck.duck-happy .duck-body {
-    animation: duck-happy 0.6s ease-in-out;
-    background: var(--lime);
-  }
-  #duck.duck-sad .duck-body {
-    animation: duck-sad 0.6s ease-in-out;
-    background: var(--pink-d);
-  }
-  @keyframes duck-happy {
-    0%, 100% { transform: translateY(0) rotate(0); }
-    25% { transform: translateY(-12px) rotate(-8deg); }
-    50% { transform: translateY(-18px) rotate(0); }
-    75% { transform: translateY(-12px) rotate(8deg); }
-  }
-  @keyframes duck-sad {
-    0%, 100% { transform: rotate(0); }
-    25% { transform: translateX(-4px) rotate(-3deg); }
-    75% { transform: translateX(4px) rotate(3deg); }
-  }
-  .duck-emoji {
-    font-size: 44px;
-    line-height: 1;
-  }
-  .duck-accessory {
-    position: absolute;
-    top: 4px;
-    right: 4px;
-    font-size: 22px;
-    line-height: 1;
-  }
-  .duck-score-badge {
-    position: absolute;
-    bottom: -8px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: var(--ink);
-    color: #fff;
-    border: 2px solid var(--ink);
-    box-shadow: 2px 2px 0 var(--pink-d);
-    padding: 2px 8px 1px;
-    font-family: 'Press Start 2P', monospace;
-    font-size: 9px;
-    min-width: 22px;
-    text-align: center;
-  }
-
-  /* Tailles */
-  #duck.duck-size-sm .duck-body { width: 56px; height: 56px; }
-  #duck.duck-size-sm .duck-emoji { font-size: 32px; }
-  #duck.duck-size-sm .duck-accessory { font-size: 16px; }
-  #duck.duck-size-lg .duck-body { width: 100px; height: 100px; }
-  #duck.duck-size-lg .duck-emoji { font-size: 60px; }
-  #duck.duck-size-lg .duck-accessory { font-size: 30px; }
-
-  /* Bulle de question */
-  .duck-bubble {
-    position: fixed;
-    width: 320px;
-    background: #fff;
-    border: 3px solid var(--ink);
-    box-shadow: 5px 5px 0 var(--ink);
-    padding: 14px;
-    z-index: 9991;
-    font-family: 'Space Mono', monospace;
-  }
-  .duck-bubble-pack {
-    font-family: 'Press Start 2P', monospace;
-    font-size: 9px;
-    background: var(--lavender);
-    color: var(--ink);
-    display: inline-block;
-    padding: 3px 7px 2px;
-    border: 2px solid var(--ink);
-    margin-bottom: 8px;
-  }
-  .duck-bubble-q {
-    font-weight: 700;
-    font-size: 13px;
-    line-height: 1.4;
-    margin-bottom: 12px;
-  }
-  .duck-bubble-choices {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-  }
-  .duck-choice {
-    background: #fff;
-    border: 2px solid var(--ink);
-    box-shadow: 2px 2px 0 var(--ink);
-    padding: 7px 10px;
-    font-family: 'Space Mono', monospace;
-    font-weight: 700;
-    font-size: 12px;
-    text-align: left;
-    cursor: pointer;
-    color: var(--ink);
-    transition: transform 0.06s, box-shadow 0.06s, background 0.15s;
-  }
-  .duck-choice:hover:not(:disabled) {
-    background: var(--yellow);
-    transform: translate(1px, 1px);
-    box-shadow: 1px 1px 0 var(--ink);
-  }
-  .duck-choice:disabled { cursor: default; }
-  .duck-choice.duck-choice-correct { background: var(--lime); }
-  .duck-choice.duck-choice-wrong { background: var(--pink-d); }
-  .duck-bubble-close {
-    position: absolute;
-    top: -10px; right: -10px;
-    background: var(--ink);
-    color: #fff;
-    border: 2px solid var(--ink);
-    width: 24px; height: 24px;
-    border-radius: 50%;
-    font-family: 'Space Mono', monospace;
-    font-weight: 700;
-    cursor: pointer;
-  }
-
-  /* Page CANARD */
-  .duck-settings-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 18px;
-  }
-  .duck-settings-card {
-    padding: 22px;
-  }
-  .duck-h {
-    font-family: 'Press Start 2P', monospace;
-    font-size: 13px;
-    margin: 0 0 12px;
-  }
-  .duck-help {
-    font-family: 'Space Mono', monospace;
-    font-size: 12px;
-    font-style: italic;
-    margin-bottom: 14px;
-    line-height: 1.4;
-  }
-  .duck-preview-big {
-    width: 140px; height: 140px;
-    background: var(--paper);
-    border: 3px solid var(--ink);
-    border-radius: 50%;
-    box-shadow: 6px 6px 0 var(--ink);
-    display: flex; align-items: center; justify-content: center;
-    margin: 0 auto 14px;
-    position: relative;
-  }
-  .duck-emoji-big { font-size: 80px; line-height: 1; }
-  .duck-accessory-big {
-    position: absolute;
-    top: 10px; right: 10px;
-    font-size: 36px;
-    line-height: 1;
-  }
-  .duck-preview-label {
-    font-family: 'Press Start 2P', monospace;
-    font-size: 12px;
-    text-align: center;
-    margin-bottom: 14px;
-  }
-  .duck-preview-actions {
-    text-align: center;
-  }
-
-  .duck-skin-row {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 8px;
-    margin-bottom: 14px;
-  }
-  .duck-skin-card {
-    background: #fff;
-    border: 2px solid var(--ink);
-    box-shadow: 2px 2px 0 var(--ink);
-    padding: 8px 4px;
-    cursor: pointer;
-    font-family: 'Space Mono', monospace;
-    text-align: center;
-    transition: transform 0.06s, box-shadow 0.06s;
-  }
-  .duck-skin-card:hover:not(.locked) { transform: translate(1px, 1px); box-shadow: 1px 1px 0 var(--ink); }
-  .duck-skin-card.on { background: var(--yellow); }
-  .duck-skin-card.locked { opacity: 0.4; cursor: not-allowed; }
-  .duck-skin-mini {
-    width: 50px; height: 50px;
-    background: var(--paper);
-    border: 2px solid var(--ink);
-    border-radius: 50%;
-    margin: 0 auto 4px;
-    display: flex; align-items: center; justify-content: center;
-    position: relative;
-  }
-  .duck-mini-emoji { font-size: 28px; line-height: 1; }
-  .duck-mini-acc { position: absolute; top: 0; right: 2px; font-size: 13px; }
-  .duck-skin-lbl {
-    font-size: 9px;
-    font-weight: 700;
-    line-height: 1.2;
-    margin-bottom: 4px;
-  }
-  .duck-skin-thresh {
-    font-family: 'Press Start 2P', monospace;
-    font-size: 8px;
-  }
-
-  .duck-size-row, .duck-interval-row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-  }
-  .duck-size-btn.on, .duck-interval-btn.on { background: var(--yellow); }
-
-  .duck-toggle {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-family: 'Space Mono', monospace;
-    font-weight: 700;
-    font-size: 12px;
-    cursor: pointer;
-    margin-top: 10px;
-  }
-  .duck-toggle input { width: 18px; height: 18px; cursor: pointer; }
-
-  .duck-actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin-top: 14px;
-  }
-
-  .duck-tips {
-    list-style: none;
-    padding: 0; margin: 0;
-  }
-  .duck-tips li {
-    font-family: 'Space Mono', monospace;
-    font-size: 13px;
-    padding: 5px 0 5px 20px;
-    position: relative;
-    line-height: 1.5;
-  }
-  .duck-tips li::before {
-    content: '🦆';
-    position: absolute;
-    left: 0;
-    top: 5px;
-    font-size: 12px;
-  }
-
-  @media (max-width: 760px) {
-    .duck-settings-grid { grid-template-columns: 1fr; }
-    .duck-skin-row { grid-template-columns: repeat(3, 1fr); }
-    .duck-bubble { width: calc(100vw - 28px); left: 14px !important; }
-    #duck { bottom: 80px; right: 14px; }
-  }
-
-  /* ============================================================
      COLLECTION : bouton AJOUTER + animation
      ============================================================ */
   .deck { position: relative; }
@@ -1451,4 +1164,357 @@
   .btn-shuffle:hover { background: var(--pink-d); }
   @media (max-width: 760px) {
     .btn-shuffle { font-size: 9px !important; padding: 5px 8px !important; }
+  }
+
+  /* ============================================================
+     🦆 CANARD — Style identique à l'app desktop (canard de bureau)
+     ============================================================ */
+
+  /* Conteneur du canard — flotte sur la page */
+  .duck-container {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: 120px;
+    height: 120px;
+    z-index: 9990;
+    cursor: grab;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    user-select: none;
+  }
+  .duck-container:active { cursor: grabbing; }
+
+  /* Image du canard. Animation breathe = fallback si sprite non animé. */
+  .duck-img {
+    width: 110px;
+    height: 110px;
+    object-fit: contain;
+    pointer-events: none;
+    transform-origin: 50% 90%;
+    animation: duck-breathe 3.2s ease-in-out infinite;
+    filter: drop-shadow(0 4px 6px rgba(0,0,0,0.22));
+    transition: transform 0.18s ease;
+  }
+  .duck-container.animated .duck-img { animation: none; }
+
+  @keyframes duck-breathe {
+    0%, 100% { transform: scale(1) translateY(0); }
+    50%      { transform: scale(1.03) translateY(-2px); }
+  }
+
+  /* Fallback emoji */
+  .duck-fallback {
+    font-size: 90px;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    filter: drop-shadow(0 4px 6px rgba(0,0,0,0.22));
+    animation: duck-breathe 3.2s ease-in-out infinite;
+    pointer-events: none;
+  }
+
+  /* Tailles */
+  .duck-container.duck-size-sm { width: 80px; height: 80px; }
+  .duck-container.duck-size-sm .duck-img { width: 76px; height: 76px; }
+  .duck-container.duck-size-sm .duck-fallback { font-size: 64px; }
+
+  .duck-container.duck-size-lg { width: 160px; height: 160px; }
+  .duck-container.duck-size-lg .duck-img { width: 150px; height: 150px; }
+  .duck-container.duck-size-lg .duck-fallback { font-size: 130px; }
+
+  /* Réactions */
+  .duck-container.happy .duck-img,
+  .duck-container.happy .duck-fallback {
+    animation: duck-happy 0.6s ease;
+  }
+  .duck-container.sad .duck-img,
+  .duck-container.sad .duck-fallback {
+    animation: duck-sad 0.6s ease;
+  }
+  .duck-container.petted .duck-img,
+  .duck-container.petted .duck-fallback {
+    animation: duck-petted 0.5s ease;
+  }
+  @keyframes duck-happy {
+    0%   { transform: scale(1); }
+    30%  { transform: scale(1.18) translateY(-12px); }
+    60%  { transform: scale(1.05) translateY(0); }
+    100% { transform: scale(1); }
+  }
+  @keyframes duck-sad {
+    0%, 100% { transform: translateX(0); }
+    20%      { transform: translateX(-8px) rotate(-3deg); }
+    40%      { transform: translateX(8px) rotate(3deg); }
+    60%      { transform: translateX(-5px); }
+    80%      { transform: translateX(5px); }
+  }
+  @keyframes duck-petted {
+    0%   { transform: scale(1) rotate(0); }
+    30%  { transform: scale(1.12) translateY(-6px) rotate(-3deg); }
+    60%  { transform: scale(1.04) translateY(-2px) rotate(2deg); }
+    100% { transform: scale(1) rotate(0); }
+  }
+
+  /* Cœur qui monte quand on caresse */
+  .duck-heart {
+    position: fixed;
+    font-size: 22px;
+    color: #ff4d6d;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.18);
+    pointer-events: none;
+    transform: translate(calc(-50% + var(--dx, 0px)), 0) scale(0);
+    animation: duck-heart-rise 1.4s ease-out forwards;
+    z-index: 9999;
+    will-change: transform, opacity;
+  }
+  @keyframes duck-heart-rise {
+    0%   { opacity: 0; transform: translate(calc(-50% + var(--dx, 0px)), 0)    scale(0.4); }
+    15%  { opacity: 1; transform: translate(calc(-50% + var(--dx, 0px)), -6px) scale(calc(var(--s, 1) * 1.15)); }
+    100% { opacity: 0; transform: translate(calc(-50% + var(--dx, 0px)), -90px) scale(calc(var(--s, 1) * 0.7)); }
+  }
+
+  /* Badge niveau / score */
+  .duck-badge {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding: 4px 8px;
+    background: rgba(20, 20, 30, 0.86);
+    color: #fff;
+    border-radius: 10px;
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    pointer-events: none;
+    opacity: 0;
+    transform: translateY(-4px);
+    transition: opacity 0.15s ease, transform 0.15s ease;
+    white-space: nowrap;
+    z-index: 5;
+  }
+  .duck-container:hover .duck-badge,
+  .duck-badge.show {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .duck-badge-level {
+    font-size: 11px;
+    color: #ffd66b;
+    font-family: 'Press Start 2P', monospace;
+  }
+
+  /* ─── Bulle de question ─── */
+  .duck-bubble {
+    position: fixed;
+    width: 240px;
+    background: #ffffff;
+    border: 3px solid var(--ink);
+    box-shadow: 5px 5px 0 var(--ink);
+    padding: 12px;
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    line-height: 1.4;
+    color: var(--ink);
+    z-index: 9991;
+  }
+  .duck-bubble-hidden { display: none; }
+
+  .duck-bubble-category {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 9px;
+    background: var(--lavender);
+    color: var(--ink);
+    display: inline-block;
+    padding: 4px 8px 3px;
+    border: 2px solid var(--ink);
+    margin-bottom: 8px;
+  }
+  .duck-bubble-question {
+    font-weight: 700;
+    font-size: 12.5px;
+    margin-bottom: 10px;
+  }
+  .duck-bubble-answers {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+  .duck-answer-btn {
+    text-align: left;
+    background: #fff;
+    border: 2px solid var(--ink);
+    box-shadow: 2px 2px 0 var(--ink);
+    padding: 7px 10px;
+    font-size: 11.5px;
+    font-family: 'Space Mono', monospace;
+    font-weight: 700;
+    color: var(--ink);
+    cursor: pointer;
+    transition: transform 0.08s, box-shadow 0.08s, background 0.15s;
+  }
+  .duck-answer-btn:hover:not(:disabled) {
+    background: var(--yellow);
+    transform: translate(1px, 1px);
+    box-shadow: 1px 1px 0 var(--ink);
+  }
+  .duck-answer-btn.correct {
+    background: var(--lime);
+    border-color: var(--ink);
+  }
+  .duck-answer-btn.wrong {
+    background: var(--pink-d);
+    border-color: var(--ink);
+  }
+  .duck-answer-btn:disabled { cursor: default; }
+
+  .duck-bubble-close {
+    position: absolute;
+    top: -10px; right: -10px;
+    background: var(--ink);
+    color: #fff;
+    border: 2px solid var(--ink);
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    font-family: 'Space Mono', monospace;
+    font-weight: 700;
+    cursor: pointer;
+    line-height: 1;
+  }
+
+  /* ─── Page CANARD : preview & settings ─── */
+  .duck-settings-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 18px;
+  }
+  .duck-settings-card { padding: 22px; }
+  .duck-h {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 13px;
+    margin: 0 0 12px;
+  }
+  .duck-help {
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    font-style: italic;
+    margin-bottom: 14px;
+    line-height: 1.4;
+  }
+
+  /* Preview du sprite réel */
+  .duck-preview-big {
+    width: 180px; height: 180px;
+    background: var(--paper);
+    border: 3px solid var(--ink);
+    box-shadow: 6px 6px 0 var(--ink);
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 14px;
+  }
+  #duck-preview-img {
+    width: 160px; height: 160px;
+    object-fit: contain;
+    filter: drop-shadow(0 4px 6px rgba(0,0,0,0.22));
+    animation: duck-breathe 3.2s ease-in-out infinite;
+  }
+  .duck-preview-label {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 13px;
+    text-align: center;
+    margin-bottom: 14px;
+  }
+  .duck-preview-actions { text-align: center; }
+
+  /* Sélecteur de niveau (carrousel de sprites) */
+  .duck-level-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  .duck-level-card {
+    background: #fff;
+    border: 2px solid var(--ink);
+    box-shadow: 2px 2px 0 var(--ink);
+    padding: 10px 6px;
+    cursor: pointer;
+    font-family: 'Space Mono', monospace;
+    text-align: center;
+    transition: transform 0.08s, box-shadow 0.08s;
+  }
+  .duck-level-card:hover:not(.locked) {
+    transform: translate(1px, 1px);
+    box-shadow: 1px 1px 0 var(--ink);
+  }
+  .duck-level-card.on { background: var(--yellow); }
+  .duck-level-card.locked { opacity: 0.45; cursor: not-allowed; }
+  .duck-level-mini-img {
+    width: 60px; height: 60px;
+    object-fit: contain;
+    margin: 0 auto 4px;
+    display: block;
+  }
+  .duck-level-lbl {
+    font-size: 9px;
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 4px;
+  }
+  .duck-level-thresh {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 8px;
+  }
+
+  /* Boutons size / interval */
+  .duck-size-row, .duck-interval-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .duck-size-btn.on, .duck-interval-btn.on { background: var(--yellow); }
+
+  /* Toggle + actions */
+  .duck-toggle {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: 'Space Mono', monospace;
+    font-weight: 700;
+    font-size: 12px;
+    cursor: pointer;
+    margin-top: 10px;
+  }
+  .duck-toggle input { width: 18px; height: 18px; cursor: pointer; }
+  .duck-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 14px;
+  }
+  .duck-tips { list-style: none; padding: 0; margin: 0; }
+  .duck-tips li {
+    font-family: 'Space Mono', monospace;
+    font-size: 13px;
+    padding: 5px 0 5px 20px;
+    position: relative;
+    line-height: 1.5;
+  }
+  .duck-tips li::before {
+    content: '🦆';
+    position: absolute;
+    left: 0; top: 5px;
+    font-size: 12px;
+  }
+
+  @media (max-width: 760px) {
+    .duck-settings-grid { grid-template-columns: 1fr; }
+    .duck-level-row { grid-template-columns: repeat(2, 1fr); }
+    .duck-bubble { width: calc(100vw - 28px); left: 14px !important; max-width: 320px; }
+    .duck-container { bottom: 80px; right: 14px; }
   }

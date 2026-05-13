@@ -1,6 +1,12 @@
-// duck.js — Le canard de CULTURE!!! sur le web
-// Quand tu es sur le site, le canard habite là. Drag, clic = question.
-// Réglages : skin, taille, intervalle questions, on/off.
+// duck.js — Le canard CULTURE!!! (version web)
+// Utilise les MÊMES sprites que l'app Electron (canard de bureau) :
+// assets/duck-1.png|webp à duck-4.png|webp + chaîne de fallback.
+// Animations identiques : breathe, happy, sad, petted, heart.
+//
+// Différences avec la version desktop :
+// - Position en CSS (pas de fenêtre Electron à déplacer)
+// - Questions piochées dans FLASHCARD_PACKS au lieu de questions.json
+// - Settings dans localStorage (clé "qpuc-duck")
 
 (function () {
   const KEY = "qpuc-duck";
@@ -8,12 +14,11 @@
   // ─── ÉTAT PERSISTÉ ───
   const DEFAULTS = {
     enabled: true,
-    skin: 1,           // 1 → 5
-    size: "md",        // sm / md / lg
-    intervalMin: 30,   // 0 = off, 5/15/30/60
+    forcedLevel: null,   // null = auto (selon score), sinon 1-4
+    size: "md",          // sm / md / lg
+    intervalMin: 30,     // 0 = off, 5/15/30/60
     score: 0,
-    position: null,    // { left, top } en px, ou null = défaut bottom-right
-    autoUnlock: true,  // unlock skin selon score
+    position: null,      // { left, top } en px, ou null = défaut bottom-center
   };
 
   function getState() {
@@ -28,135 +33,180 @@
     return s;
   }
 
-  // Score → niveau de skin auto-débloqué
-  function autoSkinFromScore(score) {
-    if (score >= 100) return 5;
-    if (score >= 50) return 4;
-    if (score >= 25) return 3;
-    if (score >= 10) return 2;
+  // Score → niveau (1..4) — comme dans l'app desktop
+  function levelFromScore(s) {
+    if (s >= 100) return 4;
+    if (s >= 50) return 3;
+    if (s >= 25) return 2;
     return 1;
   }
 
-  // Skin = {emoji principal + accessoires + libellé}
-  const SKINS = {
-    1: { duck: "🦆", accessory: "", label: "Canard de base" },
-    2: { duck: "🦆", accessory: "🤓", label: "Canard à lunettes" },
-    3: { duck: "🦆", accessory: "🎀", label: "Canard chic" },
-    4: { duck: "🦆", accessory: "🎓", label: "Canard diplômé" },
-    5: { duck: "🦆", accessory: "👑", label: "Canard roi" },
-  };
-
-  // ─── ÉLÉMENTS ───
-  let duckEl = null;
-  let bubbleEl = null;
-  let timerId = null;
-  let currentQuestion = null;
-  let answered = false;
-  let dragging = false;
-
-  function render() {
+  // Niveau effectif : si forcé manuellement, on prend ce niveau
+  function currentLevel() {
     const s = getState();
-    if (!s.enabled) {
-      if (duckEl) duckEl.style.display = "none";
-      if (bubbleEl) bubbleEl.style.display = "none";
-      stopTimer();
-      return;
-    }
-    ensureDom();
-    duckEl.style.display = "";
-    duckEl.className = "duck duck-size-" + s.size;
-    // Skin
-    const skin = SKINS[s.skin] || SKINS[1];
-    duckEl.querySelector(".duck-emoji").textContent = skin.duck;
-    duckEl.querySelector(".duck-accessory").textContent = skin.accessory;
-    // Position
-    if (s.position && typeof s.position.left === "number") {
-      duckEl.style.left = s.position.left + "px";
-      duckEl.style.top = s.position.top + "px";
-      duckEl.style.right = "auto";
-      duckEl.style.bottom = "auto";
-    }
-    // Score badge
-    duckEl.querySelector(".duck-score").textContent = s.score;
-    // Timer
-    startTimer();
+    return s.forcedLevel || levelFromScore(s.score);
   }
 
-  function ensureDom() {
-    if (duckEl) return;
-    duckEl = document.createElement("div");
-    duckEl.id = "duck";
-    duckEl.className = "duck duck-size-md";
-    duckEl.innerHTML = `
-      <div class="duck-body" title="Clique pour une question">
-        <div class="duck-emoji">🦆</div>
-        <div class="duck-accessory"></div>
-      </div>
-      <div class="duck-score-badge"><span class="duck-score">0</span></div>
-    `;
-    document.body.appendChild(duckEl);
+  // Sprite info pour la page de réglages
+  const LEVEL_INFO = {
+    1: { label: "Canard de base", min: 0 },
+    2: { label: "Canard à lunettes", min: 25 },
+    3: { label: "Canard chic", min: 50 },
+    4: { label: "Canard diplômé", min: 100 },
+  };
 
+  // ─── ÉLÉMENTS DOM ───
+  let container = null;
+  let imgEl = null;
+  let fallbackEl = null;
+  let badgeEl = null;
+  let bubbleEl = null;
+  let timerId = null;
+  let movementTimerId = null;
+  let movementMode = "still"; // still | walking
+  let currentQuestion = null;
+  let answered = false;
+
+  // Durées (réduites pour la web)
+  const STILL_MIN_MS = 8 * 1000;
+  const STILL_MAX_MS = 25 * 1000;
+  const WALK_MIN_MS = 3 * 1000;
+  const WALK_MAX_MS = 7 * 1000;
+
+  // ─── RENDER ───
+  function ensureDom() {
+    if (container) return;
+
+    // Bulle
     bubbleEl = document.createElement("div");
     bubbleEl.id = "duck-bubble";
-    bubbleEl.className = "duck-bubble";
-    bubbleEl.style.display = "none";
+    bubbleEl.className = "duck-bubble duck-bubble-hidden";
+    bubbleEl.innerHTML = `
+      <div class="duck-bubble-category">Catégorie</div>
+      <div class="duck-bubble-question">Question…</div>
+      <div class="duck-bubble-answers"></div>
+      <button class="duck-bubble-close" title="Fermer">✕</button>
+    `;
     document.body.appendChild(bubbleEl);
+
+    // Container canard
+    container = document.createElement("div");
+    container.id = "duck-container";
+    container.className = "duck-container duck-size-md";
+    container.innerHTML = `
+      <div class="duck-badge" id="duck-badge">
+        <span class="duck-badge-level">N1</span>
+        <span class="duck-badge-score">0 pts</span>
+      </div>
+      <img class="duck-img" id="duck-img" alt="Canard" draggable="false">
+      <div class="duck-fallback" id="duck-fallback" style="display:none">🦆</div>
+    `;
+    document.body.appendChild(container);
+
+    imgEl = container.querySelector(".duck-img");
+    fallbackEl = container.querySelector(".duck-fallback");
+    badgeEl = container.querySelector(".duck-badge");
 
     attachInteractions();
   }
 
-  // ─── INTERACTIONS : drag + click ───
-  function attachInteractions() {
-    let dragStart = null;
-    let didMove = false;
+  function render() {
+    const s = getState();
+    if (!s.enabled) {
+      if (container) container.style.display = "none";
+      if (bubbleEl) bubbleEl.style.display = "none";
+      stopTimer();
+      stopMovement();
+      return;
+    }
+    ensureDom();
+    container.style.display = "";
+    container.className = "duck-container duck-size-" + s.size;
 
-    duckEl.addEventListener("mousedown", (e) => {
-      if (e.button !== 0) return;
-      dragStart = { x: e.clientX, y: e.clientY, l: duckEl.offsetLeft, t: duckEl.offsetTop };
-      didMove = false;
-      dragging = true;
-      duckEl.classList.add("duck-dragging");
-      e.preventDefault();
-    });
+    // Position
+    if (s.position && typeof s.position.left === "number") {
+      container.style.left = s.position.left + "px";
+      container.style.top = s.position.top + "px";
+      container.style.right = "auto";
+      container.style.bottom = "auto";
+      container.style.transform = "none";
+    } else {
+      // Position par défaut : bas-centre
+      container.style.left = "";
+      container.style.top = "";
+      container.style.right = "30px";
+      container.style.bottom = "30px";
+      container.style.transform = "";
+    }
 
-    document.addEventListener("mousemove", (e) => {
-      if (!dragStart) return;
-      const dx = e.clientX - dragStart.x;
-      const dy = e.clientY - dragStart.y;
-      if (Math.abs(dx) + Math.abs(dy) > 4) didMove = true;
-      if (didMove) {
-        const newL = Math.max(0, Math.min(window.innerWidth - duckEl.offsetWidth, dragStart.l + dx));
-        const newT = Math.max(0, Math.min(window.innerHeight - duckEl.offsetHeight, dragStart.t + dy));
-        duckEl.style.left = newL + "px";
-        duckEl.style.top = newT + "px";
-        duckEl.style.right = "auto";
-        duckEl.style.bottom = "auto";
-        if (bubbleEl) positionBubble();
-      }
-    });
-
-    document.addEventListener("mouseup", () => {
-      if (!dragStart) return;
-      duckEl.classList.remove("duck-dragging");
-      if (didMove) {
-        update({ position: { left: duckEl.offsetLeft, top: duckEl.offsetTop } });
-      } else {
-        // Click → question manuelle (sauf si bulle déjà ouverte)
-        if (!currentQuestion) askQuestion();
-        else hideBubble();
-      }
-      dragStart = null;
-      dragging = false;
-    });
-
-    // Right-click → quick toggle menu
-    duckEl.addEventListener("contextmenu", (e) => {
-      e.preventDefault();
-      askQuestion();
-    });
+    // Sprite + badge
+    refreshDuckSprite();
+    startTimer();
+    startMovement();
   }
 
-  // ─── TIMER ───
+  // ─── SPRITE LOADING avec fallback chain ───
+  function setDuckImage(level, mode) {
+    if (!imgEl) return;
+    const candidates = [];
+    for (let lvl = level; lvl >= 1; lvl--) {
+      if (mode === "still") {
+        candidates.push(`assets/duck-${lvl}.png`);
+      } else {
+        candidates.push(`assets/duck-${lvl}.webp`, `assets/duck-${lvl}.png`);
+      }
+    }
+    let idx = 0;
+    imgEl.style.display = "";
+    fallbackEl.style.display = "none";
+    imgEl.onerror = () => {
+      idx += 1;
+      if (idx < candidates.length) {
+        imgEl.src = candidates[idx];
+      } else {
+        imgEl.onerror = null;
+        imgEl.style.display = "none";
+        fallbackEl.style.display = "flex";
+      }
+    };
+    imgEl.onload = () => {
+      const isAnimated = imgEl.currentSrc && imgEl.currentSrc.endsWith(".webp");
+      container.classList.toggle("animated", isAnimated);
+    };
+    imgEl.src = candidates[0];
+  }
+
+  function refreshDuckSprite() {
+    const lvl = currentLevel();
+    setDuckImage(lvl, movementMode);
+    if (badgeEl) {
+      badgeEl.querySelector(".duck-badge-level").textContent = "N" + lvl;
+      badgeEl.querySelector(".duck-badge-score").textContent = getState().score + " pts";
+    }
+  }
+
+  // ─── MOUVEMENT (alternance marche/immobile) ───
+  function startMovement() {
+    stopMovement();
+    scheduleNextMovementToggle();
+  }
+  function stopMovement() {
+    if (movementTimerId) { clearTimeout(movementTimerId); movementTimerId = null; }
+  }
+  function scheduleNextMovementToggle() {
+    const isStill = movementMode === "still";
+    const min = isStill ? STILL_MIN_MS : WALK_MIN_MS;
+    const max = isStill ? STILL_MAX_MS : WALK_MAX_MS;
+    const delay = min + Math.random() * (max - min);
+    movementTimerId = setTimeout(toggleMovement, delay);
+  }
+  function toggleMovement() {
+    movementMode = movementMode === "still" ? "walking" : "still";
+    setDuckImage(currentLevel(), movementMode);
+    scheduleNextMovementToggle();
+  }
+
+  // ─── TIMER QUESTIONS ───
   function startTimer() {
     stopTimer();
     const s = getState();
@@ -167,6 +217,102 @@
   }
   function stopTimer() {
     if (timerId) { clearInterval(timerId); timerId = null; }
+  }
+
+  // ─── INTERACTIONS : drag, clic (caresse), clic droit ───
+  const DRAG_THRESHOLD = 4;
+  function attachInteractions() {
+    let dragStart = null;
+
+    container.addEventListener("mousedown", (e) => {
+      if (e.button !== 0) return;
+      if (e.target.closest("#duck-bubble")) return;
+      dragStart = {
+        x: e.clientX, y: e.clientY,
+        left: container.offsetLeft, top: container.offsetTop,
+        moved: 0,
+      };
+      e.preventDefault();
+    });
+
+    document.addEventListener("mousemove", (e) => {
+      if (!dragStart) return;
+      const dx = e.clientX - dragStart.x;
+      const dy = e.clientY - dragStart.y;
+      dragStart.moved = Math.max(dragStart.moved, Math.hypot(dx, dy));
+      if (dragStart.moved >= DRAG_THRESHOLD) {
+        const newL = Math.max(0, Math.min(window.innerWidth - container.offsetWidth, dragStart.left + dx));
+        const newT = Math.max(0, Math.min(window.innerHeight - container.offsetHeight, dragStart.top + dy));
+        container.style.left = newL + "px";
+        container.style.top = newT + "px";
+        container.style.right = "auto";
+        container.style.bottom = "auto";
+        container.style.transform = "none";
+        if (bubbleEl && !bubbleEl.classList.contains("duck-bubble-hidden")) positionBubble();
+      }
+    });
+
+    document.addEventListener("mouseup", () => {
+      if (!dragStart) return;
+      const moved = dragStart.moved;
+      dragStart = null;
+      if (moved < DRAG_THRESHOLD) {
+        // Clic court : caresse OU question selon si la bulle est ouverte
+        if (currentQuestion) hideBubble();
+        else petDuck();
+      } else {
+        // Drag fini → sauvegarder la position
+        update({ position: { left: container.offsetLeft, top: container.offsetTop } });
+      }
+    });
+
+    // Clic droit = question manuelle
+    container.addEventListener("contextmenu", (e) => {
+      e.preventDefault();
+      if (!currentQuestion) askQuestion();
+    });
+  }
+
+  // ─── CARESSE (petted + heart) ───
+  function petDuck() {
+    container.classList.remove("petted", "happy", "sad");
+    void container.offsetWidth; // re-trigger animation
+    container.classList.add("petted");
+    setTimeout(() => container.classList.remove("petted"), 500);
+    spawnHeart();
+  }
+
+  function spawnHeart() {
+    const heart = document.createElement("div");
+    heart.className = "duck-heart";
+    heart.textContent = "❤";
+    const dx = (Math.random() - 0.5) * 36;
+    const scale = 0.85 + Math.random() * 0.3;
+    heart.style.setProperty("--dx", dx.toFixed(1) + "px");
+    heart.style.setProperty("--s", scale.toFixed(2));
+    // Position relative au canard
+    const rect = container.getBoundingClientRect();
+    heart.style.left = (rect.left + rect.width / 2) + "px";
+    heart.style.top = (rect.top - 10) + "px";
+    document.body.appendChild(heart);
+    setTimeout(() => heart.remove(), 1400);
+  }
+
+  // ─── RÉACTIONS ───
+  function reactHappy() {
+    container.classList.remove("sad");
+    container.classList.add("happy");
+    setTimeout(() => container.classList.remove("happy"), 700);
+  }
+  function reactSad() {
+    container.classList.remove("happy");
+    container.classList.add("sad");
+    setTimeout(() => container.classList.remove("sad"), 700);
+  }
+  function flashBadge() {
+    if (!badgeEl) return;
+    badgeEl.classList.add("show");
+    setTimeout(() => badgeEl.classList.remove("show"), 1800);
   }
 
   // ─── QUESTION (QCM depuis FLASHCARD_PACKS) ───
@@ -182,7 +328,6 @@
     });
     if (allCards.length === 0) return null;
     const card = allCards[Math.floor(Math.random() * allCards.length)];
-    // 3 mauvaises réponses cohérentes (longueur similaire)
     const wrongs = [];
     const tries = allCards.slice().sort(() => Math.random() - 0.5);
     for (const c of tries) {
@@ -191,8 +336,9 @@
         wrongs.push(c.r);
       }
     }
-    const choices = [card.r, ...wrongs].sort(() => Math.random() - 0.5);
-    return { question: card.q, correct: card.r, choices, pack: card.pack };
+    const answers = [card.r, ...wrongs].sort(() => Math.random() - 0.5);
+    const correctIdx = answers.indexOf(card.r);
+    return { question: card.q, answers, correct: correctIdx, category: card.pack };
   }
 
   function askQuestion() {
@@ -200,98 +346,90 @@
     if (!q) return;
     currentQuestion = q;
     answered = false;
-    bubbleEl.innerHTML = `
-      <div class="duck-bubble-pack">${q.pack}</div>
-      <div class="duck-bubble-q">${escapeHtml(q.question)}</div>
-      <div class="duck-bubble-choices">
-        ${q.choices.map((c) => `<button class="duck-choice" data-c="${escapeAttr(c)}">${escapeHtml(c)}</button>`).join("")}
-      </div>
-      <button class="duck-bubble-close" title="Fermer">✕</button>
-    `;
-    bubbleEl.style.display = "";
-    positionBubble();
-    bubbleEl.querySelectorAll(".duck-choice").forEach((btn) => {
-      btn.onclick = () => answer(btn.dataset.c, btn);
+
+    bubbleEl.querySelector(".duck-bubble-category").textContent = q.category || "—";
+    bubbleEl.querySelector(".duck-bubble-question").textContent = q.question;
+
+    const answersDiv = bubbleEl.querySelector(".duck-bubble-answers");
+    answersDiv.innerHTML = "";
+    q.answers.forEach((text, idx) => {
+      const btn = document.createElement("button");
+      btn.className = "duck-answer-btn";
+      btn.type = "button";
+      btn.textContent = text;
+      btn.addEventListener("click", () => onAnswer(idx));
+      answersDiv.appendChild(btn);
     });
+
     bubbleEl.querySelector(".duck-bubble-close").onclick = hideBubble;
+    bubbleEl.classList.remove("duck-bubble-hidden");
+    positionBubble();
   }
 
-  function answer(choice, btn) {
+  function onAnswer(idx) {
     if (answered) return;
     answered = true;
-    const correct = choice === currentQuestion.correct;
-    if (correct) {
-      btn.classList.add("duck-choice-correct");
-      duckEl.classList.add("duck-happy");
+    const q = currentQuestion;
+    const btns = bubbleEl.querySelectorAll(".duck-answer-btn");
+    btns.forEach((b, i) => {
+      b.disabled = true;
+      if (i === q.correct) b.classList.add("correct");
+      else if (i === idx) b.classList.add("wrong");
+    });
+    if (idx === q.correct) {
       const s = getState();
       const newScore = s.score + 1;
-      const patch = { score: newScore };
-      if (s.autoUnlock) {
-        const auto = autoSkinFromScore(newScore);
-        if (auto > s.skin) patch.skin = auto;
-      }
-      update(patch);
-      render();
+      update({ score: newScore });
+      reactHappy();
+      flashBadge();
+      refreshDuckSprite();
       if (typeof window.refreshDuckUI === "function") window.refreshDuckUI();
-      setTimeout(() => duckEl.classList.remove("duck-happy"), 1500);
     } else {
-      btn.classList.add("duck-choice-wrong");
-      // Highlight the correct one
-      bubbleEl.querySelectorAll(".duck-choice").forEach((b) => {
-        if (b.dataset.c === currentQuestion.correct) b.classList.add("duck-choice-correct");
-      });
-      duckEl.classList.add("duck-sad");
-      setTimeout(() => duckEl.classList.remove("duck-sad"), 1500);
+      reactSad();
     }
-    // Disable all
-    bubbleEl.querySelectorAll(".duck-choice").forEach((b) => { b.disabled = true; });
     setTimeout(hideBubble, 2200);
   }
 
   function hideBubble() {
-    bubbleEl.style.display = "none";
+    bubbleEl.classList.add("duck-bubble-hidden");
     currentQuestion = null;
+    answered = false;
   }
 
   function positionBubble() {
-    if (!duckEl || !bubbleEl) return;
-    const rect = duckEl.getBoundingClientRect();
-    // Try to place bubble to the LEFT of the duck, vertically aligned to top
-    const bubbleW = 320;
-    let left = rect.left - bubbleW - 14;
-    let top = rect.top;
-    if (left < 10) {
-      // Not enough space on left → place above
-      left = Math.max(10, Math.min(window.innerWidth - bubbleW - 10, rect.left));
-      top = rect.bottom + 14;
-      // If overflows bottom, place above
-      if (top + 200 > window.innerHeight) top = Math.max(10, rect.top - 220);
-    }
+    if (!container || !bubbleEl) return;
+    const rect = container.getBoundingClientRect();
+    const bubbleW = 240;
+    // Par défaut : au-dessus du canard, centré
+    let left = rect.left + rect.width / 2 - bubbleW / 2;
+    let top = rect.top - 170;
+    // Si déborde à gauche
+    if (left < 10) left = 10;
+    // Si déborde à droite
+    if (left + bubbleW > window.innerWidth - 10) left = window.innerWidth - bubbleW - 10;
+    // Si déborde en haut → placer sous le canard
+    if (top < 10) top = rect.bottom + 14;
     bubbleEl.style.left = left + "px";
     bubbleEl.style.top = top + "px";
   }
 
-  // ─── HELPERS ───
-  function escapeHtml(s) { return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
-  function escapeAttr(s) { return String(s).replace(/"/g, "&quot;").replace(/'/g, "&#39;"); }
-
   // ─── API PUBLIQUE ───
   window.Duck = {
     getState, update,
-    show: () => update({ enabled: true }) && render(),
-    hide: () => update({ enabled: false }) && render(),
+    show: () => { update({ enabled: true }); render(); },
+    hide: () => { update({ enabled: false }); render(); },
     ask: askQuestion,
-    resetScore: () => update({ score: 0 }) && render(),
-    resetPosition: () => update({ position: null }) && render(),
-    SKINS,
-    autoSkinFromScore,
+    pet: petDuck,
+    resetScore: () => { update({ score: 0 }); render(); },
+    resetPosition: () => { update({ position: null }); render(); },
+    levelFromScore, currentLevel,
+    LEVEL_INFO,
     render,
   };
 
   // ─── INIT ───
   function init() {
     if (typeof FLASHCARD_PACKS === "undefined") {
-      // Attendre que les données soient là
       setTimeout(init, 200);
       return;
     }

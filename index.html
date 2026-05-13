@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=VT323&family=Press+Start+2P&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=20">
+<link rel="stylesheet" href="style.css?v=21">
 </head>
 <body>
 
@@ -129,22 +129,22 @@
     <div class="duck-settings-grid">
 
       <div class="duck-settings-card frame">
-        <div class="duck-preview-big" id="duck-preview-big">
-          <div class="duck-emoji-big">🦆</div>
-          <div class="duck-accessory-big"></div>
+        <div class="duck-preview-big">
+          <img id="duck-preview-img" src="assets/duck-1.png" alt="Aperçu canard">
         </div>
         <div class="duck-preview-label" id="duck-skin-label">Canard de base</div>
         <div class="duck-preview-actions">
           <button class="btn btn-y" onclick="Duck.ask()">▶ POSER UNE QUESTION</button>
+          <button class="btn" onclick="Duck.pet()" style="margin-left:8px;">❤ CARESSER</button>
         </div>
       </div>
 
       <div class="duck-settings-card frame">
-        <h3 class="duck-h">SKIN</h3>
-        <p class="duck-help">Choisis ton canard. Tu débloques aussi des skins en répondant juste.</p>
-        <div class="duck-skin-row" id="duck-skin-row"></div>
+        <h3 class="duck-h">NIVEAU</h3>
+        <p class="duck-help">4 niveaux dispo. Tu peux forcer celui que tu veux, ou laisser monter au score.</p>
+        <div class="duck-level-row" id="duck-skin-row"></div>
         <label class="duck-toggle">
-          <input type="checkbox" id="duck-auto-unlock"> <span>Débloquer automatiquement selon le score</span>
+          <input type="checkbox" id="duck-auto-unlock"> <span>Auto-débloquer selon le score (10 / 25 / 50 / 100)</span>
         </label>
       </div>
 
@@ -366,31 +366,31 @@
 
 
 <!-- Scripts -->
-<script src="flashcards-data.js?v=20"></script>
-<script src="funfacts-data.js?v=20"></script>
+<script src="flashcards-data.js?v=21"></script>
+<script src="funfacts-data.js?v=21"></script>
 <script>
   if (typeof FUNFACTS_PACKS !== "undefined") {
     FUNFACTS_PACKS.forEach(function(p) { FLASHCARD_PACKS.push(p); });
   }
 </script>
-<script src="programme-data.js?v=20"></script>
-<script src="daily-lessons.js?v=20"></script>
-<script src="memo.js?v=20"></script>
-<script src="srs.js?v=20"></script>
-<script src="gamification.js?v=20"></script>
-<script src="chapters.js?v=20"></script>
-<script src="categories.js?v=20"></script>
-<script src="app.js?v=20"></script>
-<script src="today.js?v=20"></script>
-<script src="explorer.js?v=20"></script>
-<script src="flashcards.js?v=20"></script>
-<script src="quiz-12coups.js?v=20"></script>
-<script src="revisions.js?v=20"></script>
-<script src="programme.js?v=20"></script>
-<script src="carte.js?v=20"></script>
-<script src="schemas.js?v=20"></script>
-<script src="culture-app.js?v=20"></script>
-<script src="duck.js?v=20"></script>
-<script src="canard-settings.js?v=20"></script>
+<script src="programme-data.js?v=21"></script>
+<script src="daily-lessons.js?v=21"></script>
+<script src="memo.js?v=21"></script>
+<script src="srs.js?v=21"></script>
+<script src="gamification.js?v=21"></script>
+<script src="chapters.js?v=21"></script>
+<script src="categories.js?v=21"></script>
+<script src="app.js?v=21"></script>
+<script src="today.js?v=21"></script>
+<script src="explorer.js?v=21"></script>
+<script src="flashcards.js?v=21"></script>
+<script src="quiz-12coups.js?v=21"></script>
+<script src="revisions.js?v=21"></script>
+<script src="programme.js?v=21"></script>
+<script src="carte.js?v=21"></script>
+<script src="schemas.js?v=21"></script>
+<script src="culture-app.js?v=21"></script>
+<script src="duck.js?v=21"></script>
+<script src="canard-settings.js?v=21"></script>
 </body>
 </html>
