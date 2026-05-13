@@ -13,7 +13,7 @@
 
   // ─── ÉTAT PERSISTÉ ───
   const DEFAULTS = {
-    enabled: true,
+    enabled: false, // PAS de canard sur le site. Source de vérité : app desktop uniquement.
     forcedLevel: null,   // null = auto (selon score), sinon 1-4
     size: "md",          // sm / md / lg
     intervalMin: 30,     // 0 = off, 5/15/30/60
@@ -428,25 +428,25 @@
   };
 
   // ─── INIT ───
-  // Re-enable for users qui ont été force-disabled précédemment (sauf si desktop actif)
-  function reenableIfWasForceDisabled() {
-    const FORCE_FLAG = "qpuc-duck-disabled-v1";
-    if (localStorage.getItem(FORCE_FLAG) === "done") {
-      // Ne pas réactiver si le desktop est marqué comme actif
-      if (localStorage.getItem("qpuc-desktop-active") !== "1") {
-        update({ enabled: true });
-      }
-      localStorage.removeItem(FORCE_FLAG);
-    }
+  // Force la désactivation : on ne veut PAS de canard sur le site par défaut.
+  // L'app desktop est la source de vérité.
+  // Le code reste intact pour pouvoir réactiver plus tard si besoin.
+  function forceDisable() {
+    update({ enabled: false });
   }
 
   function init() {
-    if (typeof FLASHCARD_PACKS === "undefined") {
-      setTimeout(init, 200);
-      return;
-    }
-    reenableIfWasForceDisabled();
-    render();
+    forceDisable();
+    // Appel render() défensif : si du DOM canard est resté d'une version précédente,
+    // il sera caché. Pas de création vu que enabled=false.
+    try { render(); } catch (e) {}
+    // Sécurité ultime : retire tout DOM canard résiduel
+    setTimeout(() => {
+      const d = document.getElementById("duck-container");
+      if (d) d.style.display = "none";
+      const b = document.getElementById("duck-bubble");
+      if (b) b.style.display = "none";
+    }, 50);
   }
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", init);
