@@ -50,8 +50,8 @@
   // Sprite info pour la page de réglages
   const LEVEL_INFO = {
     1: { label: "Canard de base", min: 0 },
-    2: { label: "Canard à lunettes", min: 25 },
-    3: { label: "Canard chic", min: 50 },
+    2: { label: "Canard ado", min: 25 },
+    3: { label: "Canard jeune adulte", min: 50 },
     4: { label: "Canard diplômé", min: 100 },
   };
 
