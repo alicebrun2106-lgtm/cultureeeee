@@ -46,7 +46,7 @@
     return skins.find((s) => s.id === state.equippedSkin) || skins[0];
   }
 
-  // ─── Bouton nav "BOUTIQUE IA ✨" ───
+  // ─── Bouton nav "BOUTIQUE ✨" ───
   function injectNavButton() {
     // On ajoute le bouton dans la nav existante, à côté des autres liens.
     const navLinks = document.querySelector(".nav-links");
@@ -56,7 +56,7 @@
     a.href = "#";
     a.id = "btn-boutique-ia";
     a.className = "nav-shop-link";
-    a.textContent = "BOUTIQUE IA ✨";
+    a.textContent = "BOUTIQUE ✨";
     a.addEventListener("click", (e) => { e.preventDefault(); openMonetisationHub(); });
     navLinks.appendChild(a);
   }
