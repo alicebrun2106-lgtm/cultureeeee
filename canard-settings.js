@@ -87,7 +87,17 @@
     document.querySelectorAll(".duck-interval-btn").forEach((b) => {
       const val = parseInt(b.dataset.interval, 10);
       b.classList.toggle("on", val === s.intervalMin);
-      b.onclick = () => { Duck.update({ intervalMin: val }); Duck.render(); refresh(); };
+      b.onclick = () => {
+        Duck.update({ intervalMin: val });
+        Duck.render();
+        // Propagation vers l'app desktop : canard://interval-5|15|30|60 (ou 0 = pause)
+        const iframe = document.createElement("iframe");
+        iframe.style.display = "none";
+        iframe.src = "canard://interval-" + val;
+        document.body.appendChild(iframe);
+        setTimeout(() => iframe.remove(), 1000);
+        refresh();
+      };
     });
 
     // Nom du canard
