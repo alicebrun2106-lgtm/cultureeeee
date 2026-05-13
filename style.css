@@ -1703,3 +1703,67 @@
     padding: 2px 6px;
     font-size: 12px;
   }
+
+  /* ─── Banner launch desktop duck ─── */
+  .duck-launch-banner {
+    background: var(--yellow);
+    border: 4px solid var(--ink);
+    box-shadow: 8px 8px 0 var(--pink-d);
+    padding: 26px 28px;
+    margin-bottom: 26px;
+    display: grid;
+    grid-template-columns: 140px 1fr;
+    gap: 24px;
+    align-items: center;
+  }
+  .duck-launch-icon {
+    width: 140px; height: 140px;
+    background: var(--paper);
+    border: 3px solid var(--ink);
+    box-shadow: 5px 5px 0 var(--ink);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .duck-launch-icon img {
+    width: 120px; height: 120px;
+    object-fit: contain;
+    filter: drop-shadow(0 4px 6px rgba(0,0,0,0.22));
+    animation: duck-breathe 3.2s ease-in-out infinite;
+  }
+  .duck-launch-body h3 {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 16px;
+    line-height: 1.3;
+    margin: 0 0 8px;
+  }
+  .duck-launch-sub {
+    font-family: 'Space Mono', monospace;
+    font-style: italic;
+    font-size: 13px;
+    margin-bottom: 14px;
+  }
+  #btn-launch-desktop-duck {
+    background: var(--ink);
+    color: #fff;
+    border-color: var(--ink);
+    box-shadow: 5px 5px 0 var(--pink-d);
+  }
+  #btn-launch-desktop-duck:hover {
+    box-shadow: 2px 2px 0 var(--pink-d);
+  }
+  .duck-launch-hint {
+    margin-top: 12px;
+    padding: 10px 12px;
+    background: rgba(255, 255, 255, 0.6);
+    border: 2px dashed var(--ink);
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    line-height: 1.5;
+  }
+
+  @media (max-width: 700px) {
+    .duck-launch-banner { grid-template-columns: 1fr; text-align: center; }
+    .duck-launch-icon { margin: 0 auto; }
+    .duck-launch-body h3 { font-size: 13px; }
+  }

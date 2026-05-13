@@ -101,9 +101,29 @@
     }
   };
 
+  // Bouton "Je veux le canard sur mon écran" → lance l'app desktop via protocole custom
+  function setupLaunchButton() {
+    const btn = document.getElementById("btn-launch-desktop-duck");
+    if (!btn) return;
+    btn.onclick = () => {
+      const hint = document.getElementById("duck-launch-hint");
+      // Tente d'ouvrir l'app via protocole custom
+      // Pour éviter de "naviguer" depuis la page, on utilise un iframe caché
+      const iframe = document.createElement("iframe");
+      iframe.style.display = "none";
+      iframe.src = "canard://launch";
+      document.body.appendChild(iframe);
+      setTimeout(() => iframe.remove(), 1000);
+      // Affiche l'astuce de fallback
+      if (hint) {
+        hint.style.display = "";
+      }
+    };
+  }
+
   if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", () => setTimeout(refresh, 200));
+    document.addEventListener("DOMContentLoaded", () => { setTimeout(refresh, 200); setupLaunchButton(); });
   } else {
-    setTimeout(refresh, 200);
+    setTimeout(() => { refresh(); setupLaunchButton(); }, 200);
   }
 })();

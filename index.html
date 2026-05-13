@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=VT323&family=Press+Start+2P&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=26">
+<link rel="stylesheet" href="style.css?v=27">
 </head>
 <body>
 
@@ -123,64 +123,87 @@
     <div class="section-banner">
       <h2>🦆 MON CANARD</h2>
       <div class="bar"></div>
-      <span class="fig">APP DESKTOP</span>
+      <span class="fig" id="duck-score-display">SCORE —</span>
     </div>
 
-    <div class="duck-hero-card frame">
-      <div class="duck-hero-img">
+    <!-- GROS BOUTON : Sortir le canard sur le bureau -->
+    <div class="duck-launch-banner">
+      <div class="duck-launch-icon">
         <img src="assets/duck-1.png" alt="Canard">
       </div>
-      <div class="duck-hero-text">
-        <h3 class="duck-h">UN SEUL CANARD,<br>TOUJOURS SUR TON ÉCRAN</h3>
-        <p class="duck-help">
-          Ton canard vit dans une vraie app Mac. Il flotte sur ton bureau
-          en permanence, même quand tu fermes le site.<br><br>
-          Pas de double canard, pas de confusion : il est toujours là.
-        </p>
+      <div class="duck-launch-body">
+        <h3 class="duck-h">UN CANARD QUI RESTE SUR TON ÉCRAN</h3>
+        <p class="duck-launch-sub">Même quand tu quittes le site, il continue de flotter sur ton bureau.</p>
+        <button class="btn btn-y btn-big" id="btn-launch-desktop-duck">▶ JE VEUX LE CANARD SUR MON ÉCRAN</button>
+        <div class="duck-launch-hint" id="duck-launch-hint" style="display:none">
+          Si rien ne se passe, ouvre <strong>Finder → Applications → "Canard de bureau"</strong>,
+          ou tape <strong>Cmd+Espace</strong> puis "canard".
+        </div>
       </div>
     </div>
 
     <div class="duck-settings-grid">
 
       <div class="duck-settings-card frame">
-        <h3 class="duck-h">▶ LANCER L'APP</h3>
-        <p class="duck-help">L'app est installée dans <code>/Applications</code>. Pour la lancer :</p>
-        <ul class="duck-tips">
-          <li>Ouvre <strong>Finder → Applications → "Canard de bureau"</strong></li>
-          <li>Ou via <strong>Spotlight</strong> (Cmd+Espace), tape "canard"</li>
-          <li>Clic droit sur l'icône du Dock → <strong>"Garder dans le Dock"</strong></li>
-        </ul>
+        <div class="duck-preview-big">
+          <img id="duck-preview-img" src="assets/duck-1.png" alt="Aperçu canard">
+        </div>
+        <div class="duck-preview-label" id="duck-skin-label">Canard de base</div>
+        <div class="duck-preview-actions">
+          <button class="btn btn-y" onclick="Duck.ask()">▶ POSER UNE QUESTION</button>
+          <button class="btn" onclick="Duck.pet()" style="margin-left:8px;">❤ CARESSER</button>
+        </div>
       </div>
 
       <div class="duck-settings-card frame">
-        <h3 class="duck-h">⚙ RÉGLAGES</h3>
-        <p class="duck-help">Tous les réglages se font directement depuis le canard sur ton bureau :</p>
-        <ul class="duck-tips">
-          <li><strong>Clic droit</strong> sur le canard → menu contextuel</li>
-          <li>"Réglages…" → intervalle des questions, mode, catégories</li>
-          <li>"Question maintenant" → poser une question tout de suite</li>
-          <li>"Pause" / "Reprendre" → suspendre les questions</li>
-        </ul>
+        <h3 class="duck-h">NIVEAU</h3>
+        <p class="duck-help">4 niveaux dispo. Tu peux forcer celui que tu veux, ou laisser monter au score.</p>
+        <div class="duck-level-row" id="duck-skin-row"></div>
+        <label class="duck-toggle">
+          <input type="checkbox" id="duck-auto-unlock"> <span>Auto-débloquer selon le score (10 / 25 / 50 / 100)</span>
+        </label>
       </div>
 
       <div class="duck-settings-card frame">
-        <h3 class="duck-h">🦆 INTERACTIONS</h3>
-        <ul class="duck-tips">
-          <li><strong>Clic court</strong> → caresse + petit cœur ❤</li>
-          <li><strong>Clic + glisser</strong> → déplacer sur l'écran</li>
-          <li><strong>Hover</strong> → badge niveau / score</li>
-          <li><strong>Bonne réponse</strong> → +1 point</li>
-          <li><strong>10 / 25 / 50 / 100</strong> pts → nouveau skin</li>
-        </ul>
+        <h3 class="duck-h">TAILLE</h3>
+        <div class="duck-size-row">
+          <button class="btn duck-size-btn" data-size="sm">PETIT</button>
+          <button class="btn duck-size-btn" data-size="md">NORMAL</button>
+          <button class="btn duck-size-btn" data-size="lg">GRAND</button>
+        </div>
       </div>
 
       <div class="duck-settings-card frame">
-        <h3 class="duck-h">🔧 DÉMARRAGE AUTO</h3>
-        <p class="duck-help">Pour que le canard se lance dès l'allumage du Mac :</p>
+        <h3 class="duck-h">QUESTIONS</h3>
+        <p class="duck-help">À quelle fréquence le canard te pose une question ?</p>
+        <div class="duck-interval-row">
+          <button class="btn duck-interval-btn" data-interval="0">DÉSACTIVÉ</button>
+          <button class="btn duck-interval-btn" data-interval="5">5 MIN</button>
+          <button class="btn duck-interval-btn" data-interval="15">15 MIN</button>
+          <button class="btn duck-interval-btn" data-interval="30">30 MIN</button>
+          <button class="btn duck-interval-btn" data-interval="60">1 H</button>
+        </div>
+      </div>
+
+      <div class="duck-settings-card frame">
+        <h3 class="duck-h">VISIBILITÉ SUR LE SITE</h3>
+        <p class="duck-help">Affiche ou cache le canard sur la page web.</p>
+        <label class="duck-toggle">
+          <input type="checkbox" id="duck-enabled"> <span>Afficher le canard sur le site</span>
+        </label>
+        <div class="duck-actions">
+          <button class="btn" onclick="Duck.resetPosition(); refreshDuckUI();">RECENTRER</button>
+          <button class="btn" onclick="if (confirm('Reset score à 0 ?')) { Duck.resetScore(); refreshDuckUI(); }">RESET SCORE</button>
+        </div>
+      </div>
+
+      <div class="duck-settings-card frame">
+        <h3 class="duck-h">💡 ASTUCES</h3>
         <ul class="duck-tips">
-          <li>Réglages système → <strong>Général</strong></li>
-          <li>→ <strong>Ouverture</strong> → "+" → ajouter "Canard de bureau"</li>
-          <li>Le canard sera là à chaque démarrage ✓</li>
+          <li>Clique sur le canard pour le caresser ❤</li>
+          <li>Clic droit pour qu'il pose une question</li>
+          <li>Glisse-le où tu veux sur l'écran</li>
+          <li>10 / 25 / 50 / 100 pts = nouveau skin débloqué</li>
         </ul>
       </div>
 
@@ -368,32 +391,32 @@
 
 
 <!-- Scripts -->
-<script src="flashcards-data.js?v=26"></script>
-<script src="funfacts-data.js?v=26"></script>
+<script src="flashcards-data.js?v=27"></script>
+<script src="funfacts-data.js?v=27"></script>
 <script>
   if (typeof FUNFACTS_PACKS !== "undefined") {
     FUNFACTS_PACKS.forEach(function(p) { FLASHCARD_PACKS.push(p); });
   }
 </script>
-<script src="programme-data.js?v=26"></script>
-<script src="daily-lessons.js?v=26"></script>
-<script src="memo.js?v=26"></script>
-<script src="srs.js?v=26"></script>
-<script src="srs2.js?v=26"></script>
-<script src="gamification.js?v=26"></script>
-<script src="chapters.js?v=26"></script>
-<script src="categories.js?v=26"></script>
-<script src="app.js?v=26"></script>
-<script src="today.js?v=26"></script>
-<script src="explorer.js?v=26"></script>
-<script src="flashcards.js?v=26"></script>
-<script src="quiz-12coups.js?v=26"></script>
-<script src="revisions.js?v=26"></script>
-<script src="programme.js?v=26"></script>
-<script src="carte.js?v=26"></script>
-<script src="schemas.js?v=26"></script>
-<script src="culture-app.js?v=26"></script>
-<script src="duck.js?v=26"></script>
-<script src="canard-settings.js?v=26"></script>
+<script src="programme-data.js?v=27"></script>
+<script src="daily-lessons.js?v=27"></script>
+<script src="memo.js?v=27"></script>
+<script src="srs.js?v=27"></script>
+<script src="srs2.js?v=27"></script>
+<script src="gamification.js?v=27"></script>
+<script src="chapters.js?v=27"></script>
+<script src="categories.js?v=27"></script>
+<script src="app.js?v=27"></script>
+<script src="today.js?v=27"></script>
+<script src="explorer.js?v=27"></script>
+<script src="flashcards.js?v=27"></script>
+<script src="quiz-12coups.js?v=27"></script>
+<script src="revisions.js?v=27"></script>
+<script src="programme.js?v=27"></script>
+<script src="carte.js?v=27"></script>
+<script src="schemas.js?v=27"></script>
+<script src="culture-app.js?v=27"></script>
+<script src="duck.js?v=27"></script>
+<script src="canard-settings.js?v=27"></script>
 </body>
 </html>
