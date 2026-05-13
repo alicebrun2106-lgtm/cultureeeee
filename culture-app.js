@@ -85,12 +85,18 @@
   window.getPackMastery = function (packId) {
     const pack = (typeof FLASHCARD_PACKS !== "undefined") ? FLASHCARD_PACKS.find((p) => p.id === packId) : null;
     if (!pack) return null;
-    const total = pack.cards.length;
+    const rawTotal = pack.cards.length;
+    const deletedSet = getDeletedSet();
+    let total = 0;
+    for (let i = 0; i < rawTotal; i++) {
+      if (!deletedSet.has(packId + ":" + i)) total++;
+    }
     const srs = SRS.getData(SRS_KEY) || {};
     const now = Date.now();
     let seen = 0, due = 0, mastered = 0, weak = 0;
     let scoreSum = 0;
-    for (let i = 0; i < total; i++) {
+    for (let i = 0; i < rawTotal; i++) {
+      if (deletedSet.has(packId + ":" + i)) continue;
       const st = srs[getCardKey(packId, i)];
       if (!st) continue; // never seen
       seen++;
@@ -211,6 +217,36 @@
   window.isPackAdded = isPackAdded;
   window.addPack = addPack;
   window.removePack = removePack;
+
+  // ─── CARTES SUPPRIMÉES ───
+  // L'utilisateur peut supprimer des cartes trop simples. On garde un set d'IDs
+  // (packId:idx) dans localStorage. Ces cartes sont exclues des sessions.
+  const DELETED_KEY = "qpuc-deleted-cards";
+  function getDeletedSet() {
+    try {
+      const arr = JSON.parse(localStorage.getItem(DELETED_KEY));
+      return new Set(Array.isArray(arr) ? arr : []);
+    } catch { return new Set(); }
+  }
+  function saveDeletedSet(set) {
+    localStorage.setItem(DELETED_KEY, JSON.stringify([...set]));
+  }
+  function isCardDeleted(packId, idx) {
+    return getDeletedSet().has(packId + ":" + idx);
+  }
+  function markCardDeleted(packId, idx) {
+    const set = getDeletedSet();
+    set.add(packId + ":" + idx);
+    saveDeletedSet(set);
+  }
+  function unmarkCardDeleted(packId, idx) {
+    const set = getDeletedSet();
+    set.delete(packId + ":" + idx);
+    saveDeletedSet(set);
+  }
+  window.isCardDeleted = isCardDeleted;
+  window.markCardDeleted = markCardDeleted;
+  window.unmarkCardDeleted = unmarkCardDeleted;
 
   // ─── NAVIGATION ───
   window.goToTab = function (tab) {
@@ -625,9 +661,11 @@
     const srsData = SRS.getData(SRS_KEY) || {};
     const now = Date.now();
     const due = [];
+    const deletedSet = getDeletedSet();
     FLASHCARD_PACKS.forEach((pack) => {
       pack.cards.forEach((card, idx) => {
         const key = pack.id + ":" + idx;
+        if (deletedSet.has(key)) return; // carte supprimée
         const st = srsData[key];
         if (!st) return; // jamais vue → exclue
         if ((st.next || 0) <= now) {
@@ -669,13 +707,16 @@
     const pack = FLASHCARD_PACKS.find((p) => p.id === packId);
     if (!pack) return;
     const srsData = SRS.getData(SRS_KEY) || {};
+    const deletedSet = getDeletedSet();
     const allCards = pack.cards.map((c, i) => ({
       front: c.front, back: c.back, memo: c.memo || null,
       srsKey: getCardKey(packId, i), cardIdx: i,
+      deleted: deletedSet.has(getCardKey(packId, i)),
     }));
 
     const due = [], fresh = [];
     allCards.forEach((c, i) => {
+      if (c.deleted) return; // ignorer les supprimées
       const st = srsData[c.srsKey];
       if (!st) fresh.push(i);
       else if ((st.next || 0) <= Date.now()) due.push(i);
@@ -683,10 +724,11 @@
     shuffle(due); shuffle(fresh);
     let queue = [...due, ...fresh.slice(0, NEW_PER_SESSION)];
     if (queue.length === 0) {
-      const all = allCards.map((_, i) => i);
+      const all = allCards.map((_, i) => i).filter((i) => !allCards[i].deleted);
       shuffle(all);
       queue = all.slice(0, 10);
     }
+    if (queue.length === 0) return; // tout est supprimé
 
     session = {
       pack, packId, allCards, queue, index: 0, flipped: false,
@@ -698,6 +740,41 @@
     document.getElementById("session-title").textContent = pack.name;
     goToTab("session");
     showCard();
+  };
+
+  // Supprime la carte courante de la session : la sort de la queue + marque deleted
+  window.deleteCurrentCard = function () {
+    if (!session) return;
+    const c = session.allCards[session.queue[session.index]];
+    if (!c) return;
+    // Pour les sessions daily review, c.packId est sur l'item ; sinon, session.packId
+    const packId = c.packId || session.packId;
+    const cardIdx = c.cardIdx;
+    if (!confirm("Supprimer définitivement cette carte de tes paquets ?\n\n« " + c.front.substring(0, 80) + (c.front.length > 80 ? "…" : "") + " »")) return;
+    markCardDeleted(packId, cardIdx);
+    // Retire toutes les occurrences de cette carte de la queue
+    const queue = session.queue;
+    const cardSrsKey = c.srsKey;
+    for (let i = queue.length - 1; i >= 0; i--) {
+      if (i === session.index) continue; // on garde l'actuel, on avance après
+      const otherCard = session.allCards[queue[i]];
+      if (otherCard && otherCard.srsKey === cardSrsKey) {
+        queue.splice(i, 1);
+        if (i < session.index) session.index--;
+      }
+    }
+    // Petite confirmation visuelle
+    const toast = document.createElement("div");
+    toast.className = "card-delete-toast";
+    toast.textContent = "Carte supprimée ✓";
+    document.body.appendChild(toast);
+    requestAnimationFrame(() => toast.classList.add("show"));
+    setTimeout(() => { toast.classList.remove("show"); setTimeout(() => toast.remove(), 300); }, 1500);
+
+    // Passer à la suivante (ou finir)
+    session.index++;
+    if (session.index >= session.queue.length) showResult();
+    else showCard();
   };
 
   function showCard() {
@@ -836,6 +913,9 @@
   document.addEventListener("DOMContentLoaded", function () {
     const back = document.getElementById("btn-session-back");
     if (back) back.onclick = () => goToTab("mes-paquets");
+    // Wire delete button
+    const delBtn = document.getElementById("card-delete-btn");
+    if (delBtn) delBtn.onclick = (e) => { e.stopPropagation(); window.deleteCurrentCard(); };
     // Keyboard shortcuts
     document.addEventListener("keydown", function (e) {
       const sess = document.getElementById("page-session");
