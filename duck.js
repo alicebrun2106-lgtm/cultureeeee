@@ -14,6 +14,7 @@
   // ─── ÉTAT PERSISTÉ ───
   const DEFAULTS = {
     enabled: false, // PAS de canard sur le site. Source de vérité : app desktop uniquement.
+    name: "", // Prénom donné par l'utilisateur
     forcedLevel: null,   // null = auto (selon score), sinon 1-4
     size: "md",          // sm / md / lg
     intervalMin: 30,     // 0 = off, 5/15/30/60

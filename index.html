@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=VT323&family=Press+Start+2P&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=31">
+<link rel="stylesheet" href="style.css?v=32">
 </head>
 <body>
 
@@ -186,14 +186,15 @@
       </div>
 
       <div class="duck-settings-card frame">
-        <h3 class="duck-h">VISIBILITÉ SUR LE SITE</h3>
-        <p class="duck-help">Désactivé par défaut. Si tu veux aussi un canard sur la page web :</p>
-        <label class="duck-toggle">
-          <input type="checkbox" id="duck-enabled"> <span>Afficher le canard sur le site</span>
-        </label>
+        <h3 class="duck-h">MON CANARD</h3>
+        <p class="duck-help">Donne-lui un nom et gère ton canard :</p>
+        <div class="duck-name-row">
+          <label class="duck-name-label" for="duck-name-input">Son nom :</label>
+          <input type="text" id="duck-name-input" class="duck-name-input" placeholder="Ex : Charles" maxlength="20">
+        </div>
         <div class="duck-actions">
-          <button class="btn" onclick="Duck.resetPosition(); refreshDuckUI();">RECENTRER</button>
-          <button class="btn" onclick="if (confirm('Reset score à 0 ?')) { Duck.resetScore(); refreshDuckUI(); }">RESET SCORE</button>
+          <button class="btn btn-y" id="btn-reset-score">↻ RESET SCORE</button>
+          <button class="btn" id="btn-deactivate-duck">⏏ DÉSACTIVER LE CANARD</button>
         </div>
       </div>
 
@@ -391,32 +392,32 @@
 
 
 <!-- Scripts -->
-<script src="flashcards-data.js?v=31"></script>
-<script src="funfacts-data.js?v=31"></script>
+<script src="flashcards-data.js?v=32"></script>
+<script src="funfacts-data.js?v=32"></script>
 <script>
   if (typeof FUNFACTS_PACKS !== "undefined") {
     FUNFACTS_PACKS.forEach(function(p) { FLASHCARD_PACKS.push(p); });
   }
 </script>
-<script src="programme-data.js?v=31"></script>
-<script src="daily-lessons.js?v=31"></script>
-<script src="memo.js?v=31"></script>
-<script src="srs.js?v=31"></script>
-<script src="srs2.js?v=31"></script>
-<script src="gamification.js?v=31"></script>
-<script src="chapters.js?v=31"></script>
-<script src="categories.js?v=31"></script>
-<script src="app.js?v=31"></script>
-<script src="today.js?v=31"></script>
-<script src="explorer.js?v=31"></script>
-<script src="flashcards.js?v=31"></script>
-<script src="quiz-12coups.js?v=31"></script>
-<script src="revisions.js?v=31"></script>
-<script src="programme.js?v=31"></script>
-<script src="carte.js?v=31"></script>
-<script src="schemas.js?v=31"></script>
-<script src="culture-app.js?v=31"></script>
-<script src="duck.js?v=31"></script>
-<script src="canard-settings.js?v=31"></script>
+<script src="programme-data.js?v=32"></script>
+<script src="daily-lessons.js?v=32"></script>
+<script src="memo.js?v=32"></script>
+<script src="srs.js?v=32"></script>
+<script src="srs2.js?v=32"></script>
+<script src="gamification.js?v=32"></script>
+<script src="chapters.js?v=32"></script>
+<script src="categories.js?v=32"></script>
+<script src="app.js?v=32"></script>
+<script src="today.js?v=32"></script>
+<script src="explorer.js?v=32"></script>
+<script src="flashcards.js?v=32"></script>
+<script src="quiz-12coups.js?v=32"></script>
+<script src="revisions.js?v=32"></script>
+<script src="programme.js?v=32"></script>
+<script src="carte.js?v=32"></script>
+<script src="schemas.js?v=32"></script>
+<script src="culture-app.js?v=32"></script>
+<script src="duck.js?v=32"></script>
+<script src="canard-settings.js?v=32"></script>
 </body>
 </html>

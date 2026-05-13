@@ -24,7 +24,13 @@
       previewImg.src = "assets/duck-" + currentLvl + ".webp";
     }
     const labelEl = document.getElementById("duck-skin-label");
-    if (labelEl && LEVEL[currentLvl]) labelEl.textContent = LEVEL[currentLvl].label;
+    if (labelEl && LEVEL[currentLvl]) {
+      if (s.name && s.name.trim()) {
+        labelEl.textContent = s.name.trim() + " — " + LEVEL[currentLvl].label;
+      } else {
+        labelEl.textContent = LEVEL[currentLvl].label;
+      }
+    }
 
     // Grille des 4 niveaux avec sprites
     const row = document.getElementById("duck-skin-row");
@@ -74,15 +80,60 @@
       b.onclick = () => { Duck.update({ intervalMin: val }); Duck.render(); refresh(); };
     });
 
-    // Enabled
-    const enEl = document.getElementById("duck-enabled");
-    if (enEl) {
-      enEl.checked = !!s.enabled;
-      enEl.onchange = () => {
-        Duck.update({ enabled: enEl.checked });
-        Duck.render();
-        if (enEl.checked) localStorage.removeItem("qpuc-desktop-active");
+    // Nom du canard
+    const nameEl = document.getElementById("duck-name-input");
+    if (nameEl) {
+      nameEl.value = s.name || "";
+      nameEl.oninput = () => {
+        Duck.update({ name: nameEl.value.trim() });
+        // Update label preview si nom donné
+        const lbl = document.getElementById("duck-skin-label");
+        if (lbl) {
+          if (nameEl.value.trim()) lbl.textContent = nameEl.value.trim() + " — " + (LEVEL[currentLvl] ? LEVEL[currentLvl].label : "Canard");
+          else if (LEVEL[currentLvl]) lbl.textContent = LEVEL[currentLvl].label;
+        }
+      };
+    }
+
+    // Reset score button
+    const resetBtn = document.getElementById("btn-reset-score");
+    if (resetBtn) {
+      resetBtn.onclick = () => {
+        if (!confirm("Reset le score à 0 ? (web + bureau)")) return;
+        // Reset web
+        Duck.resetScore();
+        // Reset desktop via protocole
+        const iframe = document.createElement("iframe");
+        iframe.style.display = "none";
+        iframe.src = "canard://reset-score";
+        document.body.appendChild(iframe);
+        setTimeout(() => iframe.remove(), 1000);
         refresh();
+      };
+    }
+
+    // Désactiver le canard
+    const deactivateBtn = document.getElementById("btn-deactivate-duck");
+    if (deactivateBtn) {
+      deactivateBtn.onclick = () => {
+        if (!confirm("Désactiver le canard ? (ferme l'app desktop)")) return;
+        // Cache le canard web
+        Duck.update({ enabled: false });
+        Duck.render();
+        // Demande à l'app desktop de quitter
+        const iframe = document.createElement("iframe");
+        iframe.style.display = "none";
+        iframe.src = "canard://quit";
+        document.body.appendChild(iframe);
+        setTimeout(() => iframe.remove(), 1000);
+        // Reset flag desktop-active
+        localStorage.removeItem("qpuc-desktop-active");
+        // Reset bouton launch
+        const launchBtn = document.getElementById("btn-launch-desktop-duck");
+        if (launchBtn) {
+          launchBtn.textContent = "▶ JE VEUX LE CANARD SUR MON ÉCRAN";
+          launchBtn.classList.remove("duck-launched");
+        }
       };
     }
 
