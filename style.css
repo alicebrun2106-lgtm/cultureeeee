@@ -693,15 +693,23 @@
   .session-card-text {
     font-family: 'Space Mono', monospace;
     font-weight: 700;
-    font-size: 18px;
-    line-height: 1.5;
+    font-size: 20px;
+    line-height: 1.55;
     color: var(--ink);
   }
   .session-card-answer {
-    font-family: 'Press Start 2P', monospace;
-    font-size: 18px;
-    line-height: 1.4;
+    font-family: 'Space Mono', monospace;
+    font-weight: 700;
+    font-size: 22px;
+    line-height: 1.5;
     color: var(--ink);
+    background: var(--lime);
+    border: 2px solid var(--ink);
+    padding: 14px 16px;
+    margin-top: 14px;
+    display: inline-block;
+    max-width: 100%;
+    box-shadow: 3px 3px 0 var(--ink);
   }
   .session-card-memo {
     margin-top: 16px;

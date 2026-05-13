@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=VT323&family=Press+Start+2P&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=22">
+<link rel="stylesheet" href="style.css?v=23">
 </head>
 <body>
 
@@ -21,7 +21,7 @@
       <a href="#" data-tab="cartes" onclick="goToTab('cartes'); return false;">CARTES</a>
       <a href="#" data-tab="canard" onclick="goToTab('canard'); return false;">🦆 CANARD</a>
     </div>
-    <span class="fig" id="nav-stats">— PAQUETS</span>
+    <span class="nav-stats-hidden" id="nav-stats" style="display:none">— PAQUETS</span>
   </div>
 </nav>
 
@@ -375,31 +375,32 @@
 
 
 <!-- Scripts -->
-<script src="flashcards-data.js?v=22"></script>
-<script src="funfacts-data.js?v=22"></script>
+<script src="flashcards-data.js?v=23"></script>
+<script src="funfacts-data.js?v=23"></script>
 <script>
   if (typeof FUNFACTS_PACKS !== "undefined") {
     FUNFACTS_PACKS.forEach(function(p) { FLASHCARD_PACKS.push(p); });
   }
 </script>
-<script src="programme-data.js?v=22"></script>
-<script src="daily-lessons.js?v=22"></script>
-<script src="memo.js?v=22"></script>
-<script src="srs.js?v=22"></script>
-<script src="gamification.js?v=22"></script>
-<script src="chapters.js?v=22"></script>
-<script src="categories.js?v=22"></script>
-<script src="app.js?v=22"></script>
-<script src="today.js?v=22"></script>
-<script src="explorer.js?v=22"></script>
-<script src="flashcards.js?v=22"></script>
-<script src="quiz-12coups.js?v=22"></script>
-<script src="revisions.js?v=22"></script>
-<script src="programme.js?v=22"></script>
-<script src="carte.js?v=22"></script>
-<script src="schemas.js?v=22"></script>
-<script src="culture-app.js?v=22"></script>
-<script src="duck.js?v=22"></script>
-<script src="canard-settings.js?v=22"></script>
+<script src="programme-data.js?v=23"></script>
+<script src="daily-lessons.js?v=23"></script>
+<script src="memo.js?v=23"></script>
+<script src="srs.js?v=23"></script>
+<script src="srs2.js?v=23"></script>
+<script src="gamification.js?v=23"></script>
+<script src="chapters.js?v=23"></script>
+<script src="categories.js?v=23"></script>
+<script src="app.js?v=23"></script>
+<script src="today.js?v=23"></script>
+<script src="explorer.js?v=23"></script>
+<script src="flashcards.js?v=23"></script>
+<script src="quiz-12coups.js?v=23"></script>
+<script src="revisions.js?v=23"></script>
+<script src="programme.js?v=23"></script>
+<script src="carte.js?v=23"></script>
+<script src="schemas.js?v=23"></script>
+<script src="culture-app.js?v=23"></script>
+<script src="duck.js?v=23"></script>
+<script src="canard-settings.js?v=23"></script>
 </body>
 </html>

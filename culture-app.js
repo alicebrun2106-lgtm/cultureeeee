@@ -91,65 +91,76 @@
     for (let i = 0; i < rawTotal; i++) {
       if (!deletedSet.has(packId + ":" + i)) total++;
     }
-    const srs = SRS.getData(SRS_KEY) || {};
-    const now = Date.now();
-    let seen = 0, due = 0, mastered = 0, weak = 0;
+    let seen = 0, dueNow = 0, dueTodayCount = 0;
+    let newCards = 0, learningCards = 0, reviewCards = 0, relearningCards = 0;
+    let mature = 0, young = 0, weak = 0;
     let scoreSum = 0;
+    let efSum = 0, efCount = 0;
+    let intervalSum = 0, intervalCount = 0;
     for (let i = 0; i < rawTotal; i++) {
-      if (deletedSet.has(packId + ":" + i)) continue;
-      const st = srs[getCardKey(packId, i)];
-      if (!st) continue; // never seen
+      const key = packId + ":" + i;
+      if (deletedSet.has(key)) continue;
+      const p = SRS2.getCardProgress(key);
+      if (!p || p.state === "new") {
+        newCards++;
+        continue;
+      }
       seen++;
-      const isDue = (st.next || 0) <= now;
-      if (isDue) due++;
-      // Per-card mastery score (0-100) :
-      // reps=0 et vu → ~10 ; reps=1 → 30 ; reps=2 → 55 ; reps=3 → 80 ; reps≥4 → 95
-      // bonus si ef élevé (jusqu'à +5), malus si due maintenant (-15)
-      let cardScore = 0;
-      if (st.reps >= 4) cardScore = 95;
-      else if (st.reps === 3) cardScore = 80;
-      else if (st.reps === 2) cardScore = 55;
-      else if (st.reps === 1) cardScore = 30;
-      else cardScore = 10; // reps 0 mais vue
-      const efBonus = Math.max(0, Math.min(5, (st.ef - 2.5) * 5));
-      cardScore += efBonus;
-      if (isDue) cardScore -= 15;
-      cardScore = Math.max(0, Math.min(100, Math.round(cardScore)));
+      if (SRS2.isDueNow(p)) dueNow++;
+      if (SRS2.isDueToday(p)) dueTodayCount++;
+      if (p.state === "learning") learningCards++;
+      else if (p.state === "review") reviewCards++;
+      else if (p.state === "relearning") relearningCards++;
+      if (p.state === "review") {
+        if (p.intervalDays >= 21) mature++; else young++;
+        intervalSum += p.intervalDays; intervalCount++;
+      }
+      efSum += p.easeFactor; efCount++;
+      const cardScore = SRS2.getCardMastery(p);
       scoreSum += cardScore;
-      // Master / weak
-      if (st.reps >= 3 && !isDue) mastered++;
-      if (st.reps < 2 || (st.ef && st.ef < 2.0)) weak++;
+      // Weak : lapses > 0, ease < 2, lastGrade again/hard, ou relearning
+      if (p.lapseCount > 0 || p.easeFactor < 2 || p.lastGrade === "again" || p.lastGrade === "hard" || p.state === "relearning") {
+        weak++;
+      }
     }
-    const newCards = total - seen;
-    // Mastery percent : moyenne des scores cartes + pénalité pour les non-vues
-    const seenAvg = seen > 0 ? scoreSum / seen : 0;
     const coverage = total > 0 ? seen / total : 0;
-    // mastery = avg des cartes vues * coverage (les non-vues comptent 0)
+    const seenAvg = seen > 0 ? scoreSum / seen : 0;
     const masteryPercent = Math.round(seenAvg * coverage);
 
     // Status label
     let statusLabel;
     if (seen === 0) statusLabel = "Nouveau";
-    else if (masteryPercent >= 90) statusLabel = "Maîtrisé";
-    else if (masteryPercent >= 65) statusLabel = "Solide";
-    else if (masteryPercent >= 30) statusLabel = "À consolider";
-    else statusLabel = "En cours";
+    else if (masteryPercent < 30) statusLabel = "À lancer";
+    else if (masteryPercent < 55) statusLabel = "En apprentissage";
+    else if (masteryPercent < 75) statusLabel = "À consolider";
+    else if (masteryPercent < 90) statusLabel = "Solide";
+    else statusLabel = "Maîtrisé";
 
     const lastPlayed = getPackLastPlayed(packId);
-    const isDoneForToday = (seen > 0 && due === 0 && isToday(lastPlayed));
+    // Done for the day : tu as révisé aujourd'hui ET plus rien n'est dû MAINTENANT
+    const isDoneForToday = (seen > 0 && dueNow === 0 && isToday(lastPlayed));
 
     return {
       totalCards: total,
       seenCards: seen,
+      unseenCards: total - seen,
       newCards,
-      dueToday: due,
-      masteredCards: mastered,
+      learningCards, reviewCards, relearningCards,
+      dueNow,
+      dueToday: dueNow, // compat — on garde dueToday = dueNow pour l'UI
+      dueTodayCount,
+      matureCards: mature,
+      youngCards: young,
       weakCards: weak,
+      averageEaseFactor: efCount > 0 ? Math.round((efSum / efCount) * 100) / 100 : SRS2.CONFIG.startingEaseFactor,
+      averageIntervalDays: intervalCount > 0 ? Math.round(intervalSum / intervalCount) : 0,
       masteryPercent,
       statusLabel,
       isDoneForToday,
       lastPlayed,
       isStarted: seen > 0,
+      // compat fields anciens
+      masteredCards: mature, // on assimile master = mature
     };
   };
 
@@ -319,10 +330,6 @@
     const figStyle = isInk ? 'style="background:#0a0a0a; color:#fff; border-color:#fff;"' : '';
     const dotStyle = isInk ? 'style="background:#0a0a0a; border-color:#fff;"' : '';
 
-    let h = 0;
-    for (let i = 0; i < pack.id.length; i++) h = (h * 31 + pack.id.charCodeAt(i)) | 0;
-    const figNum = "fig." + (Math.abs(h) % 9 + 1) + "." + (Math.abs(h >> 8) % 9 + 1);
-
     const div = document.createElement("button");
     div.className = "deck " + color;
     if (m.isDoneForToday) div.classList.add("deck-done-today");
@@ -362,7 +369,6 @@
       ${doneBadge}
       ${addBtnHtml}
       <div class="deck-img">
-        <span class="fig" ${figStyle}>[${figNum}]</span>
         <span class="dot-circ" ${dotStyle}></span>
         <svg viewBox="0 0 100 90" style="position:absolute; inset:0; width:100%; height:100%;" shape-rendering="crispEdges">
           ${svgFill}
@@ -658,17 +664,15 @@
   // qui ont été vues au moins une fois. Exclut les cartes totalement nouvelles.
   function startDailyMixedReview() {
     if (typeof FLASHCARD_PACKS === "undefined") return;
-    const srsData = SRS.getData(SRS_KEY) || {};
-    const now = Date.now();
     const due = [];
     const deletedSet = getDeletedSet();
     FLASHCARD_PACKS.forEach((pack) => {
       pack.cards.forEach((card, idx) => {
         const key = pack.id + ":" + idx;
-        if (deletedSet.has(key)) return; // carte supprimée
-        const st = srsData[key];
-        if (!st) return; // jamais vue → exclue
-        if ((st.next || 0) <= now) {
+        if (deletedSet.has(key)) return;
+        const p = SRS2.getCardProgress(key);
+        if (!p || p.state === "new") return; // jamais vue → exclue
+        if (SRS2.isDueNow(p)) {
           due.push({
             front: card.front, back: card.back, memo: card.memo || null,
             srsKey: key, cardIdx: idx,
@@ -706,7 +710,6 @@
   window.startFlashcardSession = function (packId) {
     const pack = FLASHCARD_PACKS.find((p) => p.id === packId);
     if (!pack) return;
-    const srsData = SRS.getData(SRS_KEY) || {};
     const deletedSet = getDeletedSet();
     const allCards = pack.cards.map((c, i) => ({
       front: c.front, back: c.back, memo: c.memo || null,
@@ -714,21 +717,27 @@
       deleted: deletedSet.has(getCardKey(packId, i)),
     }));
 
-    const due = [], fresh = [];
+    // Order : learning/relearning dues maintenant > review dues maintenant > new
+    const learningDue = [], reviewDue = [], newCards = [];
     allCards.forEach((c, i) => {
-      if (c.deleted) return; // ignorer les supprimées
-      const st = srsData[c.srsKey];
-      if (!st) fresh.push(i);
-      else if ((st.next || 0) <= Date.now()) due.push(i);
+      if (c.deleted) return;
+      const p = SRS2.getCardProgress(c.srsKey);
+      if (!p || p.state === "new") {
+        newCards.push(i);
+      } else if (SRS2.isDueNow(p)) {
+        if (p.state === "learning" || p.state === "relearning") learningDue.push(i);
+        else reviewDue.push(i);
+      }
     });
-    shuffle(due); shuffle(fresh);
-    let queue = [...due, ...fresh.slice(0, NEW_PER_SESSION)];
+    shuffle(learningDue); shuffle(reviewDue); shuffle(newCards);
+    let queue = [...learningDue, ...reviewDue, ...newCards.slice(0, NEW_PER_SESSION)];
     if (queue.length === 0) {
+      // "Review en avance" : prendre quelques cartes peu importe leur due
       const all = allCards.map((_, i) => i).filter((i) => !allCards[i].deleted);
       shuffle(all);
       queue = all.slice(0, 10);
     }
-    if (queue.length === 0) return; // tout est supprimé
+    if (queue.length === 0) return;
 
     session = {
       pack, packId, allCards, queue, index: 0, flipped: false,
@@ -830,13 +839,23 @@
     document.getElementById("session-quality").hidden = false;
   };
 
+  // Convert quality int (legacy) → grade string (Anki)
+  function qualityToGrade(q) {
+    if (q <= 1) return "again";
+    if (q === 3) return "hard";
+    if (q === 4) return "good";
+    if (q === 5) return "easy";
+    return "good";
+  }
+
   window.rateFlashcard = function (quality) {
     if (!session || !session.flipped) return;
     const c = session.allCards[session.queue[session.index]];
-    // Update SRS
-    const state = SRS.getState(SRS_KEY, c.srsKey);
-    const newState = SRS.update(state, quality);
-    SRS.save(SRS_KEY, c.srsKey, newState);
+    const grade = qualityToGrade(quality);
+    // SRS2 : récupère progress + schedule + save
+    const prev = SRS2.getCardProgress(c.srsKey);
+    const next = SRS2.scheduleCard(prev, grade);
+    SRS2.saveCardProgress(c.srsKey, next);
     // Track : pour daily review, on track sur le packId réel de la carte
     const trackPackId = session.isDailyReview ? c.packId : session.packId;
     try {
@@ -920,12 +939,20 @@
     document.addEventListener("keydown", function (e) {
       const sess = document.getElementById("page-session");
       if (!sess || !sess.classList.contains("active") || !session) return;
-      if (e.key === " " || e.key === "Enter") { e.preventDefault(); if (!session.flipped) flipFlashcard(); }
-      else if (session.flipped) {
-        if (e.key === "1") rateFlashcard(1);
-        else if (e.key === "2") rateFlashcard(3);
-        else if (e.key === "3") rateFlashcard(4);
-        else if (e.key === "4") rateFlashcard(5);
+      // Ignorer si user tape dans un input
+      const tag = (e.target && e.target.tagName) || "";
+      if (tag === "INPUT" || tag === "TEXTAREA") return;
+      if (e.key === " " || e.key === "Enter") {
+        e.preventDefault();
+        if (!session.flipped) flipFlashcard();
+      } else if (session.flipped) {
+        const k = e.key.toLowerCase();
+        // Raccourcis : Q = À revoir, S = Difficile, F = Bien, D = Facile
+        // Aussi : chiffres 1/2/3/4
+        if (k === "q" || e.key === "1") rateFlashcard(1);
+        else if (k === "s" || e.key === "2") rateFlashcard(3);
+        else if (k === "f" || e.key === "3") rateFlashcard(4);
+        else if (k === "d" || e.key === "4") rateFlashcard(5);
       }
     });
   });
