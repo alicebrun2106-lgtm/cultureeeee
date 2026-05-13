@@ -1767,3 +1767,13 @@
     .duck-launch-icon { margin: 0 auto; }
     .duck-launch-body h3 { font-size: 13px; }
   }
+
+  /* État "canard lancé sur le bureau" */
+  #btn-launch-desktop-duck.duck-launched {
+    background: var(--lime);
+    color: var(--ink);
+    box-shadow: 3px 3px 0 var(--ink);
+  }
+  #btn-launch-desktop-duck.duck-launched:hover {
+    box-shadow: 1px 1px 0 var(--ink);
+  }

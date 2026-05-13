@@ -79,7 +79,25 @@
     const enEl = document.getElementById("duck-enabled");
     if (enEl) {
       enEl.checked = !!s.enabled;
-      enEl.onchange = () => { Duck.update({ enabled: enEl.checked }); Duck.render(); refresh(); };
+      enEl.onchange = () => {
+        Duck.update({ enabled: enEl.checked });
+        Duck.render();
+        // Si l'user ré-active le canard web, on désactive le mode "desktop seul"
+        if (enEl.checked) localStorage.removeItem("qpuc-desktop-active");
+        refresh();
+      };
+    }
+
+    // Bouton launch : update le label si desktop actif
+    const launchBtn = document.getElementById("btn-launch-desktop-duck");
+    if (launchBtn) {
+      if (localStorage.getItem("qpuc-desktop-active") === "1") {
+        launchBtn.textContent = "✓ CANARD ACTIF SUR LE BUREAU";
+        launchBtn.classList.add("duck-launched");
+      } else {
+        launchBtn.textContent = "▶ JE VEUX LE CANARD SUR MON ÉCRAN";
+        launchBtn.classList.remove("duck-launched");
+      }
     }
   }
 
@@ -101,23 +119,35 @@
     }
   };
 
-  // Bouton "Je veux le canard sur mon écran" → lance l'app desktop via protocole custom
+  // Bouton "Je veux le canard sur mon écran" → lance l'app desktop ET cache le canard web
   function setupLaunchButton() {
     const btn = document.getElementById("btn-launch-desktop-duck");
     if (!btn) return;
     btn.onclick = () => {
       const hint = document.getElementById("duck-launch-hint");
-      // Tente d'ouvrir l'app via protocole custom
-      // Pour éviter de "naviguer" depuis la page, on utilise un iframe caché
+      // 1) Lance l'app desktop via protocole canard://
       const iframe = document.createElement("iframe");
       iframe.style.display = "none";
       iframe.src = "canard://launch";
       document.body.appendChild(iframe);
       setTimeout(() => iframe.remove(), 1000);
-      // Affiche l'astuce de fallback
-      if (hint) {
-        hint.style.display = "";
+
+      // 2) Cache le canard du site (le desktop prend le relais)
+      if (typeof Duck !== "undefined") {
+        Duck.update({ enabled: false });
+        Duck.render();
       }
+      localStorage.setItem("qpuc-desktop-active", "1");
+
+      // 3) Affiche le hint d'aide
+      if (hint) hint.style.display = "";
+
+      // 4) Met à jour le bouton
+      btn.textContent = "✓ CANARD LANCÉ SUR LE BUREAU";
+      btn.classList.add("duck-launched");
+
+      // 5) Refresh la UI
+      setTimeout(() => refresh(), 100);
     };
   }
 

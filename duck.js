@@ -428,11 +428,14 @@
   };
 
   // ─── INIT ───
-  // Re-enable for users qui ont été force-disabled précédemment
+  // Re-enable for users qui ont été force-disabled précédemment (sauf si desktop actif)
   function reenableIfWasForceDisabled() {
     const FORCE_FLAG = "qpuc-duck-disabled-v1";
     if (localStorage.getItem(FORCE_FLAG) === "done") {
-      update({ enabled: true });
+      // Ne pas réactiver si le desktop est marqué comme actif
+      if (localStorage.getItem("qpuc-desktop-active") !== "1") {
+        update({ enabled: true });
+      }
       localStorage.removeItem(FORCE_FLAG);
     }
   }
