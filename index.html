@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=VT323&family=Press+Start+2P&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=34">
+<link rel="stylesheet" href="style.css?v=35">
 </head>
 <body>
 
@@ -18,7 +18,7 @@
     <div class="nav-links">
       <a href="#" data-tab="trouver" class="active" onclick="goToTab('trouver'); return false;">TROUVER</a>
       <a href="#" data-tab="mes-paquets" onclick="goToTab('mes-paquets'); return false;">MES PAQUETS</a>
-      <a href="#" data-tab="cartes" onclick="goToTab('cartes'); return false;">CARTES</a>
+      <a href="#" data-tab="social" onclick="goToTab('social'); return false;">SOCIAL</a>
       <a href="#" data-tab="canard" onclick="goToTab('canard'); return false;">🦆 CANARD</a>
     </div>
     <span class="nav-stats-hidden" id="nav-stats" style="display:none">— PAQUETS</span>
@@ -85,6 +85,7 @@
       <h2>TROUVER DES PAQUETS</h2>
       <div class="bar"></div>
       <span class="fig" id="banner-count-trouver">— PAQUETS</span>
+      <button class="btn btn-y btn-shuffle" onclick="openPackCreator()" title="Créer un nouveau paquet">+ CRÉER MON PAQUET</button>
       <button class="btn btn-shuffle" onclick="shuffleTrouver()" title="Mélanger l'affichage">🔀 MÉLANGER</button>
     </div>
 
@@ -216,31 +217,23 @@
 <!-- ============================================================
      PAGE: CARTES (carte de France & schémas)
 ============================================================ -->
-<section id="page-cartes" class="page-section">
+<section id="page-social" class="page-section">
   <section class="container">
     <div class="section-banner">
-      <h2>CARTES</h2>
+      <h2>SOCIAL</h2>
       <div class="bar"></div>
-      <span class="fig">GÉO INTERACTIVE</span>
+      <span class="fig">SCOREBOARD · DÉFIS · PAQUETS À VOLER</span>
     </div>
-    <div class="deck-grid">
-      <div class="deck m" onclick="initCarte()" style="cursor:pointer;">
-        <div class="deck-img"><div class="deck-emoji">🗺️</div></div>
-        <div class="deck-body">
-          <div class="deck-cat">FRANCE</div>
-          <div class="deck-title">CARTE<br>INTERACTIVE</div>
-          <div class="deck-foot"><span>RÉGIONS · DPTS</span><span>→</span></div>
-        </div>
-      </div>
-      <div class="deck v" onclick="initSchemas()" style="cursor:pointer;">
-        <div class="deck-img"><div class="deck-emoji">📊</div></div>
-        <div class="deck-body">
-          <div class="deck-cat">INSTITUTIONS</div>
-          <div class="deck-title">SCHÉMAS<br>VE RÉP · UE</div>
-          <div class="deck-foot"><span>3 DIAGRAMMES</span><span>→</span></div>
-        </div>
-      </div>
+
+    <!-- Onglets internes : Général / Par paquet / Défis / Paquets à voler -->
+    <div class="social-tabs">
+      <button class="social-tab on" data-stab="general" onclick="window.socialSwitchTab('general', this)">SCOREBOARD GÉNÉRAL</button>
+      <button class="social-tab" data-stab="bypack"  onclick="window.socialSwitchTab('bypack', this)">PAR PAQUET</button>
+      <button class="social-tab" data-stab="defis"   onclick="window.socialSwitchTab('defis', this)">DÉFIS</button>
+      <button class="social-tab" data-stab="steal"   onclick="window.socialSwitchTab('steal', this)">PAQUETS À VOLER</button>
     </div>
+
+    <div id="social-content" class="social-content"></div>
   </section>
 </section>
 
@@ -250,7 +243,10 @@
 ============================================================ -->
 <section id="page-session" class="page-section">
   <div class="session-wrap">
-    <button class="btn" id="btn-session-back">← RETOUR</button>
+    <div class="session-topbar">
+      <button class="btn" id="btn-session-back">← RETOUR</button>
+      <button class="btn btn-y" id="btn-add-card-to-pack" onclick="window.openAddCardsToPack(window.__currentSessionPackId)">+ AJOUTER UNE CARTE</button>
+    </div>
     <div class="session-top" style="margin-top:18px;">
       <div class="session-title" id="session-title">Pack</div>
       <div class="session-progress" id="session-progress">1 / 1</div>
@@ -392,32 +388,35 @@
 
 
 <!-- Scripts -->
-<script src="flashcards-data.js?v=34"></script>
-<script src="funfacts-data.js?v=34"></script>
+<script src="flashcards-data.js?v=35"></script>
+<script src="funfacts-data.js?v=35"></script>
 <script>
   if (typeof FUNFACTS_PACKS !== "undefined") {
     FUNFACTS_PACKS.forEach(function(p) { FLASHCARD_PACKS.push(p); });
   }
 </script>
-<script src="programme-data.js?v=34"></script>
-<script src="daily-lessons.js?v=34"></script>
-<script src="memo.js?v=34"></script>
-<script src="srs.js?v=34"></script>
-<script src="srs2.js?v=34"></script>
-<script src="gamification.js?v=34"></script>
-<script src="chapters.js?v=34"></script>
-<script src="categories.js?v=34"></script>
-<script src="app.js?v=34"></script>
-<script src="today.js?v=34"></script>
-<script src="explorer.js?v=34"></script>
-<script src="flashcards.js?v=34"></script>
-<script src="quiz-12coups.js?v=34"></script>
-<script src="revisions.js?v=34"></script>
-<script src="programme.js?v=34"></script>
-<script src="carte.js?v=34"></script>
-<script src="schemas.js?v=34"></script>
-<script src="culture-app.js?v=34"></script>
-<script src="duck.js?v=34"></script>
-<script src="canard-settings.js?v=34"></script>
+<script src="programme-data.js?v=35"></script>
+<script src="daily-lessons.js?v=35"></script>
+<script src="memo.js?v=35"></script>
+<script src="srs.js?v=35"></script>
+<script src="srs2.js?v=35"></script>
+<script src="gamification.js?v=35"></script>
+<script src="chapters.js?v=35"></script>
+<script src="categories.js?v=35"></script>
+<script src="app.js?v=35"></script>
+<script src="today.js?v=35"></script>
+<script src="explorer.js?v=35"></script>
+<script src="flashcards.js?v=35"></script>
+<script src="quiz-12coups.js?v=35"></script>
+<script src="revisions.js?v=35"></script>
+<script src="programme.js?v=35"></script>
+<script src="carte.js?v=35"></script>
+<script src="schemas.js?v=35"></script>
+<script src="culture-app.js?v=35"></script>
+<script src="duck.js?v=35"></script>
+<script src="canard-settings.js?v=35"></script>
+<script src="monetisation-mock.js?v=35"></script>
+<script src="social.js?v=35"></script>
+<script src="pack-creator.js?v=35"></script>
 </body>
 </html>

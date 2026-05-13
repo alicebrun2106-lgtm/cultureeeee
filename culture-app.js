@@ -267,7 +267,7 @@
     const map = {
       "trouver": "page-trouver",
       "mes-paquets": "page-mes-paquets",
-      "cartes": "page-cartes",
+      "social": "page-social",
       "session": "page-session",
       "result": "page-result",
     };
@@ -280,6 +280,7 @@
     // Refresh content per tab
     if (tab === "trouver") renderTrouver();
     else if (tab === "mes-paquets") renderMesPaquets();
+    else if (tab === "social" && typeof window.renderSocial === "function") window.renderSocial();
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -710,6 +711,8 @@
   window.startFlashcardSession = function (packId) {
     const pack = FLASHCARD_PACKS.find((p) => p.id === packId);
     if (!pack) return;
+    // Expose le pack courant pour le bouton "+ ajouter une carte" du topbar
+    window.__currentSessionPackId = packId;
     const deletedSet = getDeletedSet();
     const allCards = pack.cards.map((c, i) => ({
       front: c.front, back: c.back, memo: c.memo || null,
