@@ -124,6 +124,7 @@ const CHAPTERS = [
     packIds: [
       "trivia-curiosites-monde", "records-chiffres-insolites", "records-stats",
       "funfacts-culture-g", "questions-pieges", "tissus-divers",
+      "idees-recues-misconceptions",
     ],
   },
   {

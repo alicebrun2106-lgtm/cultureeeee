@@ -1417,4 +1417,47 @@ const FLASHCARD_PACKS = [
       {front: "Qui a chanté « Les Yeux de la mama » (2015) ?", back: "Kendji Girac", memo: "Album « Kendji ». Gagnant de The Voice 2014."},
     ],
   },
+
+  // ─── PAQUET : IDÉES REÇUES & COMMON MISCONCEPTIONS ───
+  {
+    id: "idees-recues-misconceptions",
+    name: "Idées reçues — la vraie réponse",
+    icon: "🤯",
+    description: "Les fausses évidences que tout le monde croit. La vraie réponse va te surprendre.",
+    difficulty: "intermediaire",
+    reversible: false,
+    cards: [
+      // Histoire
+      {front: "Combien de cornes les casques vikings avaient-ils ?", back: "Aucune. Les Vikings ne portaient jamais de cornes — c'est une invention du XIXe siècle pour l'opéra wagnérien.", memo: "Des cornes au combat = se faire arracher la tête. Les casques retrouvés sont lisses, en cuir ou en fer."},
+      {front: "Quelle taille faisait Napoléon Bonaparte ?", back: "Environ 1,68 m — taille moyenne pour l'époque, pas petit du tout.", memo: "Le mythe vient des Anglais (propagande) et de la différence entre pied français et pied anglais : 5'2\" français = 5'7\" anglais."},
+      {front: "Marie-Antoinette a-t-elle dit « Qu'ils mangent de la brioche » ?", back: "Non — aucune source historique. La phrase apparaît dans les Confessions de Rousseau, écrites quand elle avait 9 ans.", memo: "Cliché entretenu pendant la Révolution pour justifier son procès."},
+      {front: "Cléopâtre était-elle égyptienne ?", back: "Non — elle était grecque (dynastie ptoléméenne, originaire de Macédoine).", memo: "Elle parlait grec à la cour. Elle fut la 1re Ptolémée à apprendre l'égyptien."},
+      {front: "Qui a prouvé que la Terre est ronde ?", back: "Personne au temps de Christophe Colomb : on le savait depuis l'Antiquité grecque (Ératosthène, IIIe s. av. J.-C., a même calculé sa circonférence).", memo: "Le mythe « les gens du Moyen Âge pensaient la Terre plate » est faux : c'est un récit du XIXe siècle."},
+      {front: "Les pyramides d'Égypte ont-elles été construites par des esclaves ?", back: "Non — par des ouvriers payés et nourris (preuves archéologiques de leur village).", memo: "Le mythe vient de la Bible et d'Hollywood. Les graffitis des ouvriers montrent des « équipes » fières."},
+      {front: "Qui a été brûlé pour avoir dit que la Terre tourne autour du Soleil ?", back: "Pas Galilée — il a été assigné à résidence. C'est Giordano Bruno qui a été brûlé (1600).", memo: "Galilée a abjuré et est mort dans son lit. Bruno a refusé d'abjurer."},
+      {front: "Qui a inventé l'ampoule électrique ?", back: "Pas Edison — il a perfectionné une invention. Joseph Swan (UK) avait déposé un brevet avant lui.", memo: "Edison a surtout industrialisé et popularisé l'ampoule à filament. Il a fini par s'associer à Swan."},
+      // Sciences
+      {front: "Quel pourcentage de notre cerveau utilisons-nous ?", back: "100% — le mythe des « 10% » est complètement faux.", memo: "Les neurosciences montrent une activité dans toutes les zones, même au repos. Le mythe a été popularisé par Hollywood (Lucy, Limitless)."},
+      {front: "Les daltoniens voient-ils en noir et blanc ?", back: "Non — ils voient en couleurs, mais confondent certaines (souvent rouge/vert).", memo: "L'achromatopsie totale (vraie vision N&B) est extrêmement rare."},
+      {front: "De quelle couleur est le sang dans nos veines ?", back: "Rouge, toujours. Le bleu n'est qu'un effet optique de la peau qui absorbe le rouge.", memo: "Le sang veineux est rouge foncé (peu d'oxygène). Le bleu vu sous la peau = filtrage de la lumière."},
+      {front: "Le verre est-il un liquide qui coule lentement ?", back: "Non — c'est un solide amorphe. Les vitres anciennes plus épaisses en bas étaient fabriquées comme ça.", memo: "Mythe répandu en physique. Le verre est plus visqueux que la matière vivante mais cristallisé."},
+      {front: "Combien de temps un poisson rouge se souvient-il ?", back: "Plusieurs mois — les études prouvent une mémoire de 3 à 5 mois minimum.", memo: "Le mythe des « 3 secondes » est faux. Ils reconnaissent leurs propriétaires."},
+      {front: "Perdons-nous toute notre chaleur par la tête ?", back: "Non — proportionnellement à la surface exposée. La tête = ~10% du corps, donc ~10% des pertes.", memo: "Mythe issu d'une étude militaire US sur des sujets habillés mais tête nue."},
+      {front: "Les zones du goût sur la langue sont-elles séparées ?", back: "Non — toutes les zones perçoivent tous les goûts. Le célèbre schéma est faux.", memo: "Issu d'une mauvaise traduction d'un article allemand de 1901. Démenti depuis 1970."},
+      // Animaux
+      {front: "Les chauves-souris sont-elles aveugles ?", back: "Non — elles voient très bien. Elles utilisent l'écholocation en complément.", memo: "Le mythe vient de l'expression « aveugle comme une chauve-souris ». Certaines voient même les UV."},
+      {front: "Les autruches mettent-elles la tête dans le sable ?", back: "Non — elles baissent la tête au sol pour retourner leurs œufs ou observer.", memo: "Mythe né d'observations à distance. Une autruche debout court à 70 km/h, elle ne fuit pas en se cachant."},
+      {front: "Les taureaux chargent-ils à cause du rouge ?", back: "Non — ils sont dichromates (ne distinguent pas le rouge). Ils chargent le mouvement de la cape.", memo: "Le rouge de la muleta sert à masquer le sang. Une cape jaune marcherait aussi bien."},
+      {front: "De quelle couleur est la langue d'une girafe ?", back: "Bleu-violet (ou noire), pas rose.", memo: "La pigmentation foncée protège du soleil — la langue est tout le temps dehors (50 cm de long)."},
+      {front: "Les chats voient-ils en noir et blanc ?", back: "Non — ils voient les couleurs (limitées : bleu et vert surtout).", memo: "Ils ne distinguent pas bien le rouge. Vision nocturne supérieure à la nôtre."},
+      // Culture / cinéma / techno
+      {front: "Quelle était la couleur originale du Coca-Cola ?", back: "Marron — toujours. La rumeur du « Coca vert à l'origine » est totalement fausse.", memo: "Mythe internet. La couleur vient du caramel ajouté dès la recette de 1886."},
+      {front: "Peut-on voir la Grande Muraille de Chine depuis l'espace ?", back: "Non — pas à l'œil nu, même depuis l'orbite basse. C'est largement démenti par les astronautes.", memo: "Mythe scolaire. Yang Liwei, 1er astronaute chinois, a confirmé en 2003 ne pas la voir."},
+      {front: "Einstein était-il mauvais à l'école en maths ?", back: "Non — il était brillant en maths dès le lycée. Le mythe vient d'une mauvaise interprétation de son bulletin (où 6 = excellent en Suisse).", memo: "Il a juste raté un concours d'entrée à 16 ans, à cause d'autres matières (français, biologie)."},
+      // Sociétal / langue
+      {front: "Mère Teresa a-t-elle été béatifiée par Jean-Paul II ?", back: "Béatifiée par Jean-Paul II (2003), mais canonisée seulement en 2016 par le pape François.", memo: "Béatification = étape intermédiaire vers la sainteté. Elle est officiellement « sainte » depuis 2016."},
+      {front: "Le mot « sandwich » vient-il vraiment d'un comte ?", back: "Oui — du comte de Sandwich (John Montagu), qui aurait demandé sa viande entre 2 tranches pour jouer aux cartes sans s'interrompre (1762).", memo: "Surprenant mais vrai. Le mot apparaît dans le journal d'un voyageur français la même année."},
+      {front: "Les enfants apprennent-ils les langues mieux que les adultes ?", back: "Pas pour tout : les adultes apprennent la grammaire et le vocabulaire plus vite. Les enfants ont juste un meilleur accent.", memo: "Études de neurolinguistique récentes (Hartshorne, Tenenbaum 2018, MIT). Le mythe du « cerveau jeune » est nuancé."},
+    ],
+  },
 ];
