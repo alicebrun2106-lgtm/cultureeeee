@@ -440,11 +440,44 @@
   // ─── TROUVER PAGE ───
   let currentFilter = "all";
   let visibleCount = 24;
+  let searchQuery = "";
   // Seed pour ordonner aléatoirement mais de façon stable pendant la session
   let trouverSeed = Math.floor(Math.random() * 100000) + 1;
   window.shuffleTrouver = function () { trouverSeed = Math.floor(Math.random() * 100000) + 1; visibleCount = 24; renderTrouver(); };
 
+  // Normalise une chaîne (sans accents, lowercase) pour matcher sur la recherche.
+  function norm(s) {
+    return String(s || "")
+      .toLowerCase()
+      .normalize("NFD").replace(/[̀-ͯ]/g, "");
+  }
+
+  // Setup de la barre de recherche : recherche live + bouton effacer.
+  function setupSearchBar() {
+    const input = document.getElementById("search-trouver");
+    const clearBtn = document.getElementById("search-clear");
+    if (!input || input.__bound) return;
+    input.__bound = true;
+    input.addEventListener("input", () => {
+      searchQuery = input.value.trim();
+      visibleCount = 24; // reset pagination quand on cherche
+      if (clearBtn) clearBtn.style.display = searchQuery ? "" : "none";
+      renderTrouver();
+    });
+    if (clearBtn) {
+      clearBtn.addEventListener("click", () => {
+        input.value = "";
+        searchQuery = "";
+        clearBtn.style.display = "none";
+        visibleCount = 24;
+        renderTrouver();
+        input.focus();
+      });
+    }
+  }
+
   function renderTrouver() {
+    setupSearchBar();
     const grid = document.getElementById("deck-grid-all");
     if (!grid) return;
     grid.innerHTML = "";
@@ -456,6 +489,20 @@
     if (currentFilter !== "all" && typeof CHAPTERS !== "undefined") {
       const ch = CHAPTERS.find((c) => c.id === currentFilter);
       if (ch) packs = packs.filter((p) => ch.packIds.includes(p.id));
+    }
+
+    // Filtre par recherche : match sur nom + description + nom du chapitre
+    if (searchQuery) {
+      const q = norm(searchQuery);
+      packs = packs.filter((p) => {
+        const inName = norm(p.name).includes(q);
+        const inDesc = norm(p.description || "").includes(q);
+        const chapter = (typeof CHAPTERS !== "undefined")
+          ? CHAPTERS.find((c) => c.packIds.includes(p.id))
+          : null;
+        const inChap = chapter ? norm(chapter.name).includes(q) : false;
+        return inName || inDesc || inChap;
+      });
     }
 
     // Order : non-ajoutés en premier (variety), puis ajoutés à la fin
