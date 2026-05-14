@@ -64,7 +64,7 @@ const CHAPTERS = [
     packIds: [
       "cinema-realisateurs-cultes", "cinema-series", "cinema-tv-pdf",
       "films-cultes", "prix-cinema", "personnages-principaux",
-      "cinema-francais",
+      "cinema-francais", "acteurs-cultes-monde",
     ],
   },
   {
