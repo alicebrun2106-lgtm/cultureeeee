@@ -1334,6 +1334,41 @@ const FLASHCARD_PACKS = [
       // Festivals
       {front: "Qui a remporté la Palme d'or 2024 ?", back: "« Anora » de Sean Baker (États-Unis)", memo: "Pas un film français, mais c'était le palmarès."},
       {front: "Qui présidait le jury du Festival de Cannes 2025 ?", back: "Juliette Binoche", memo: "Actrice française, Oscar 1997 pour « Le Patient anglais »."},
+      // Réalisateurs classiques complémentaires
+      {front: "Qui a réalisé « La Règle du jeu » (1939) ?", back: "Jean Renoir", memo: "Fils du peintre Auguste Renoir. Aussi « La Grande Illusion »."},
+      {front: "Qui a réalisé « Les Enfants du Paradis » (1945) ?", back: "Marcel Carné", memo: "Scénario de Jacques Prévert. Tourné pendant l'Occupation."},
+      {front: "Qui a réalisé « Pickpocket » (1959) ?", back: "Robert Bresson", memo: "Cinéaste minimaliste. Acteurs non-professionnels (« modèles »)."},
+      {front: "Qui a réalisé « Mon oncle » (1958) ?", back: "Jacques Tati", memo: "Oscar du meilleur film étranger 1959. Personnage de M. Hulot."},
+      {front: "Qui a réalisé « Plein soleil » (1960) ?", back: "René Clément", memo: "Avec Alain Delon. Adaptation du « Talentueux M. Ripley » de Patricia Highsmith."},
+      {front: "Qui a réalisé « Le Salaire de la peur » (1953) ?", back: "Henri-Georges Clouzot", memo: "Palme d'or à Cannes. Aussi « Les Diaboliques » (1955)."},
+      {front: "Qui a réalisé « Ma nuit chez Maud » (1969) ?", back: "Éric Rohmer", memo: "Membre du courant Nouvelle Vague. Série « Six contes moraux »."},
+      {front: "Qui a réalisé « Le Boucher » (1970) ?", back: "Claude Chabrol", memo: "Spécialiste du thriller psychologique en province. Mort en 2010."},
+      {front: "Qui a réalisé « Police » (1985) et « À nos amours » (1983) ?", back: "Maurice Pialat", memo: "Cinéaste rude et naturaliste. Palme d'or pour « Sous le soleil de Satan » (1987)."},
+      {front: "Qui a réalisé « Les Choses de la vie » (1970) ?", back: "Claude Sautet", memo: "Avec Romy Schneider et Michel Piccoli. Aussi « César et Rosalie »."},
+      {front: "Qui a réalisé « L'Horloger de Saint-Paul » (1974) ?", back: "Bertrand Tavernier", memo: "Adaptation de Simenon. Aussi « Que la fête commence »."},
+      {front: "Qui a réalisé « Touchez pas au grisbi » (1954) ?", back: "Jacques Becker", memo: "Avec Jean Gabin. Référence du polar français."},
+      // Réalisateurs contemporains
+      {front: "Qui a réalisé « Polisse » (2011) ?", back: "Maïwenn", memo: "Prix du jury à Cannes. Sur la brigade de protection des mineurs."},
+      {front: "Qui a réalisé « Mustang » (2015) ?", back: "Deniz Gamze Ergüven", memo: "Réalisatrice franco-turque. César du meilleur 1er film."},
+      {front: "Qui a réalisé « 120 battements par minute » (2017) ?", back: "Robin Campillo", memo: "Grand Prix à Cannes. Sur Act Up Paris dans les années 90."},
+      {front: "Qui a réalisé « L'Innocent » (2022) ?", back: "Louis Garrel", memo: "Comédie avec Roschdy Zem, Anouk Grinberg, Noémie Merlant."},
+      {front: "Qui a réalisé « La Nuit du 12 » (2022) ?", back: "Dominik Moll", memo: "6 Césars dont meilleur film. Polar d'après faits réels."},
+      // Acteurs / actrices célèbres
+      {front: "Quelle actrice française détient le record de Césars du meilleur rôle féminin (5) ?", back: "Isabelle Adjani", memo: "Possession (1981), L'Été meurtrier (1983), Camille Claudel (1989), La Reine Margot (1995), Skirt Day (2009)."},
+      {front: "Quelle actrice a remporté l'Oscar de la meilleure actrice pour « Le Patient anglais » (1996) ?", back: "Juliette Binoche", memo: "Seul Oscar français dans cette catégorie entre Signoret et Cotillard."},
+      {front: "Quelle actrice française a joué Catwoman dans « Batman le défi » (1992) ?", back: "Personne — c'est l'américaine Michelle Pfeiffer", memo: "Question piège. Aucune française dans ce rôle."},
+      {front: "Quel acteur français a joué dans « Inglourious Basterds » (2009) ?", back: "Denis Ménochet et Mélanie Laurent", memo: "Mélanie Laurent en rôle principal (Shosanna). Ménochet en fermier au début."},
+      {front: "Quel acteur a remporté le César du meilleur acteur pour « Mon roi » (2015) ?", back: "Vincent Cassel n'a pas reçu de César pour ce film — l'a fait Vincent Lindon pour « La Loi du marché »", memo: "Lindon a aussi le prix d'interprétation à Cannes 2015."},
+      {front: "Qui est la jeune actrice révélée par « La Vie d'Adèle » (Palme d'or 2013) ?", back: "Adèle Exarchopoulos", memo: "Aux côtés de Léa Seydoux. Plus jeune actrice à recevoir la Palme."},
+      {front: "Quel acteur français a tourné dans « Un prophète » et « Le Comte de Monte-Cristo » (2024) ?", back: "Tahar Rahim", memo: "Révélé par « Un prophète » (2009). Aussi « Le Serpent » (Netflix)."},
+      {front: "Quel acteur français a joué Yves Saint Laurent ET « Boîte noire » (2021) ?", back: "Pierre Niney", memo: "César du meilleur acteur 2015 pour Yves Saint Laurent."},
+      {front: "Quelle actrice a joué dans « Portrait de la jeune fille en feu » et « Anatomie d'une chute » ?", back: "Aucune — ce sont Adèle Haenel & Noémie Merlant pour le 1er, Sandra Hüller pour le 2e", memo: "Question piège : aucune actrice commune entre ces deux films de Sciamma et Triet."},
+      // Festivals / récompenses
+      {front: "Quel est le plus haut prix décerné au Festival de Cannes ?", back: "La Palme d'or", memo: "Créée en 1955 (avant : Grand prix). Décernée à un seul film par édition."},
+      {front: "Quelle réalisatrice est la 1re femme à avoir remporté la Palme d'or ?", back: "Jane Campion en 1993 pour « La Leçon de piano »", memo: "Néo-zélandaise. Suivie de Julia Ducournau (2021) et Justine Triet (2023)."},
+      {front: "Quelle est l'équivalent français des Oscars ?", back: "Les Césars", memo: "Créés en 1976 par Georges Cravenne. Statuette signée César Baldaccini (sculpteur)."},
+      {front: "Quel est le César décerné depuis 2009 pour récompenser un comédien africain ou des DROM ?", back: "Aucun — pas de César spécifique. Mais le César du meilleur espoir masculin/féminin existe.", memo: "Question piège. Le César du meilleur espoir féminin / masculin existe depuis 1983."},
+      {front: "Qui est le réalisateur français le plus nommé à la Palme d'or ?", back: "Ken Loach (britannique, 14 nominations) — pour la France : Truffaut, Godard, Resnais étaient très souvent en sélection", memo: "Question subtile : la Palme va aux films, pas aux réalisateurs. La France domine en quantité de films sélectionnés."},
     ],
   },
 
@@ -1371,6 +1406,45 @@ const FLASHCARD_PACKS = [
       {front: "Comment appelle-t-on le mouvement post-2017 de libération de la parole des femmes contre les violences sexuelles ?", back: "#MeToo (ou #BalanceTonPorc en France)", memo: "Lancé par Alyssa Milano après l'affaire Weinstein. Sandra Muller en France."},
       {front: "Quel mot désigne les biais favorables aux personnes minces dans la société (étudiés par les sciences sociales) ?", back: "Le grossophobie", memo: "Reconnue comme discrimination par le Défenseur des droits depuis 2020."},
       {front: "Quel terme désigne le fait que la majorité des Français se déclarent désormais sans religion ?", back: "La sécularisation (déchristianisation)", memo: "Pour la 1re fois en 2023, INSEE/INED constate une majorité sans religion."},
+      // Travail & nouveaux usages
+      {front: "Quel terme désigne le fait de défiler en boucle sur des contenus négatifs (guerre, catastrophe) ?", back: "Le doomscrolling", memo: "Néologisme apparu fin 2020 (Covid + Trump). Cause d'anxiété et insomnie."},
+      {front: "Quel concept désigne le poids invisible de la gestion du quotidien (qui doit penser à quoi) ?", back: "La charge mentale", memo: "Popularisée en France par la BD d'Emma (2017). Repose souvent sur les femmes."},
+      {front: "Quel néologisme désigne les emplois jugés inutiles par ceux qui les exercent ?", back: "Les « bullshit jobs »", memo: "Concept de l'anthropologue David Graeber (2018). Cinq catégories : larbins, sbires, rafistoleurs, cocheurs de cases, contremaîtres."},
+      {front: "Quel terme désigne le fait de quitter ostensiblement son travail (souvent filmé pour les réseaux) ?", back: "Le loud quitting", memo: "Opposé du quiet quitting. Apparu sur TikTok en 2023."},
+      {front: "Quel concept désigne les organisations sans hiérarchie pyramidale ?", back: "L'holacratie (ou entreprise libérée)", memo: "Théorisée par Brian Robertson. Frédéric Laloux la popularise en France."},
+      {front: "Quel terme désigne la peur de manquer quelque chose (sur les réseaux ou en société) ?", back: "Le FOMO (Fear Of Missing Out)", memo: "Inverse : JOMO (Joy Of Missing Out). Étudiée comme cause d'anxiété chez les jeunes."},
+      // Société / climat / écologie
+      {front: "Quel terme désigne le sentiment de tristesse face à la destruction de la nature ?", back: "La solastalgie", memo: "Forgé par le philosophe Glenn Albrecht en 2003. Distinct de l'éco-anxiété (sur le futur)."},
+      {front: "Quel courant prône une décroissance technologique volontaire ?", back: "Le low-tech (basses technologies)", memo: "Pratique réparation, robustesse, sobriété. Philippe Bihouix figure française."},
+      {front: "Quel concept désigne le mode de vie qui réduit la consommation énergétique et matérielle ?", back: "La sobriété (heureuse ou imposée)", memo: "Popularisée par Pierre Rabhi. Plan « sobriété énergétique » de l'État en 2022."},
+      // Sociologie et théoriciens
+      {front: "Quel sociologue français a théorisé l'« habitus » et la « distinction » ?", back: "Pierre Bourdieu", memo: "Mort en 2002. Concepts de capital culturel, social, économique."},
+      {front: "Quel sociologue français contemporain a écrit « La Société du déclassement » ?", back: "Camille Peugny", memo: "Spécialiste de la mobilité sociale. Le déclassement = enfants moins bien dotés que parents."},
+      {front: "Quel concept de Bourdieu désigne l'ensemble des dispositions héritées de la classe sociale ?", back: "L'habitus", memo: "Goûts, postures, langage. Reproduit sans intention consciente."},
+      {front: "Quel philosophe français a écrit « La Société de consommation » (1970) ?", back: "Jean Baudrillard", memo: "Théoricien de l'hyperréel et du simulacre. Mort en 2007."},
+      // Urbanisme & territoires
+      {front: "Quel terme désigne le processus d'embourgeoisement d'un quartier populaire ?", back: "La gentrification", memo: "Originaire du Royaume-Uni (Ruth Glass, 1964). Le Marais, Belleville sont des exemples parisiens."},
+      {front: "Quel concept désigne la concentration des activités dans les grandes villes ?", back: "La métropolisation", memo: "Étudiée par les géographes. Renforce l'écart avec la France périphérique."},
+      {front: "Comment appelle-t-on les territoires manquants de médecins ?", back: "Des déserts médicaux", memo: "Problème politique majeur. Concerne 8 millions de Français selon la DREES."},
+      {front: "Quel terme désigne le retour à la campagne après la vie urbaine ?", back: "Le néo-ruralisme", memo: "Accéléré par la Covid (télétravail). Étudié par l'INSEE et la DATAR."},
+      // Famille & relations
+      {front: "Quel terme anglais désigne les parents qui ne lâchent pas leurs enfants devenus adultes ?", back: "Les helicopter parents (parents hélicoptères)", memo: "Phénomène étudié notamment aux États-Unis et de plus en plus en France."},
+      {front: "Comment appelle-t-on les enfants qui retournent vivre chez leurs parents après leurs études ?", back: "La génération Tanguy (en France)", memo: "Du film d'Étienne Chatiliez (2001). Phénomène en hausse, lié à la crise du logement."},
+      {front: "Quel terme désigne la fin progressive d'une relation par disparition graduelle (vs ghosting brutal) ?", back: "Le breadcrumbing (miettes de pain)", memo: "Néologisme des applis de rencontre. Avec d'autres : zombieing, orbiting, benching."},
+      // Numérique & IA
+      {front: "Quel terme désigne les humains qui interagissent quasi exclusivement avec des IA ?", back: "Les « companion users » (utilisateurs de compagnons IA)", memo: "Tendance étudiée depuis 2023. Replika, Character.AI sont des exemples populaires."},
+      {front: "Quel mouvement militaire pour une retraite numérique (smartphone non connecté) gagne en France ?", back: "Le « digital detox » ou détox numérique", memo: "Pratiqué notamment par les cadres en burn-out. Stages spécialisés."},
+      {front: "Quel concept désigne la dépendance excessive aux applications de gratification immédiate ?", back: "L'économie de l'attention", memo: "Théorisée par Yves Citton, Tim Wu. Les apps ne vendent pas un produit, elles captent notre attention."},
+      // Discrimination & inclusion
+      {front: "Quel terme désigne les biais favorables aux personnes minces dans la société ?", back: "Le grossophobie (ou ageism pour l'âge)", memo: "Reconnue comme discrimination par le Défenseur des droits."},
+      {front: "Comment appelle-t-on les remarques quotidiennes blessantes sur l'origine, le genre, l'orientation ?", back: "Les micro-agressions", memo: "Concept popularisé en France depuis 2015. Étudiées par les sociologues du travail."},
+      {front: "Quel terme désigne la prise de conscience des injustices systémiques (anglais) ?", back: "Le « woke » (réveillé)", memo: "Né dans les luttes noires américaines. Repris/déformé dans le débat politique français."},
+      // Politique & démocratie
+      {front: "Quel concept désigne la sortie des partis traditionnels par les électeurs ?", back: "La désaffiliation politique (ou dépolitisation)", memo: "Étudiée par Pierre Rosanvallon, Olivier Galland. Abstention record aux élections."},
+      {front: "Quel terme désigne le rejet général des élites par les citoyens ?", back: "Le populisme (ou démagogie)", memo: "Étudiée par Pierre Rosanvallon dans « Le siècle du populisme »."},
+      {front: "Quel néologisme désigne la fatigue de devoir faire de la « pédagogie » sur les discriminations ?", back: "La fatigue raciale (ou identity fatigue)", memo: "Étudiée chez les personnes racisées en France. Concept américain Diane Goodman."},
+      // Concepts mondiaux ancrés en France
+      {front: "Quel courant philosophique défend la décroissance économique pour préserver la planète ?", back: "La décroissance (degrowth)", memo: "Théorisée par Serge Latouche, économiste français. Opposé au consumérisme."},
     ],
   },
 
@@ -1415,6 +1489,44 @@ const FLASHCARD_PACKS = [
       {front: "Qui a chanté « Bambino » (1956) ?", back: "Dalida", memo: "1re version française, propulse sa carrière. Disque d'or."},
       {front: "Qui a chanté « Je ne suis pas un héros » (1980) ?", back: "Daniel Balavoine", memo: "Album « Un autre monde ». Décédé en 1986 dans un crash."},
       {front: "Qui a chanté « Les Yeux de la mama » (2015) ?", back: "Kendji Girac", memo: "Album « Kendji ». Gagnant de The Voice 2014."},
+      // Grands classiques
+      {front: "Qui a chanté « Les copains d'abord » (1964) ?", back: "Georges Brassens", memo: "À propos de son amitié avec ses copains de Sète. Album « Les copains d'abord »."},
+      {front: "Qui a chanté « Avec le temps » (1971) ?", back: "Léo Ferré", memo: "Chanson sur la perte amoureuse. Souvent reprise (Dalida, Catherine Ringer)."},
+      {front: "Qui a chanté « La Javanaise » (1963) ?", back: "Serge Gainsbourg (avec Juliette Gréco)", memo: "Écrite par Gainsbourg pour Gréco. Forme un « jeu » avec la voyelle « av »."},
+      {front: "Qui a chanté « Je t'aime moi non plus » (1969) ?", back: "Serge Gainsbourg et Jane Birkin", memo: "Initialement avec Brigitte Bardot (1967, jamais sortie). Scandale international."},
+      {front: "Qui a chanté « Y'a d'la joie » (1937) ?", back: "Charles Trenet", memo: "Surnommé « le fou chantant ». Aussi « La Mer » (1946)."},
+      {front: "Qui a chanté « Les Champs-Élysées » (1969) ?", back: "Joe Dassin", memo: "Adaptation française d'une chanson britannique. Hit international."},
+      {front: "Qui a chanté « La Mamma » (1963) ?", back: "Charles Aznavour", memo: "Sur la mort d'une mère. Adaptation d'un texte de Robert Gall."},
+      {front: "Qui a chanté « Désenchantée » (1991) ?", back: "Mylène Farmer", memo: "Écrite par Laurent Boutonnat. Restera n°1 plusieurs semaines. Reprise par Kate Ryan."},
+      // Rock français
+      {front: "Quel groupe a sorti « Cendrillon » (1982) ?", back: "Téléphone", memo: "Aussi « Hygiaphone », « Un autre monde ». Jean-Louis Aubert, Louis Bertignac."},
+      {front: "Quel groupe a sorti « L'aventurier » (1982) ?", back: "Indochine", memo: "Album « L'Aventurier ». Inspiré du personnage Bob Morane."},
+      {front: "Qui a chanté « Gaby oh Gaby » (1980) ?", back: "Alain Bashung", memo: "Premier grand succès. Aussi « SOS Amor » et plus tard « La nuit je mens »."},
+      {front: "Quel groupe a sorti « Le vent nous portera » (2001) ?", back: "Noir Désir", memo: "Album « Des visages des figures ». Bertrand Cantat à la voix."},
+      // Femmes contemporaines
+      {front: "Qui a chanté « Sur ma route » (2015) ?", back: "Black M", memo: "Ex-Sexion d'assaut. Devenu hit pop national."},
+      {front: "Qui a chanté « La grenade » (2018) ?", back: "Clara Luciani", memo: "Album « Sainte-Victoire ». Victoire de la révélation 2019."},
+      {front: "Qui a chanté « Pookie » (2018) ?", back: "Aya Nakamura", memo: "Single diamant. Album « Nakamura » (2018) #1 des ventes."},
+      {front: "Qui a chanté « Balance ton quoi » (2019) ?", back: "Angèle", memo: "Album « Brol ». Référence à #BalanceTonPorc."},
+      {front: "Qui a chanté « Sirius » (2022) ?", back: "Pomme", memo: "Album « Consolation ». Voix folk acoustique."},
+      // Rap classique
+      {front: "Quel groupe de rap a sorti « Suprême NTM » (1998) ?", back: "Suprême NTM", memo: "JoeyStarr et Kool Shen. Album culte, après « Paris sous les bombes » (1995)."},
+      {front: "Quel rappeur a sorti « Qui sème le vent récolte le tempo » (1991) ?", back: "MC Solaar", memo: "1er rappeur français en or. Reprise par Madonna en 1994 (« Ray of Light »... référence)."},
+      {front: "Quelle rappeuse a sorti « Dans ma bulle » (2006) ?", back: "Diam's", memo: "Album diamant. Aussi « La Boulette »."},
+      // Rap récent / streaming
+      {front: "Quel rappeur belge francophone a sorti « Macarena » (2017) ?", back: "Damso", memo: "Album « Ipséité ». L'un des rappeurs les plus écoutés en France."},
+      {front: "Quel rappeur a sorti « Mamacita » (2018) ?", back: "Niska & Aya Nakamura", memo: "Issu du featuring de l'album « Mr Sal » de Niska."},
+      {front: "Quel artiste a sorti « Tiakola » (2022) ?", back: "Tiakola (Mélanin)", memo: "Ex 4Keus. Style mélodique. Album « Mélo » disque de diamant."},
+      {front: "Qui a chanté « Voilà » (2021) ?", back: "Barbara Pravi", memo: "2e place à l'Eurovision 2021. Auteure-compositrice."},
+      // Variété & duos
+      {front: "Qui a chanté « Vivre pour le meilleur » (2002) ?", back: "Johnny Hallyday", memo: "Single sorti à 60 ans. Reprise sur scène de nombreuses fois."},
+      {front: "Qui a chanté « Donne-moi le temps » (2002) ?", back: "Jenifer", memo: "Gagnante de la 1re saison de la Star Academy (2001). Premier album éponyme en 2002."},
+      {front: "Qui a chanté « Tata Yoyo » (1980) ?", back: "Annie Cordy", memo: "Chanson humoristique. Sa chanson la plus connue avec « La Bonne du curé »."},
+      {front: "Qui a chanté « Et maintenant » (1961) ?", back: "Gilbert Bécaud", memo: "Reprise par Frank Sinatra en anglais (« What Now My Love »)."},
+      {front: "Qui a chanté « Tous les garçons et les filles » (1962) ?", back: "Françoise Hardy", memo: "1er hit, à 18 ans. Icône yé-yé."},
+      // Récents 2024-2025
+      {front: "Qui a chanté « Mon amour » avec Aya Nakamura (2024) ?", back: "Slimane", memo: "Représentait la France à l'Eurovision 2024 (4e place). Album « Cupidon »."},
+      {front: "Qui a remporté l'Eurovision 2024 ?", back: "Nemo (Suisse) avec « The Code »", memo: "Pas une chanson française. La France (Slimane) finit 4e."},
     ],
   },
 
@@ -1458,6 +1570,44 @@ const FLASHCARD_PACKS = [
       {front: "Mère Teresa a-t-elle été béatifiée par Jean-Paul II ?", back: "Béatifiée par Jean-Paul II (2003), mais canonisée seulement en 2016 par le pape François.", memo: "Béatification = étape intermédiaire vers la sainteté. Elle est officiellement « sainte » depuis 2016."},
       {front: "Le mot « sandwich » vient-il vraiment d'un comte ?", back: "Oui — du comte de Sandwich (John Montagu), qui aurait demandé sa viande entre 2 tranches pour jouer aux cartes sans s'interrompre (1762).", memo: "Surprenant mais vrai. Le mot apparaît dans le journal d'un voyageur français la même année."},
       {front: "Les enfants apprennent-ils les langues mieux que les adultes ?", back: "Pas pour tout : les adultes apprennent la grammaire et le vocabulaire plus vite. Les enfants ont juste un meilleur accent.", memo: "Études de neurolinguistique récentes (Hartshorne, Tenenbaum 2018, MIT). Le mythe du « cerveau jeune » est nuancé."},
+      // Histoire complémentaire
+      {front: "Vercingétorix a-t-il jeté ses armes aux pieds de César à Alésia ?", back: "Pas si dramatique : il s'est rendu, mais la scène théâtrale est une invention du XIXe siècle (peinture de Royer, 1899).", memo: "Plutarque dit qu'il a chevauché autour de César avant de descendre. Pas de \"jet d'armes\" théâtral."},
+      {front: "Quel âge avait Jeanne d'Arc quand elle a été brûlée ?", back: "19 ans (en 1431), pas une « petite fille » comme on l'imagine souvent.", memo: "Née vers 1412. Capturée à 18, brûlée à 19. Considérée comme une jeune adulte à l'époque."},
+      {front: "Versailles avait-il des toilettes ?", back: "Oui — des « chaises percées » dans toutes les chambres royales. Mais les courtisans utilisaient parfois les couloirs.", memo: "Mythe : « pas de toilettes à Versailles ». Faux. Mais peu d'égouts → odeurs effectivement."},
+      {front: "Les hommes préhistoriques chassaient-ils des dinosaures ?", back: "Non — 65 millions d'années séparent les dinosaures (disparus) et l'apparition de l'homme.", memo: "Mythe popularisé par les dessins animés (Flintstones). T-Rex a vécu plus près de nous que du stégosaure."},
+      {front: "Les Vikings étaient-ils principalement des pilleurs barbares ?", back: "Non — surtout des marchands, agriculteurs et explorateurs. Le pillage est une activité minoritaire et brève (793-1066).", memo: "Ont colonisé Islande, Groenland, atteint l'Amérique 500 ans avant Colomb (Vinland)."},
+      {front: "Le mur de Berlin séparait-il les deux Allemagnes ?", back: "Non — seulement Berlin-Ouest (enclavée en RDA) du reste. La frontière entre RFA et RDA était une autre ligne, plus longue.", memo: "Le mur de Berlin = ~155 km autour de Berlin-Ouest. La frontière inter-allemande = ~1400 km."},
+      {front: "Combien de rois Louis ont régné en France ?", back: "18 rois (de Louis I « le Pieux » à Louis XVIII), mais ils ne sont pas tous numérotés d'affilée.", memo: "Louis XVII n'a jamais régné (mort à 10 ans en 1795, prisonnier). Louis-Philippe (1830-1848) n'est pas Louis XIX."},
+      // Sciences complémentaires
+      {front: "La foudre tombe-t-elle deux fois au même endroit ?", back: "Oui — souvent. La tour Eiffel est frappée ~10 fois par an, l'Empire State Building ~100 fois.", memo: "Mythe inverse. Les paratonnerres l'attirent volontairement au même point."},
+      {front: "Les humains descendent-ils des singes ?", back: "Non — humains et grands singes ont un ancêtre commun (il y a ~7 millions d'années).", memo: "Erreur très répandue. Darwin n'a pas dit ça. Les chimpanzés actuels sont nos cousins, pas nos ancêtres."},
+      {front: "Le café déshydrate-t-il ?", back: "Non — l'eau du café compense largement la légère diurèse. Les études récentes le confirment.", memo: "Mythe scolaire. Boire 4 expressos = équivalent hydratique à 3 expressos d'eau."},
+      {front: "Les épinards sont-ils particulièrement riches en fer ?", back: "Pas spécialement — moins que les lentilles ou la viande. Mythe né d'une erreur de virgule décimale (3,5 mg au lieu de 35 mg).", memo: "Popeye a propagé cette croyance dans les années 1930. Erreur corrigée scientifiquement depuis 1937."},
+      {front: "Le sucre rend-il les enfants hyperactifs ?", back: "Non — aucune étude n'a démontré ce lien. C'est l'effet placebo des parents.", memo: "Étude célèbre Hoover & Milich (1994) : parents qui croient leur enfant a mangé du sucre voient plus d'hyperactivité, même s'il n'en a pas eu."},
+      {front: "Les ongles continuent-ils de pousser après la mort ?", back: "Non — la peau se rétracte en se déshydratant, donnant cette impression.", memo: "Idem pour les cheveux. Mythe entretenu par les films d'horreur."},
+      // Animaux complémentaires
+      {front: "Les lemmings se suicident-ils en masse ?", back: "Non — c'est un mythe créé par un documentaire Disney (« White Wilderness », 1958) où les animaux ont été poussés de force.", memo: "Documentaire truqué. Disney a perdu la confiance scientifique après cette affaire."},
+      {front: "Les abeilles meurent-elles toujours après avoir piqué ?", back: "Non — seules les abeilles à miel mourrent (dard accroché). Les bourdons et guêpes peuvent piquer plusieurs fois.", memo: "Le dard à barbillon reste accroché dans la peau humaine — pas dans celle des autres insectes."},
+      {front: "Les requins attaquent-ils souvent les humains ?", back: "Non — moins de 10 morts par an au monde. Les noix de coco tuent plus.", memo: "Une vingtaine d'espèces sur 500 sont potentiellement dangereuses. Surtout grand blanc, tigre, bouledogue."},
+      {front: "Les pingouins et manchots sont-ils la même chose ?", back: "Non — les pingouins volent (hémisphère nord, arctique), les manchots non (hémisphère sud, antarctique).", memo: "Confusion à cause de la traduction anglais « penguin » → français mal traduit en « pingouin »."},
+      // Langue & expressions
+      {front: "Les Inuits ont-ils vraiment 100 mots pour la neige ?", back: "Non — environ une dizaine de racines, comme dans toute langue avec environnement enneigé. Le chiffre 100 est exagéré.", memo: "Mythe né d'un article de Whorf (1940). Le français a aussi de nombreux mots : neige, poudreuse, verglas, givre…"},
+      {front: "Le mot « Eskimo » signifie-t-il « mangeur de viande crue » ?", back: "Plutôt « celui qui lace des chaussures » — étymologie controversée. Le mot Inuit (« le peuple ») est préféré.", memo: "L'étymologie « mangeur de viande crue » est contestée par les linguistes amérindiens."},
+      // Géographie / monde
+      {front: "Le Sahara a-t-il toujours été un désert ?", back: "Non — il était une savane verdoyante il y a ~6 000 ans (peintures rupestres du Tassili).", memo: "Cycle climatique de Milankovitch. Refera désert/savane dans le futur."},
+      {front: "La Tour Eiffel devait-elle être démontée après 20 ans ?", back: "Oui — c'était l'accord initial. Eiffel l'a sauvée en y installant une antenne radio en 1909.", memo: "Construite pour l'Expo 1889. Devait disparaître en 1909. Utilité militaire = sauvée."},
+      // Culture pop
+      {front: "Le « 1879 » de la composition de la Marseillaise est-il exact ?", back: "Non — composée en 1792 par Rouget de Lisle à Strasbourg, devenue hymne national en 1879.", memo: "Question piège souvent posée. La date 1879 est celle de son officialisation, pas sa composition."},
+      {front: "Mickey Mouse est-il dans le domaine public ?", back: "Oui — depuis le 1er janvier 2024 (le \"Steamboat Willie\" original de 1928).", memo: "Disney a perdu son monopole sur la version originale. Mais les versions modernes restent protégées."},
+      {front: "L'expression « Aux armes citoyens » est-elle le titre original de la Marseillaise ?", back: "Non — Rouget de Lisle l'a appelée « Chant de guerre pour l'armée du Rhin ».", memo: "« La Marseillaise » vient des fédérés marseillais qui l'ont chantée en marchant sur Paris en 1792."},
+      // Tech
+      {front: "Le mode incognito du navigateur protège-t-il ma vie privée ?", back: "Non — il efface juste votre historique local. Votre FAI, employeur et site visité voient toujours tout.", memo: "Mythe le plus dangereux du web. Pour la vraie confidentialité : VPN + Tor."},
+      {front: "Faut-il décharger complètement une batterie avant de la recharger ?", back: "Non — c'était vrai pour les vieilles batteries NiMH. Pour le lithium-ion (smartphones, laptops), c'est le contraire.", memo: "Cycles partiels mieux que cycles complets pour lithium. Idéal : entre 20% et 80%."},
+      {front: "Les ondes WiFi/5G sont-elles cancérigènes ?", back: "Non — aucune étude n'a démontré de lien. L'OMS les classe « possiblement cancérigènes » par précaution, comme le café noir.", memo: "Classement IARC groupe 2B. Même catégorie que le café noir, le talc, l'aloe vera."},
+      // Corps humain
+      {front: "Notre langue a-t-elle des zones spécifiques pour chaque goût ?", back: "Non — tous les goûts sont perçus partout. La carte des zones (1901) est une erreur démentie depuis longtemps.", memo: "Sucré, salé, acide, amer, umami : tous perçus uniformément. Mythe encore enseigné dans certains manuels."},
+      {front: "Avalons-nous des araignées en dormant ?", back: "Non — quasiment jamais. Le mythe vient d'un article fabriqué exprès en 1993 pour montrer la viralité de fausses infos.", memo: "Lisa Holst, journaliste, a inventé cette \"statistique\" pour démontrer le pouvoir des emails. Tout le monde y a cru."},
+      {front: "Cracker ses doigts donne-t-il de l'arthrose ?", back: "Non — aucune étude n'a montré ce lien. Le médecin américain Donald Unger a craqué ses doigts gauches pendant 60 ans sans différence.", memo: "Il a reçu le prix Ig Nobel 2009 pour cette \"expérience\". Le bruit vient de bulles de gaz qui éclatent."},
     ],
   },
 ];
