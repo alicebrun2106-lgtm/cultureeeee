@@ -14,7 +14,7 @@ const CHAPTERS = [
       "gastronomie", "gastronomie-pdf", "gastronomie-techniques", "vins-cepages",
       "vie-quotidienne-admin", "gentiles-geographie", "geo-insolite",
       "pop-culture-fr", "pop-culture-bases", "stats-france", "actu-societe",
-      "politique-france-recente",
+      "politique-france-recente", "etudes-societales-recentes",
     ],
   },
   {
@@ -53,6 +53,7 @@ const CHAPTERS = [
       "beatles", "rolling-stones", "instruments-musique",
       "musique-pop", "musique-bases", "musique-classique", "musique-classique-variete",
       "musique-groupes", "compositeurs", "compositeurs-essentiels",
+      "chansons-francaises",
     ],
   },
   {
@@ -63,6 +64,7 @@ const CHAPTERS = [
     packIds: [
       "cinema-realisateurs-cultes", "cinema-series", "cinema-tv-pdf",
       "films-cultes", "prix-cinema", "personnages-principaux",
+      "cinema-francais",
     ],
   },
   {
