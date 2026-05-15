@@ -301,7 +301,8 @@
   // ─── BUILD DECK CARD ───
   function buildDeck(pack, opts) {
     opts = opts || {};
-    const showAddBtn = !!opts.showAddBtn; // visible sur Trouver
+    const showAddBtn = !!opts.showAddBtn;        // visible sur Trouver
+    const showRemoveBtn = !!opts.showRemoveBtn;  // visible sur Mes Paquets
     const added = isPackAdded(pack.id);
     const m = window.getPackMastery(pack.id);
     const cat = getPackChapter(pack.id).toUpperCase();
@@ -347,8 +348,9 @@
     if (added) div.classList.add("deck-added");
 
     div.onclick = (e) => {
-      // Ignore le clic si on a tapé sur le bouton AJOUTER
+      // Ignore le clic si on a tapé sur le bouton AJOUTER ou SUPPRIMER
       if (e.target.closest(".deck-add-btn")) return;
+      if (e.target.closest(".deck-remove-btn")) return;
       startFlashcardSession(pack.id);
     };
 
@@ -359,6 +361,10 @@
       ? (added
         ? '<div class="deck-add-btn deck-added-check" title="Dans tes paquets">✓ AJOUTÉ</div>'
         : '<div class="deck-add-btn" title="Ajouter à mes paquets">+ AJOUTER</div>')
+      : "";
+    // Remove button (only on Mes Paquets tab)
+    const removeBtnHtml = showRemoveBtn
+      ? '<button class="deck-remove-btn" title="Retirer de mes paquets" aria-label="Retirer">✕</button>'
       : "";
 
     // Status pill (only when started)
@@ -378,6 +384,7 @@
     div.innerHTML = `
       ${doneBadge}
       ${addBtnHtml}
+      ${removeBtnHtml}
       <div class="deck-img">
         <span class="dot-circ" ${dotStyle}></span>
         <svg viewBox="0 0 100 90" style="position:absolute; inset:0; width:100%; height:100%;" shape-rendering="crispEdges">
@@ -416,6 +423,27 @@
         };
       }
     }
+
+    // Wire remove button (sur Mes Paquets)
+    if (showRemoveBtn) {
+      const removeBtn = div.querySelector(".deck-remove-btn");
+      if (removeBtn) {
+        removeBtn.onclick = (e) => {
+          e.stopPropagation();
+          const ok = confirm(`Retirer "${pack.name}" de tes paquets ?\n\nTa progression (cartes apprises) sera conservée si tu le rajoutes plus tard.`);
+          if (!ok) return;
+          removePack(pack.id);
+          // Animation de sortie + refresh
+          div.style.transition = "transform 0.25s ease, opacity 0.25s ease";
+          div.style.transform = "scale(0.85)";
+          div.style.opacity = "0";
+          setTimeout(() => {
+            if (typeof renderMesPaquets === "function") renderMesPaquets();
+          }, 260);
+        };
+      }
+    }
+
     return div;
   }
 
@@ -647,7 +675,7 @@
         <div class="deck-grid four"></div>
       `;
       const grid = section.querySelector(".deck-grid");
-      todo.forEach((x) => grid.appendChild(buildDeck(x.pack)));
+      todo.forEach((x) => grid.appendChild(buildDeck(x.pack, { showRemoveBtn: true })));
       container.appendChild(section);
     }
 
@@ -664,7 +692,7 @@
         <div class="deck-grid four done-grid"></div>
       `;
       const grid = section.querySelector(".deck-grid");
-      done.forEach((x) => grid.appendChild(buildDeck(x.pack)));
+      done.forEach((x) => grid.appendChild(buildDeck(x.pack, { showRemoveBtn: true })));
       container.appendChild(section);
     }
   }

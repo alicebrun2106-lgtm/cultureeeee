@@ -1120,6 +1120,33 @@
   /* Si done overlay aussi présent, on offset le bouton AJOUTER */
   .deck-done-overlay + .deck-add-btn { top: 38px; }
 
+  /* Bouton SUPPRIMER sur Mes Paquets — petit ✕ discret en haut à droite */
+  .deck { position: relative; }
+  .deck-remove-btn {
+    position: absolute;
+    top: 8px; right: 8px;
+    z-index: 5;
+    background: #fff;
+    color: var(--ink);
+    border: 2px solid var(--ink);
+    box-shadow: 2px 2px 0 var(--ink);
+    width: 28px; height: 28px;
+    padding: 0;
+    font-family: 'Space Mono', monospace;
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 1;
+    cursor: pointer;
+    transition: transform 0.08s, box-shadow 0.08s, background 0.15s;
+  }
+  .deck-remove-btn:hover {
+    background: var(--pink-d);
+    transform: translate(1px, 1px);
+    box-shadow: 1px 1px 0 var(--ink);
+  }
+  /* Si overlay DONE présent, décale le bouton SUPPRIMER */
+  .deck-done-overlay + .deck-remove-btn { top: 38px; }
+
   /* Animation "ajout" : scale + flash vert */
   .deck-just-added {
     animation: deck-add-pulse 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
