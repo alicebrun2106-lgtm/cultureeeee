@@ -264,6 +264,19 @@
     font-family: 'Press Start 2P', monospace;
     font-size: 14px; line-height: 1.25;
     margin: 0 0 10px; color: var(--ink);
+    /* Évite tout débordement : casse les mots trop longs si besoin */
+    overflow-wrap: anywhere;
+    word-break: break-word;
+    hyphens: auto;
+  }
+  /* Titre long (> 24 caractères) : police plus petite + Space Mono pour
+     gagner en compacité, tout en gardant le look brutaliste. */
+  .deck-title.deck-title-long {
+    font-family: 'Space Mono', monospace;
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 0.02em;
+    line-height: 1.3;
   }
   .deck-meta {
     display: flex; gap: 2px;

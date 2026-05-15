@@ -324,7 +324,16 @@
 
     const niv = Math.min(5, 1 + Math.floor(mastery / 20));
     const name = pack.name.toUpperCase();
-    const titleHtml = name.length > 18 ? name.split(/[ —–-]/).slice(0, 3).join("<br>") : name;
+    // Split sur les tirets longs (avec espaces autour) UNIQUEMENT, pas sur les espaces.
+    // Évite de découper "ACTEURS & RÉALISATEURS" en morceaux séparés et de perdre la suite.
+    let titleHtml;
+    if (name.length > 24 && / [—–-] /.test(name)) {
+      titleHtml = name.split(/ [—–-] /).join("<br>");
+    } else {
+      titleHtml = name;
+    }
+    // Classe pour titre long → réduit la police côté CSS
+    const longTitleClass = name.length > 24 ? " deck-title-long" : "";
 
     const isInk = color === "k";
     const svgFill = isInk ? svg.replace(/#0a0a0a/g, "#ffffff") : svg;
@@ -377,7 +386,7 @@
       </div>
       <div class="deck-body">
         <div class="deck-cat">${cat}${statusPill}</div>
-        <div class="deck-title">${titleHtml}</div>
+        <div class="deck-title${longTitleClass}">${titleHtml}</div>
         <div class="deck-meta">${metaHtml}</div>
         ${miniStats}
         <div class="deck-foot"><span>NIV.${niv}</span><span>${footRight}</span></div>
