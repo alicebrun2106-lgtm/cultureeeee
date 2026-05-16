@@ -9,9 +9,8 @@
 //   - Toast "Merci !" puis fermeture
 
 (function () {
-  // 🔑 ENDPOINT FORMSPREE — à remplacer par l'URL de ton form
-  // Tant que c'est vide, on saute le POST et on stocke seulement en localStorage.
-  const FORMSPREE_ENDPOINT = ""; // ← coller ici l'URL "https://formspree.io/f/xxxx"
+  // 🔑 ENDPOINT FORMSPREE — chaque vote arrive par email à Alice
+  const FORMSPREE_ENDPOINT = "https://formspree.io/f/mvzyppza";
 
   const VOTES_KEY = "qpuc-feature-votes";
 
