@@ -19,7 +19,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=VT323&family=Press+Start+2P&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=50">
+<link rel="stylesheet" href="style.css?v=51">
 </head>
 <body>
 
@@ -466,36 +466,36 @@
 
 
 <!-- Scripts -->
-<script src="flashcards-data.js?v=50"></script>
-<script src="funfacts-data.js?v=50"></script>
+<script src="flashcards-data.js?v=51"></script>
+<script src="funfacts-data.js?v=51"></script>
 <script>
   if (typeof FUNFACTS_PACKS !== "undefined") {
     FUNFACTS_PACKS.forEach(function(p) { FLASHCARD_PACKS.push(p); });
   }
 </script>
-<script src="programme-data.js?v=50"></script>
-<script src="daily-lessons.js?v=50"></script>
-<script src="memo.js?v=50"></script>
-<script src="srs.js?v=50"></script>
-<script src="srs2.js?v=50"></script>
-<script src="gamification.js?v=50"></script>
-<script src="chapters.js?v=50"></script>
-<script src="categories.js?v=50"></script>
-<script src="app.js?v=50"></script>
-<script src="today.js?v=50"></script>
-<script src="explorer.js?v=50"></script>
-<script src="flashcards.js?v=50"></script>
-<script src="quiz-12coups.js?v=50"></script>
-<script src="revisions.js?v=50"></script>
-<script src="programme.js?v=50"></script>
-<script src="carte.js?v=50"></script>
-<script src="schemas.js?v=50"></script>
-<script src="culture-app.js?v=50"></script>
-<script src="duck.js?v=50"></script>
-<script src="canard-settings.js?v=50"></script>
-<script src="monetisation-mock.js?v=50"></script>
-<script src="social.js?v=50"></script>
-<script src="pack-creator.js?v=50"></script>
+<script src="programme-data.js?v=51"></script>
+<script src="daily-lessons.js?v=51"></script>
+<script src="memo.js?v=51"></script>
+<script src="srs.js?v=51"></script>
+<script src="srs2.js?v=51"></script>
+<script src="gamification.js?v=51"></script>
+<script src="chapters.js?v=51"></script>
+<script src="categories.js?v=51"></script>
+<script src="app.js?v=51"></script>
+<script src="today.js?v=51"></script>
+<script src="explorer.js?v=51"></script>
+<script src="flashcards.js?v=51"></script>
+<script src="quiz-12coups.js?v=51"></script>
+<script src="revisions.js?v=51"></script>
+<script src="programme.js?v=51"></script>
+<script src="carte.js?v=51"></script>
+<script src="schemas.js?v=51"></script>
+<script src="culture-app.js?v=51"></script>
+<script src="duck.js?v=51"></script>
+<script src="canard-settings.js?v=51"></script>
+<script src="monetisation-mock.js?v=51"></script>
+<script src="social.js?v=51"></script>
+<script src="pack-creator.js?v=51"></script>
 
 <!-- ───── PWA : registration du service worker + bouton "Installer l'app" ───── -->
 <script>
@@ -503,9 +503,30 @@
   // Enregistre le SW (offline + install). Silencieux si le navigateur ne supporte pas.
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
-      navigator.serviceWorker.register("sw.js").catch((err) => {
-        console.warn("SW registration failed:", err);
-      });
+      navigator.serviceWorker.register("sw.js")
+        .then((reg) => {
+          // Vérifie périodiquement les MAJ du SW (sinon il peut tarder à update)
+          reg.update().catch(() => {});
+          // Quand un nouveau SW prend la main, on recharge la page une fois
+          let refreshing = false;
+          navigator.serviceWorker.addEventListener("controllerchange", () => {
+            if (refreshing) return;
+            refreshing = true;
+            window.location.reload();
+          });
+          // Si un nouveau SW attend en standby, on lui demande de prendre la main
+          if (reg.waiting) reg.waiting.postMessage("SKIP_WAITING");
+          reg.addEventListener("updatefound", () => {
+            const newWorker = reg.installing;
+            if (!newWorker) return;
+            newWorker.addEventListener("statechange", () => {
+              if (newWorker.state === "installed" && navigator.serviceWorker.controller) {
+                newWorker.postMessage("SKIP_WAITING");
+              }
+            });
+          });
+        })
+        .catch((err) => console.warn("SW registration failed:", err));
     });
   }
 
