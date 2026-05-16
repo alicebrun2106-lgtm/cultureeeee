@@ -273,8 +273,8 @@
     };
     const el = document.getElementById(map[tab] || "page-trouver");
     if (el) el.classList.add("active");
-    // Highlight nav
-    document.querySelectorAll(".nav-links a").forEach((a) => {
+    // Highlight nav (desktop + mobile bottom tabs)
+    document.querySelectorAll(".nav-links a, .mobile-tabs .mtab").forEach((a) => {
       a.classList.toggle("active", a.dataset.tab === tab);
     });
     // Refresh content per tab

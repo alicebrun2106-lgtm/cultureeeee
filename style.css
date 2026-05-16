@@ -2627,3 +2627,167 @@
   color: #555;
   font-style: italic;
 }
+
+/* ═════════════════════════════════════════════════════════
+   VERSION MOBILE — quand l'écran ≤ 640px, le site se transforme
+   en app : nav du haut cachée, barre d'onglets en bas, mise
+   en page compactée style iOS.
+   ═════════════════════════════════════════════════════════ */
+
+/* Barre d'onglets bas — masquée par défaut (desktop) */
+.mobile-tabs { display: none; }
+
+@media (max-width: 640px) {
+  /* Hide desktop top nav, show bottom tab bar */
+  .nav { display: none !important; }
+  .mobile-tabs {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    background: #fff;
+    border-top: 3px solid var(--ink);
+    box-shadow: 0 -4px 0 var(--ink);
+    z-index: 100;
+    padding-bottom: env(safe-area-inset-bottom, 0);
+  }
+  .mtab {
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 8px 4px 10px;
+    text-decoration: none;
+    color: var(--ink);
+    border: 2px solid transparent;
+    font-family: 'Space Mono', monospace;
+    font-weight: 700;
+    font-size: 9px;
+    letter-spacing: 0.05em;
+    transition: background 0.1s;
+  }
+  .mtab.active {
+    background: var(--yellow);
+    border-color: var(--ink);
+    box-shadow: inset 0 2px 0 var(--ink);
+  }
+  .mtab-icon {
+    font-size: 20px;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+
+  /* Body padding pour pas que le contenu soit caché par la barre */
+  body { padding-bottom: 70px; }
+
+  /* Container : padding réduit */
+  .container { padding: 0 14px; }
+
+  /* Section banners : plus compacts */
+  .section-banner { margin: 18px 0 12px; }
+  .section-banner h2 {
+    font-size: 14px;
+    padding: 7px 10px 6px;
+    box-shadow: 3px 3px 0 var(--ink);
+    border-width: 2.5px;
+  }
+  .section-banner .bar { height: 3px; }
+  .section-banner .fig { font-size: 9px; padding: 2px 6px; }
+
+  /* Hero : tout en colonne, plus compact, masque le gros SVG */
+  .hero { padding: 18px 0 14px; }
+  .frame-thick {
+    border-width: 3px;
+    box-shadow: 5px 5px 0 var(--ink);
+  }
+  .masthead h1 { font-size: 36px; }
+  .masthead { padding: 12px 14px 10px; }
+  .deck-tagline { font-size: 13px; padding: 8px 14px; }
+  .hero-grid { grid-template-columns: 1fr; }
+  .hero-left {
+    padding: 16px 14px;
+    border-right: none;
+    border-bottom: 3px solid var(--ink);
+  }
+  .hero-right { min-height: 180px; }
+  .hero-eyebrow { font-size: 10px; }
+  .hero-cta-row { gap: 8px; }
+  .hero-cta-row .btn-big {
+    flex: 1;
+    padding: 12px 12px;
+    font-size: 11px;
+    justify-content: center;
+  }
+
+  /* Deck grid : 2 colonnes au lieu de 4 */
+  .deck-grid {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 12px;
+  }
+  .deck { box-shadow: 3px 3px 0 var(--ink); border-width: 2.5px; }
+  .deck-body { padding: 8px 10px 10px; }
+  .deck-title { font-size: 11px; line-height: 1.25; margin-bottom: 6px; }
+  .deck-title.deck-title-long { font-size: 10px; }
+  .deck-cat { font-size: 8px; }
+  .deck-foot { font-size: 9px; }
+  .deck-meta .seg { height: 5px; }
+
+  /* Boutons : plus compacts */
+  .btn { padding: 10px 12px; font-size: 11px; box-shadow: 3px 3px 0 var(--ink); border-width: 2.5px; }
+  .btn-big { padding: 13px 14px; font-size: 12px; }
+
+  /* Barre de recherche */
+  .search-row { gap: 8px; margin: 14px 0 10px; }
+  .search-input {
+    padding: 10px 12px;
+    font-size: 14px;
+    box-shadow: 3px 3px 0 var(--ink);
+    border-width: 2.5px;
+  }
+
+  /* Filter bar : scroll horizontal compact */
+  .filter-bar { overflow-x: auto; padding-bottom: 4px; -webkit-overflow-scrolling: touch; }
+  .filter-bar::-webkit-scrollbar { display: none; }
+
+  /* Cache le bouton "shuffle" du banner Trouver si écran tout petit */
+  .btn-shuffle { font-size: 10px; padding: 8px 10px; }
+
+  /* Page CANARD : grid en colonne */
+  .duck-settings-grid {
+    grid-template-columns: 1fr !important;
+    gap: 12px;
+  }
+  .duck-launch-banner {
+    grid-template-columns: 1fr !important;
+    text-align: center;
+  }
+  .duck-launch-icon img { width: 80px; }
+  .duck-h { font-size: 12px; }
+
+  /* Session flashcard : padding/fonts réduits */
+  .session-card-text { font-size: 17px; }
+  .session-card-answer { font-size: 15px; }
+
+  /* Bouton PWA install : adapte sa position pour ne pas masquer la tab bar */
+  .pwa-install-btn { bottom: 84px; }
+
+  /* Boutique modal : adapté au petit écran */
+  .mock-modal { padding: 18px 16px 22px; }
+  .mock-modal-backdrop { padding: 20px 12px; }
+  .mock-tabs { gap: 6px; padding-bottom: 10px; margin-bottom: 14px; }
+  .mock-tab { padding: 6px 8px; font-size: 8px; }
+  .mock-grid { grid-template-columns: 1fr 1fr; }
+
+  /* Page Social : grid compact */
+  .defi-grid, .steal-grid { grid-template-columns: 1fr; }
+  .scoreboard .sb-row { grid-template-columns: 44px 32px 1fr auto; padding: 7px 9px; font-size: 13px; }
+  .sb-rank { font-size: 10px; }
+  .sb-avatar { font-size: 19px; }
+}
+
+/* Très petits écrans (iPhone SE etc.) */
+@media (max-width: 380px) {
+  .masthead h1 { font-size: 28px; }
+  .mtab-label { font-size: 8px; }
+  .mtab-icon { font-size: 18px; }
+  .deck-title { font-size: 10px; }
+  .btn { padding: 9px 10px; font-size: 10px; }
+}
