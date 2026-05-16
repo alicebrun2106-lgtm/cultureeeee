@@ -1,5 +1,6 @@
 :root {
     color-scheme: light only;
+    forced-color-adjust: none;
     --ink: #0a0a0a;
     --paper: #fff8e8;
     --pink: #f7c8d8;
@@ -10,8 +11,34 @@
     --lavender: #c9b6f5;
     --gray: #8a8a8a;
   }
+  /* Force le navigateur (Samsung Internet, Chrome) à NE PAS inverser les couleurs
+     même si "mode sombre forcé" est activé côté téléphone. */
+  *, *::before, *::after { forced-color-adjust: none; }
+  html { color-scheme: light only; }
   * { box-sizing: border-box; }
-  html, body { margin:0; padding:0; background:#f7c8d8; color:var(--ink); font-family:'Space Mono', ui-monospace, monospace; }
+  html, body {
+    margin:0; padding:0;
+    background:#f7c8d8 !important;
+    color:#0a0a0a !important;
+    font-family:'Space Mono', ui-monospace, monospace;
+  }
+
+  /* Contre-attaque vs Chrome "Force Dark Mode" qui applique un filter:invert.
+     prefers-color-scheme: dark se déclenche quand le système est en dark.
+     On ré-impose nos couleurs claires explicitement. */
+  @media (prefers-color-scheme: dark) {
+    :root { color-scheme: only light; }
+    html, body {
+      background-color: #f7c8d8 !important;
+      color: #0a0a0a !important;
+    }
+    .frame, .deck-body, .session-card { background-color: #fff !important; color: #0a0a0a !important; }
+    .btn { background: #fff !important; color: #0a0a0a !important; }
+    .btn-y { background: #ffd84a !important; }
+    .btn-m { background: #a3eed7 !important; }
+    .btn-l { background: #c9b6f5 !important; }
+    .nav, .mobile-tabs { background: #fff !important; color: #0a0a0a !important; }
+  }
   body {
     background-image: radial-gradient(#0a0a0a 0.6px, transparent 0.7px);
     background-size: 5px 5px;
