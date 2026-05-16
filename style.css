@@ -2336,3 +2336,68 @@
   font-style: italic;
   margin-top: 4px;
 }
+
+/* ===== DOWNLOAD ROW : 3 plateformes ===== */
+.duck-download-row {
+  margin-top: 20px;
+  padding: 14px 16px;
+  background: var(--mint);
+  border: 3px solid var(--ink);
+  box-shadow: 5px 5px 0 var(--ink);
+}
+.duck-download-title {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  margin-bottom: 12px;
+}
+.duck-download-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 10px;
+}
+.duck-dl-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  background: #fff;
+  text-decoration: none;
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: 12px;
+  text-align: left;
+}
+.duck-dl-btn::before { display: none; } /* enlève le triangle play */
+.duck-dl-emoji {
+  font-size: 26px;
+  line-height: 1;
+}
+.duck-dl-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.duck-dl-info strong {
+  font-family: 'Space Mono', monospace;
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.duck-dl-info small {
+  font-size: 11px;
+  color: #555;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.duck-install-os { margin-top: 12px; }
+.duck-install-os strong {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  display: block;
+  margin-top: 8px;
+  margin-bottom: 4px;
+}
