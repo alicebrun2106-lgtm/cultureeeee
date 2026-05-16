@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=VT323&family=Press+Start+2P&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=46">
+<link rel="stylesheet" href="style.css?v=47">
 </head>
 <body>
 
@@ -146,11 +146,29 @@
       <div class="duck-launch-body">
         <h3 class="duck-h">UN CANARD QUI RESTE SUR TON ÉCRAN</h3>
         <p class="duck-launch-sub">Pas sur le site. Sur ton bureau. Il continue de flotter même quand tu quittes la page.</p>
-        <button class="btn btn-y btn-big" id="btn-launch-desktop-duck">▶ JE VEUX LE CANARD SUR MON ÉCRAN</button>
+        <div class="duck-launch-actions">
+          <button class="btn btn-y btn-big" id="btn-launch-desktop-duck">▶ JE VEUX LE CANARD SUR MON ÉCRAN</button>
+          <a class="btn btn-big" id="btn-download-desktop-duck"
+             href="https://github.com/alicebrun2106-lgtm/qpuc/releases/download/v1.0.0/Canard.de.bureau-1.0.0-arm64.dmg"
+             download>
+            📥 TÉLÉCHARGER L'APP
+          </a>
+        </div>
         <div class="duck-launch-hint" id="duck-launch-hint" style="display:none">
           Si rien ne se passe, ouvre <strong>Finder → Applications → "Canard de bureau"</strong>,
           ou tape <strong>Cmd+Espace</strong> puis "canard".
         </div>
+        <details class="duck-install-help">
+          <summary>1re installation ? Mode d'emploi (macOS Apple Silicon uniquement)</summary>
+          <ol class="duck-install-steps">
+            <li>Clique <strong>📥 TÉLÉCHARGER L'APP</strong> ci-dessus</li>
+            <li>Ouvre le fichier <code>.dmg</code> téléchargé</li>
+            <li>Glisse <strong>Canard de bureau</strong> dans le dossier <strong>Applications</strong></li>
+            <li>Au 1er lancement : <strong>clic droit sur l'app → Ouvrir → Ouvrir</strong>
+              <span class="duck-install-note">(macOS demande confirmation car l'app n'est pas signée Apple Developer — une seule fois)</span></li>
+            <li>Ensuite : reviens ici et clique <strong>JE VEUX LE CANARD</strong></li>
+          </ol>
+        </details>
       </div>
     </div>
 
@@ -399,35 +417,35 @@
 
 
 <!-- Scripts -->
-<script src="flashcards-data.js?v=46"></script>
-<script src="funfacts-data.js?v=46"></script>
+<script src="flashcards-data.js?v=47"></script>
+<script src="funfacts-data.js?v=47"></script>
 <script>
   if (typeof FUNFACTS_PACKS !== "undefined") {
     FUNFACTS_PACKS.forEach(function(p) { FLASHCARD_PACKS.push(p); });
   }
 </script>
-<script src="programme-data.js?v=46"></script>
-<script src="daily-lessons.js?v=46"></script>
-<script src="memo.js?v=46"></script>
-<script src="srs.js?v=46"></script>
-<script src="srs2.js?v=46"></script>
-<script src="gamification.js?v=46"></script>
-<script src="chapters.js?v=46"></script>
-<script src="categories.js?v=46"></script>
-<script src="app.js?v=46"></script>
-<script src="today.js?v=46"></script>
-<script src="explorer.js?v=46"></script>
-<script src="flashcards.js?v=46"></script>
-<script src="quiz-12coups.js?v=46"></script>
-<script src="revisions.js?v=46"></script>
-<script src="programme.js?v=46"></script>
-<script src="carte.js?v=46"></script>
-<script src="schemas.js?v=46"></script>
-<script src="culture-app.js?v=46"></script>
-<script src="duck.js?v=46"></script>
-<script src="canard-settings.js?v=46"></script>
-<script src="monetisation-mock.js?v=46"></script>
-<script src="social.js?v=46"></script>
-<script src="pack-creator.js?v=46"></script>
+<script src="programme-data.js?v=47"></script>
+<script src="daily-lessons.js?v=47"></script>
+<script src="memo.js?v=47"></script>
+<script src="srs.js?v=47"></script>
+<script src="srs2.js?v=47"></script>
+<script src="gamification.js?v=47"></script>
+<script src="chapters.js?v=47"></script>
+<script src="categories.js?v=47"></script>
+<script src="app.js?v=47"></script>
+<script src="today.js?v=47"></script>
+<script src="explorer.js?v=47"></script>
+<script src="flashcards.js?v=47"></script>
+<script src="quiz-12coups.js?v=47"></script>
+<script src="revisions.js?v=47"></script>
+<script src="programme.js?v=47"></script>
+<script src="carte.js?v=47"></script>
+<script src="schemas.js?v=47"></script>
+<script src="culture-app.js?v=47"></script>
+<script src="duck.js?v=47"></script>
+<script src="canard-settings.js?v=47"></script>
+<script src="monetisation-mock.js?v=47"></script>
+<script src="social.js?v=47"></script>
+<script src="pack-creator.js?v=47"></script>
 </body>
 </html>
