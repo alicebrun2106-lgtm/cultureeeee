@@ -75,7 +75,7 @@
           <div class="mock-big-duck">${getEquippedSkin().emoji}</div>
           <div>
             <h2 class="mock-title">LE COIN DU CANARD</h2>
-            <p class="mock-sub">Boutique, soutien, IA magique et documents transformés en flashcards.</p>
+            <p class="mock-sub">Boutique, soutien, génération de paquets et documents transformés en flashcards.</p>
           </div>
         </div>
 
@@ -83,7 +83,7 @@
           <button class="mock-tab on" data-tab="shop"     onclick="window.renderMockTab('shop', this)">SKINS</button>
           <button class="mock-tab"    data-tab="donation" onclick="window.renderMockTab('donation', this)">DONATION</button>
           <button class="mock-tab"    data-tab="book"     onclick="window.renderMockTab('book', this)">📚 LIVRE → CARTES</button>
-          <button class="mock-tab"    data-tab="ai"       onclick="window.renderMockTab('ai', this)">IA → PAQUET</button>
+          <button class="mock-tab"    data-tab="ai"       onclick="window.renderMockTab('ai', this)">🪄 PAQUET MAGIQUE</button>
           <button class="mock-tab"    data-tab="document" onclick="window.renderMockTab('document', this)">DOC → CARTES</button>
           <button class="mock-tab"    data-tab="premium"  onclick="window.renderMockTab('premium', this)">PREMIUM</button>
         </div>
@@ -124,12 +124,12 @@
       <div class="coming-soon-card">
         <div class="coming-tag">🔜 BIENTÔT</div>
         <h3 class="mock-h">📚 LIVRE → CARTES</h3>
-        <p class="mock-muted">Tape le nom d'un livre, l'IA génère un paquet de 20 cartes : intrigue, personnages, dates clés, citations, thèmes. Parfait pour réviser un bouquin ou découvrir un classique.</p>
+        <p class="mock-muted">Tape le nom d'un livre, le canard te fabrique un paquet de 20 cartes : intrigue, personnages, dates clés, citations, thèmes. Parfait pour réviser un bouquin ou découvrir un classique.</p>
         <div class="coming-example">
           <strong>Exemples :</strong> <em>« Le Comte de Monte-Cristo », « 1984 », « L'Étranger »</em>
         </div>
         <p class="coming-cta-line"><strong>Tu serais intéressé(e) ?</strong> Dis-le nous, on saura quoi coder en priorité.</p>
-        <button class="btn btn-y mock-cta" onclick="window.openFeatureSurvey('livre-ia', '📚 Livre → cartes IA', 'Tape le nom d\\'un livre, l\\'IA génère 20 cartes sur l\\'intrigue, les personnages, les thèmes.')">💬 DIS-NOUS CE QUE T'EN PENSES</button>
+        <button class="btn btn-y mock-cta" onclick="window.openFeatureSurvey('livre-cartes', '📚 Livre → cartes', 'Tape le nom d\\'un livre, le canard te fabrique 20 cartes sur l\\'intrigue, les personnages, les thèmes.')">💬 DIS-NOUS CE QUE T'EN PENSES</button>
       </div>
     `;
   }
@@ -138,13 +138,13 @@
     container.innerHTML = `
       <div class="coming-soon-card">
         <div class="coming-tag">🔜 BIENTÔT</div>
-        <h3 class="mock-h">🤖 IA → PAQUET</h3>
-        <p class="mock-muted">Donne-nous un thème, un niveau, un style — l'IA fabrique un paquet de cartes 100% custom. « Révolution française niveau concours », « Mythologie grecque pour ado »…</p>
+        <h3 class="mock-h">🪄 PAQUET MAGIQUE</h3>
+        <p class="mock-muted">Donne-nous un thème, un niveau, un style — le canard te fabrique un paquet de cartes 100% sur mesure. « Révolution française niveau concours », « Mythologie grecque pour ado »…</p>
         <div class="coming-example">
           <strong>Tu choisis :</strong> thème · niveau (débutant → concours) · style (QPUC, pièges, dates) · nombre de cartes
         </div>
         <p class="coming-cta-line"><strong>Tu serais intéressé(e) ?</strong> Dis-le nous.</p>
-        <button class="btn btn-y mock-cta" onclick="window.openFeatureSurvey('ia-paquet', '🤖 IA → paquet sur mesure', 'Génère un paquet de cartes IA à partir d\\'un thème, niveau, style libres.')">💬 DIS-NOUS CE QUE T'EN PENSES</button>
+        <button class="btn btn-y mock-cta" onclick="window.openFeatureSurvey('paquet-magique', '🪄 Paquet sur mesure', 'Génère un paquet de cartes à partir d\\'un thème, niveau, style libres.')">💬 DIS-NOUS CE QUE T'EN PENSES</button>
       </div>
     `;
   }
@@ -154,7 +154,7 @@
       <div class="coming-soon-card">
         <div class="coming-tag">🔜 BIENTÔT</div>
         <h3 class="mock-h">📄 DOCUMENT → CARTES</h3>
-        <p class="mock-muted">Upload ton cours, ton PDF, ton article — l'IA en extrait les notions clés et fabrique automatiquement des cartes de révision.</p>
+        <p class="mock-muted">Upload ton cours, ton PDF, ton article — le canard en extrait les notions clés et fabrique automatiquement des cartes de révision.</p>
         <div class="coming-example">
           <strong>Formats :</strong> PDF, Word, image (photo de cours), texte collé
         </div>
@@ -169,16 +169,16 @@
       <div class="coming-soon-card">
         <div class="coming-tag">🔜 BIENTÔT</div>
         <h3 class="mock-h">💎 PREMIUM</h3>
-        <p class="mock-muted">Un abonnement pour débloquer les features qui coûtent du calcul (IA, gros documents, skins exclusifs). Tu paies, on code, on encaisse pas les ronds tant que ça vaut pas le coup.</p>
+        <p class="mock-muted">Un abonnement pour débloquer les features qui coûtent du calcul (génération de paquets, gros documents, skins exclusifs). Tu paies, on code, on encaisse pas les ronds tant que ça vaut pas le coup.</p>
         <ul class="mock-perks">
-          <li>Générations IA illimitées</li>
+          <li>Générations de paquets illimitées</li>
           <li>Documents plus longs (50+ pages)</li>
           <li>Skins premium du canard</li>
           <li>Statistiques avancées de progression</li>
           <li>Mode hors-ligne complet</li>
         </ul>
         <p class="coming-cta-line"><strong>Tu paierais combien pour ça ?</strong> Ton avis nous aide à fixer le prix juste.</p>
-        <button class="btn btn-y mock-cta" onclick="window.openFeatureSurvey('premium', '💎 Premium CULTURE!!!', 'Abonnement qui débloque les features IA + skins + stats + offline.')">💬 DIS-NOUS CE QUE T'EN PENSES</button>
+        <button class="btn btn-y mock-cta" onclick="window.openFeatureSurvey('premium', '💎 Premium CULTURE!!!', 'Abonnement qui débloque les générations de paquets + skins + stats + offline.')">💬 DIS-NOUS CE QUE T'EN PENSES</button>
       </div>
     `;
   }
