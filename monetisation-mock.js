@@ -129,7 +129,7 @@
           <strong>Exemples :</strong> <em>« Le Comte de Monte-Cristo », « 1984 », « L'Étranger »</em>
         </div>
         <p class="coming-cta-line"><strong>Tu serais intéressé(e) ?</strong> Dis-le nous, on saura quoi coder en priorité.</p>
-        <button class="btn btn-y mock-cta" onclick="window.openFeatureSurvey('livre-cartes', '📚 Livre → cartes', 'Tape le nom d\\'un livre, le canard te fabrique 20 cartes sur l\\'intrigue, les personnages, les thèmes.')">💬 DIS-NOUS CE QUE T'EN PENSES</button>
+        <button class="btn btn-y mock-cta" onclick="window.openFeatureSurvey('livre-cartes', '📚 Livre → cartes', 'Tape le nom d\\'un livre, le canard te fabrique 20 cartes sur l\\'intrigue, les personnages, les thèmes.', '0,99€ par livre', 'inclus dans Premium 4,99€/mois')">💬 CE PRIX TE VA ?</button>
       </div>
     `;
   }
@@ -144,7 +144,7 @@
           <strong>Tu choisis :</strong> thème · niveau (débutant → concours) · style (QPUC, pièges, dates) · nombre de cartes
         </div>
         <p class="coming-cta-line"><strong>Tu serais intéressé(e) ?</strong> Dis-le nous.</p>
-        <button class="btn btn-y mock-cta" onclick="window.openFeatureSurvey('paquet-magique', '🪄 Paquet sur mesure', 'Génère un paquet de cartes à partir d\\'un thème, niveau, style libres.')">💬 DIS-NOUS CE QUE T'EN PENSES</button>
+        <button class="btn btn-y mock-cta" onclick="window.openFeatureSurvey('paquet-magique', '🪄 Paquet sur mesure', 'Génère un paquet de cartes à partir d\\'un thème, niveau, style libres.', '1,49€ par paquet', 'inclus dans Premium 4,99€/mois')">💬 CE PRIX TE VA ?</button>
       </div>
     `;
   }
@@ -159,7 +159,7 @@
           <strong>Formats :</strong> PDF, Word, image (photo de cours), texte collé
         </div>
         <p class="coming-cta-line"><strong>Tu serais intéressé(e) ?</strong></p>
-        <button class="btn btn-y mock-cta" onclick="window.openFeatureSurvey('doc-cartes', '📄 Document → cartes', 'Transforme tes cours/PDFs/photos en flashcards automatiquement.')">💬 DIS-NOUS CE QUE T'EN PENSES</button>
+        <button class="btn btn-y mock-cta" onclick="window.openFeatureSurvey('doc-cartes', '📄 Document → cartes', 'Transforme tes cours/PDFs/photos en flashcards automatiquement.', '1,99€ par document', 'inclus dans Premium 4,99€/mois')">💬 CE PRIX TE VA ?</button>
       </div>
     `;
   }
@@ -177,8 +177,8 @@
           <li>Statistiques avancées de progression</li>
           <li>Mode hors-ligne complet</li>
         </ul>
-        <p class="coming-cta-line"><strong>Tu paierais combien pour ça ?</strong> Ton avis nous aide à fixer le prix juste.</p>
-        <button class="btn btn-y mock-cta" onclick="window.openFeatureSurvey('premium', '💎 Premium CULTURE!!!', 'Abonnement qui débloque les générations de paquets + skins + stats + offline.')">💬 DIS-NOUS CE QUE T'EN PENSES</button>
+        <p class="coming-cta-line"><strong>À ce prix, tu prendrais Premium ?</strong></p>
+        <button class="btn btn-y mock-cta" onclick="window.openFeatureSurvey('premium', '💎 Premium CULTURE!!!', 'Abonnement qui débloque toutes les générations de paquets + skins + stats + offline + mode hors-ligne.', '4,99€/mois', '39€/an (économise 21€)')">💬 CE PRIX TE VA ?</button>
       </div>
     `;
   }

@@ -25,11 +25,18 @@
   }
 
   // ─── Ouverture du modal de sondage ───
-  // featureKey : id unique (ex: "livre-ia")
-  // featureName : titre lisible (ex: "📚 Livre → cartes IA")
-  // featureDesc : description courte de ce que ça fera
-  function openSurvey(featureKey, featureName, featureDesc) {
+  // featureKey : id unique (ex: "livre-cartes")
+  // featureName : titre lisible
+  // featureDesc : description courte
+  // priceProposed : prix qu'on TEST (ex: "4,99€/mois" ou "0,99€ par livre")
+  // priceSub : prix abo alternatif (optionnel, ex: "Inclus dans Premium 4,99€/mois")
+  function openSurvey(featureKey, featureName, featureDesc, priceProposed, priceSub) {
     closeSurvey();
+
+    const priceBlock = priceSub
+      ? `<div class="fb-price-main">${escapeHtml(priceProposed)}</div>
+         <div class="fb-price-sub">ou ${escapeHtml(priceSub)}</div>`
+      : `<div class="fb-price-main">${escapeHtml(priceProposed)}</div>`;
 
     const modal = document.createElement("div");
     modal.id = "fb-survey-modal";
@@ -42,43 +49,36 @@
         <h2 class="mock-title">${escapeHtml(featureName)}</h2>
         <p class="mock-sub">${escapeHtml(featureDesc)}</p>
 
+        <div class="fb-price-card">
+          <div class="fb-price-label">💰 PRIX</div>
+          ${priceBlock}
+        </div>
+
         <div class="fb-divider"></div>
 
         <p class="fb-intro">
-          On veut savoir si on doit vraiment la coder. <strong>Dis-nous</strong> :
+          <strong>À ce prix, tu prendrais ?</strong>
         </p>
 
         <div class="fb-question">
-          <label class="fb-label">1. Tu utiliserais ça ?</label>
-          <div class="fb-options fb-options-3">
-            <button type="button" class="fb-opt" data-q="usage" data-v="oui">👍 Oui carrément</button>
-            <button type="button" class="fb-opt" data-q="usage" data-v="peut-etre">🤔 Peut-être</button>
-            <button type="button" class="fb-opt" data-q="usage" data-v="non">👎 Non</button>
+          <div class="fb-options fb-options-vert">
+            <button type="button" class="fb-opt" data-q="reaction" data-v="oui">👍 Oui, à ce prix je prends</button>
+            <button type="button" class="fb-opt" data-q="reaction" data-v="peut-etre">🤔 Peut-être, j'essaierais</button>
+            <button type="button" class="fb-opt" data-q="reaction" data-v="trop-cher">💸 Intéressé(e), mais trop cher</button>
+            <button type="button" class="fb-opt" data-q="reaction" data-v="pas-interesse">👎 Pas intéressé(e) même gratuit</button>
           </div>
         </div>
 
         <div class="fb-question">
-          <label class="fb-label">2. Combien tu paierais pour un accès illimité ?</label>
-          <div class="fb-options">
-            <button type="button" class="fb-opt" data-q="prix" data-v="0">0€ — gratuit seulement</button>
-            <button type="button" class="fb-opt" data-q="prix" data-v="1-3-mois">1-3€ / mois</button>
-            <button type="button" class="fb-opt" data-q="prix" data-v="4-7-mois">4-7€ / mois</button>
-            <button type="button" class="fb-opt" data-q="prix" data-v="8plus-mois">8€+ / mois</button>
-            <button type="button" class="fb-opt" data-q="prix" data-v="5-oneshot">Une fois 5€</button>
-            <button type="button" class="fb-opt" data-q="prix" data-v="10plus-oneshot">Une fois 10-20€</button>
-          </div>
-        </div>
-
-        <div class="fb-question">
-          <label class="fb-label">3. Commentaire (optionnel)</label>
-          <textarea id="fb-comment" class="mock-input fb-textarea" placeholder="Ex : je veux vraiment ce truc parce que…"></textarea>
+          <label class="fb-label">Une question ou un commentaire ?</label>
+          <textarea id="fb-comment" class="mock-input fb-textarea" placeholder="Ex : je préférerais payer une fois sans abonnement / je veux essayer avant de payer / …"></textarea>
         </div>
 
         <div class="fb-actions">
-          <button class="btn btn-y fb-submit" onclick="window.fbSubmitSurvey('${featureKey}')">💌 ENVOYER MON AVIS</button>
+          <button class="btn btn-y fb-submit" onclick="window.fbSubmitSurvey('${featureKey}', '${escapeJs(priceProposed)}')">💌 ENVOYER</button>
         </div>
 
-        <p class="fb-foot">Tes réponses sont anonymes. Aide-nous à coder les bons trucs.</p>
+        <p class="fb-foot">Tes réponses sont anonymes. Aide-nous à coder ce qui te sert vraiment.</p>
       </div>
     `;
     modal.addEventListener("click", (e) => { if (e.target === modal) closeSurvey(); });
@@ -87,7 +87,6 @@
     // Wire les boutons d'option (toggle "on")
     modal.querySelectorAll(".fb-opt").forEach((b) => {
       b.addEventListener("click", () => {
-        // Désactive les autres de la même question
         const q = b.dataset.q;
         modal.querySelectorAll(`.fb-opt[data-q="${q}"]`).forEach((o) => o.classList.remove("on"));
         b.classList.add("on");
@@ -100,22 +99,21 @@
     if (m) m.remove();
   }
 
-  async function submitSurvey(featureKey) {
+  async function submitSurvey(featureKey, priceTested) {
     const modal = document.getElementById("fb-survey-modal");
     if (!modal) return;
-    const usage = modal.querySelector('.fb-opt[data-q="usage"].on');
-    const prix  = modal.querySelector('.fb-opt[data-q="prix"].on');
+    const reaction = modal.querySelector('.fb-opt[data-q="reaction"].on');
     const comment = (modal.querySelector("#fb-comment") || {}).value || "";
 
-    if (!usage || !prix) {
-      toast("Réponds aux 2 premières questions pour valider.");
+    if (!reaction) {
+      toast("Choisis une réponse pour valider.");
       return;
     }
 
     const vote = {
       feature: featureKey,
-      usage: usage.dataset.v,
-      prix: prix.dataset.v,
+      price_tested: priceTested,
+      reaction: reaction.dataset.v,
       comment: comment.trim(),
       timestamp: new Date().toISOString(),
       ua: navigator.userAgent
@@ -150,9 +148,13 @@
       return;
     }
     const txt = "VOTES LOCAUX (" + all.length + ") :\n\n" + all.map((v, i) =>
-      `[${i+1}] ${v.feature}\n  Usage: ${v.usage} · Prix: ${v.prix}\n  ` + (v.comment ? `Commentaire: ${v.comment}\n  ` : "") + `Date: ${v.timestamp}`
+      `[${i+1}] ${v.feature}\n  Prix testé: ${v.price_tested || "n/a"} → ${v.reaction || v.usage || "?"}\n  ` + (v.comment ? `Commentaire: ${v.comment}\n  ` : "") + `Date: ${v.timestamp}`
     ).join("\n\n");
     alert(txt);
+  }
+
+  function escapeJs(s) {
+    return String(s || "").replace(/\\/g, "\\\\").replace(/'/g, "\\'");
   }
 
   function toast(msg) {

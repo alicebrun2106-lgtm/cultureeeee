@@ -2590,6 +2590,42 @@
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
 }
+.fb-options-vert {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.fb-options-vert .fb-opt {
+  text-align: left;
+  justify-content: flex-start;
+}
+
+/* Bloc PRIX dans le sondage */
+.fb-price-card {
+  background: var(--yellow);
+  border: 3px solid var(--ink);
+  box-shadow: 4px 4px 0 var(--ink);
+  padding: 14px 16px;
+  margin: 14px 0 6px;
+  text-align: center;
+}
+.fb-price-label {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  margin-bottom: 8px;
+}
+.fb-price-main {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 22px;
+  letter-spacing: 0.02em;
+  margin-bottom: 4px;
+}
+.fb-price-sub {
+  font-size: 12px;
+  color: #333;
+  font-style: italic;
+}
 .fb-opt {
   background: var(--paper);
   border: 2px solid var(--ink);
