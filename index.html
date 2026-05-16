@@ -2,12 +2,24 @@
 <html lang="fr">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>CULTURE!!!</title>
+
+<!-- PWA : permet l'install sur l'écran d'accueil mobile + offline -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0a0a0a">
+<meta name="application-name" content="CULTURE!!!">
+
+<!-- iOS : install via "Sur l'écran d'accueil" depuis Safari -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="CULTURE!!!">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=VT323&family=Press+Start+2P&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=48">
+<link rel="stylesheet" href="style.css?v=49">
 </head>
 <body>
 
@@ -454,35 +466,106 @@
 
 
 <!-- Scripts -->
-<script src="flashcards-data.js?v=48"></script>
-<script src="funfacts-data.js?v=48"></script>
+<script src="flashcards-data.js?v=49"></script>
+<script src="funfacts-data.js?v=49"></script>
 <script>
   if (typeof FUNFACTS_PACKS !== "undefined") {
     FUNFACTS_PACKS.forEach(function(p) { FLASHCARD_PACKS.push(p); });
   }
 </script>
-<script src="programme-data.js?v=48"></script>
-<script src="daily-lessons.js?v=48"></script>
-<script src="memo.js?v=48"></script>
-<script src="srs.js?v=48"></script>
-<script src="srs2.js?v=48"></script>
-<script src="gamification.js?v=48"></script>
-<script src="chapters.js?v=48"></script>
-<script src="categories.js?v=48"></script>
-<script src="app.js?v=48"></script>
-<script src="today.js?v=48"></script>
-<script src="explorer.js?v=48"></script>
-<script src="flashcards.js?v=48"></script>
-<script src="quiz-12coups.js?v=48"></script>
-<script src="revisions.js?v=48"></script>
-<script src="programme.js?v=48"></script>
-<script src="carte.js?v=48"></script>
-<script src="schemas.js?v=48"></script>
-<script src="culture-app.js?v=48"></script>
-<script src="duck.js?v=48"></script>
-<script src="canard-settings.js?v=48"></script>
-<script src="monetisation-mock.js?v=48"></script>
-<script src="social.js?v=48"></script>
-<script src="pack-creator.js?v=48"></script>
+<script src="programme-data.js?v=49"></script>
+<script src="daily-lessons.js?v=49"></script>
+<script src="memo.js?v=49"></script>
+<script src="srs.js?v=49"></script>
+<script src="srs2.js?v=49"></script>
+<script src="gamification.js?v=49"></script>
+<script src="chapters.js?v=49"></script>
+<script src="categories.js?v=49"></script>
+<script src="app.js?v=49"></script>
+<script src="today.js?v=49"></script>
+<script src="explorer.js?v=49"></script>
+<script src="flashcards.js?v=49"></script>
+<script src="quiz-12coups.js?v=49"></script>
+<script src="revisions.js?v=49"></script>
+<script src="programme.js?v=49"></script>
+<script src="carte.js?v=49"></script>
+<script src="schemas.js?v=49"></script>
+<script src="culture-app.js?v=49"></script>
+<script src="duck.js?v=49"></script>
+<script src="canard-settings.js?v=49"></script>
+<script src="monetisation-mock.js?v=49"></script>
+<script src="social.js?v=49"></script>
+<script src="pack-creator.js?v=49"></script>
+
+<!-- ───── PWA : registration du service worker + bouton "Installer l'app" ───── -->
+<script>
+(function () {
+  // Enregistre le SW (offline + install). Silencieux si le navigateur ne supporte pas.
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+      navigator.serviceWorker.register("sw.js").catch((err) => {
+        console.warn("SW registration failed:", err);
+      });
+    });
+  }
+
+  // Bouton "Installer l'app" — apparaît si Chrome/Edge/Android propose l'install
+  let deferredInstallPrompt = null;
+  window.addEventListener("beforeinstallprompt", (e) => {
+    e.preventDefault();
+    deferredInstallPrompt = e;
+    showInstallButton();
+  });
+  // Si déjà installée, on cache le bouton
+  window.addEventListener("appinstalled", () => {
+    deferredInstallPrompt = null;
+    hideInstallButton();
+  });
+
+  function showInstallButton() {
+    if (document.getElementById("pwa-install-btn")) return;
+    const btn = document.createElement("button");
+    btn.id = "pwa-install-btn";
+    btn.className = "pwa-install-btn";
+    btn.innerHTML = "📲 INSTALLER L'APP";
+    btn.title = "Installer CULTURE!!! sur ton appareil";
+    btn.addEventListener("click", async () => {
+      if (!deferredInstallPrompt) return;
+      deferredInstallPrompt.prompt();
+      const choice = await deferredInstallPrompt.userChoice;
+      if (choice.outcome === "accepted") hideInstallButton();
+      deferredInstallPrompt = null;
+    });
+    document.body.appendChild(btn);
+  }
+  function hideInstallButton() {
+    const btn = document.getElementById("pwa-install-btn");
+    if (btn) btn.remove();
+  }
+
+  // iOS Safari : pas d'event "beforeinstallprompt". On affiche un mini-hint
+  // (seulement si l'app n'est pas déjà lancée en mode standalone).
+  const isStandalone = window.matchMedia("(display-mode: standalone)").matches
+    || window.navigator.standalone === true;
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+  if (isIOS && !isStandalone) {
+    // On affiche le hint une seule fois par session
+    if (!sessionStorage.getItem("pwa-ios-hint-shown")) {
+      setTimeout(() => {
+        sessionStorage.setItem("pwa-ios-hint-shown", "1");
+        const hint = document.createElement("div");
+        hint.className = "pwa-ios-hint";
+        hint.innerHTML = `
+          <span>📲 Installe l'app : <strong>Partager</strong> → <strong>Sur l'écran d'accueil</strong></span>
+          <button class="pwa-ios-hint-close" aria-label="Fermer">×</button>
+        `;
+        hint.querySelector(".pwa-ios-hint-close").addEventListener("click", () => hint.remove());
+        document.body.appendChild(hint);
+        setTimeout(() => { if (hint.parentNode) hint.remove(); }, 12000);
+      }, 3500);
+    }
+  }
+})();
+</script>
 </body>
 </html>

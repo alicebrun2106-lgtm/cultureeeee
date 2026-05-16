@@ -2401,3 +2401,66 @@
   margin-top: 8px;
   margin-bottom: 4px;
 }
+
+/* ===== PWA INSTALL BUTTON (Android/Chrome/Edge) ===== */
+.pwa-install-btn {
+  position: fixed;
+  bottom: 18px;
+  right: 18px;
+  z-index: 9999;
+  background: var(--yellow);
+  color: var(--ink);
+  border: 3px solid var(--ink);
+  box-shadow: 4px 4px 0 var(--ink);
+  padding: 12px 16px;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  animation: pwa-install-pulse 2s ease-in-out infinite;
+}
+.pwa-install-btn:hover {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0 var(--ink);
+  animation: none;
+}
+@keyframes pwa-install-pulse {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+
+/* ===== iOS HINT (Safari ne supporte pas le prompt d'install) ===== */
+.pwa-ios-hint {
+  position: fixed;
+  bottom: 16px;
+  left: 16px;
+  right: 16px;
+  z-index: 9999;
+  background: var(--ink);
+  color: var(--paper);
+  border: 3px solid var(--ink);
+  box-shadow: 5px 5px 0 var(--yellow);
+  padding: 14px 40px 14px 16px;
+  font-family: 'Space Mono', monospace;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.4;
+  animation: pwa-hint-in 0.3s ease;
+}
+.pwa-ios-hint strong { color: var(--yellow); }
+.pwa-ios-hint-close {
+  position: absolute;
+  top: 4px; right: 6px;
+  background: transparent;
+  border: none;
+  color: var(--paper);
+  font-size: 22px;
+  font-weight: 700;
+  cursor: pointer;
+  line-height: 1;
+  padding: 4px 8px;
+}
+@keyframes pwa-hint-in {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}

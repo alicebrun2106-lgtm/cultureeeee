@@ -1,0 +1,27 @@
+{
+  "name": "CULTURE!!! — flashcards de culture générale",
+  "short_name": "CULTURE!!!",
+  "description": "Apprends la culture générale avec des paquets de flashcards et ton canard de bureau.",
+  "lang": "fr",
+  "start_url": "./?source=pwa",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#f7c8d8",
+  "theme_color": "#0a0a0a",
+  "icons": [
+    {
+      "src": "assets/icon-192.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "assets/icon-512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["education", "games"]
+}
