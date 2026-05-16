@@ -19,7 +19,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=VT323&family=Press+Start+2P&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=49">
+<link rel="stylesheet" href="style.css?v=50">
 </head>
 <body>
 
@@ -466,36 +466,36 @@
 
 
 <!-- Scripts -->
-<script src="flashcards-data.js?v=49"></script>
-<script src="funfacts-data.js?v=49"></script>
+<script src="flashcards-data.js?v=50"></script>
+<script src="funfacts-data.js?v=50"></script>
 <script>
   if (typeof FUNFACTS_PACKS !== "undefined") {
     FUNFACTS_PACKS.forEach(function(p) { FLASHCARD_PACKS.push(p); });
   }
 </script>
-<script src="programme-data.js?v=49"></script>
-<script src="daily-lessons.js?v=49"></script>
-<script src="memo.js?v=49"></script>
-<script src="srs.js?v=49"></script>
-<script src="srs2.js?v=49"></script>
-<script src="gamification.js?v=49"></script>
-<script src="chapters.js?v=49"></script>
-<script src="categories.js?v=49"></script>
-<script src="app.js?v=49"></script>
-<script src="today.js?v=49"></script>
-<script src="explorer.js?v=49"></script>
-<script src="flashcards.js?v=49"></script>
-<script src="quiz-12coups.js?v=49"></script>
-<script src="revisions.js?v=49"></script>
-<script src="programme.js?v=49"></script>
-<script src="carte.js?v=49"></script>
-<script src="schemas.js?v=49"></script>
-<script src="culture-app.js?v=49"></script>
-<script src="duck.js?v=49"></script>
-<script src="canard-settings.js?v=49"></script>
-<script src="monetisation-mock.js?v=49"></script>
-<script src="social.js?v=49"></script>
-<script src="pack-creator.js?v=49"></script>
+<script src="programme-data.js?v=50"></script>
+<script src="daily-lessons.js?v=50"></script>
+<script src="memo.js?v=50"></script>
+<script src="srs.js?v=50"></script>
+<script src="srs2.js?v=50"></script>
+<script src="gamification.js?v=50"></script>
+<script src="chapters.js?v=50"></script>
+<script src="categories.js?v=50"></script>
+<script src="app.js?v=50"></script>
+<script src="today.js?v=50"></script>
+<script src="explorer.js?v=50"></script>
+<script src="flashcards.js?v=50"></script>
+<script src="quiz-12coups.js?v=50"></script>
+<script src="revisions.js?v=50"></script>
+<script src="programme.js?v=50"></script>
+<script src="carte.js?v=50"></script>
+<script src="schemas.js?v=50"></script>
+<script src="culture-app.js?v=50"></script>
+<script src="duck.js?v=50"></script>
+<script src="canard-settings.js?v=50"></script>
+<script src="monetisation-mock.js?v=50"></script>
+<script src="social.js?v=50"></script>
+<script src="pack-creator.js?v=50"></script>
 
 <!-- ───── PWA : registration du service worker + bouton "Installer l'app" ───── -->
 <script>
@@ -509,61 +509,109 @@
     });
   }
 
-  // Bouton "Installer l'app" — apparaît si Chrome/Edge/Android propose l'install
+  // Détection : déjà installée → on n'affiche rien
+  const isStandalone = window.matchMedia("(display-mode: standalone)").matches
+    || window.navigator.standalone === true;
+  if (isStandalone) return;
+
+  // L'event "beforeinstallprompt" arrive sur Chrome/Edge/Android. On le garde
+  // pour pouvoir le déclencher au clic du bouton.
   let deferredInstallPrompt = null;
   window.addEventListener("beforeinstallprompt", (e) => {
     e.preventDefault();
     deferredInstallPrompt = e;
-    showInstallButton();
   });
-  // Si déjà installée, on cache le bouton
   window.addEventListener("appinstalled", () => {
     deferredInstallPrompt = null;
-    hideInstallButton();
+    const btn = document.getElementById("pwa-install-btn");
+    if (btn) btn.remove();
   });
 
-  function showInstallButton() {
+  // Crée et affiche le bouton flottant dès que possible
+  function createInstallButton() {
     if (document.getElementById("pwa-install-btn")) return;
     const btn = document.createElement("button");
     btn.id = "pwa-install-btn";
     btn.className = "pwa-install-btn";
     btn.innerHTML = "📲 INSTALLER L'APP";
     btn.title = "Installer CULTURE!!! sur ton appareil";
-    btn.addEventListener("click", async () => {
-      if (!deferredInstallPrompt) return;
-      deferredInstallPrompt.prompt();
-      const choice = await deferredInstallPrompt.userChoice;
-      if (choice.outcome === "accepted") hideInstallButton();
-      deferredInstallPrompt = null;
-    });
+    btn.addEventListener("click", openInstallModal);
     document.body.appendChild(btn);
   }
-  function hideInstallButton() {
-    const btn = document.getElementById("pwa-install-btn");
-    if (btn) btn.remove();
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", createInstallButton);
+  } else {
+    createInstallButton();
   }
 
-  // iOS Safari : pas d'event "beforeinstallprompt". On affiche un mini-hint
-  // (seulement si l'app n'est pas déjà lancée en mode standalone).
-  const isStandalone = window.matchMedia("(display-mode: standalone)").matches
-    || window.navigator.standalone === true;
-  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-  if (isIOS && !isStandalone) {
-    // On affiche le hint une seule fois par session
-    if (!sessionStorage.getItem("pwa-ios-hint-shown")) {
-      setTimeout(() => {
-        sessionStorage.setItem("pwa-ios-hint-shown", "1");
-        const hint = document.createElement("div");
-        hint.className = "pwa-ios-hint";
-        hint.innerHTML = `
-          <span>📲 Installe l'app : <strong>Partager</strong> → <strong>Sur l'écran d'accueil</strong></span>
-          <button class="pwa-ios-hint-close" aria-label="Fermer">×</button>
-        `;
-        hint.querySelector(".pwa-ios-hint-close").addEventListener("click", () => hint.remove());
-        document.body.appendChild(hint);
-        setTimeout(() => { if (hint.parentNode) hint.remove(); }, 12000);
-      }, 3500);
+  // ───── MODAL : explique l'install selon le navigateur ─────
+  function openInstallModal() {
+    // Si Chrome/Edge a déjà préparé le prompt natif : on le déclenche direct
+    if (deferredInstallPrompt) {
+      deferredInstallPrompt.prompt();
+      deferredInstallPrompt.userChoice.then((choice) => {
+        if (choice.outcome === "accepted") {
+          const btn = document.getElementById("pwa-install-btn");
+          if (btn) btn.remove();
+        }
+        deferredInstallPrompt = null;
+      });
+      return;
     }
+
+    // Sinon (iOS, Firefox, anciens navigateurs…) : on ouvre un modal explicatif
+    const ua = navigator.userAgent;
+    const isIOS = /iPad|iPhone|iPod/.test(ua) && !window.MSStream;
+    const isAndroid = /Android/.test(ua);
+    const isMac = /Macintosh/.test(ua);
+    const isMobile = isIOS || isAndroid || /Mobile/.test(ua);
+
+    const modal = document.createElement("div");
+    modal.id = "pwa-install-modal";
+    modal.className = "pwa-modal-backdrop";
+    modal.innerHTML = `
+      <div class="pwa-modal frame">
+        <button class="pwa-modal-close" aria-label="Fermer">×</button>
+        <h2 class="pwa-modal-title">📲 INSTALLER CULTURE!!!</h2>
+        <p class="pwa-modal-sub">Mets l'app sur l'écran d'accueil pour la lancer en un clic, même sans internet.</p>
+
+        <div class="pwa-section ${isIOS ? "pwa-section-active" : ""}">
+          <h3>🍎 iPhone / iPad (Safari)</h3>
+          <ol>
+            <li>Touche l'icône <strong>Partager</strong>
+              <span class="pwa-ios-share-icon">⤴</span> en bas de l'écran</li>
+            <li>Fais défiler et touche <strong>« Sur l'écran d'accueil »</strong></li>
+            <li>Touche <strong>« Ajouter »</strong> en haut à droite</li>
+            <li>L'icône CULTURE!!! apparaît sur ton écran d'accueil</li>
+          </ol>
+          <p class="pwa-warn">⚠️ Ça ne marche que dans <strong>Safari</strong>, pas dans Chrome/Firefox iOS.</p>
+        </div>
+
+        <div class="pwa-section ${isAndroid ? "pwa-section-active" : ""}">
+          <h3>🤖 Android (Chrome/Edge/Samsung Internet)</h3>
+          <ol>
+            <li>Touche le menu <strong>⋮</strong> en haut à droite</li>
+            <li>Touche <strong>« Installer l'application »</strong> ou <strong>« Ajouter à l'écran d'accueil »</strong></li>
+            <li>Confirme</li>
+          </ol>
+        </div>
+
+        <div class="pwa-section ${isMac && !isMobile ? "pwa-section-active" : ""}">
+          <h3>💻 Mac / Windows (Chrome / Edge / Brave)</h3>
+          <ol>
+            <li>Cherche l'icône <strong>⊕</strong> dans la barre d'adresse</li>
+            <li>Ou : menu <strong>⋮</strong> → <strong>« Installer CULTURE!!! »</strong></li>
+            <li>Confirme</li>
+          </ol>
+          <p class="pwa-warn">⚠️ Safari Mac ne supporte pas l'installation PWA.</p>
+        </div>
+
+        <p class="pwa-modal-foot">Tu auras une icône, une appli plein écran (sans la barre du navigateur), et ça marche <strong>même sans réseau</strong>.</p>
+      </div>
+    `;
+    modal.addEventListener("click", (e) => { if (e.target === modal) modal.remove(); });
+    modal.querySelector(".pwa-modal-close").addEventListener("click", () => modal.remove());
+    document.body.appendChild(modal);
   }
 })();
 </script>
