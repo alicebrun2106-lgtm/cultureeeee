@@ -19,7 +19,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=VT323&family=Press+Start+2P&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=59">
+<link rel="stylesheet" href="style.css?v=60">
 </head>
 <body>
 
@@ -245,6 +245,31 @@
         </div>
       </div>
 
+      <!-- 🔔 NOTIFICATIONS — canard qui te ping sur ton tel -->
+      <div class="duck-settings-card frame" id="duck-notif-card">
+        <h3 class="duck-h">🔔 NOTIFICATIONS</h3>
+        <p class="duck-help">Le canard te ping sur ton tel avec une question.<br><small style="font-style:italic; color:#777;">Marche tant que l'app reste dans tes apps récentes.</small></p>
+
+        <div id="duck-notif-disabled">
+          <p class="duck-notif-status">Statut : <strong id="duck-notif-perm">—</strong></p>
+          <button class="btn btn-y" id="btn-enable-duck-notif">🔔 ACTIVER LES NOTIFS</button>
+        </div>
+
+        <div id="duck-notif-enabled" style="display:none;">
+          <p class="duck-notif-status">✅ Le canard te pingue toutes les <strong id="duck-notif-interval-label">1 heure</strong></p>
+          <div class="duck-notif-row">
+            <button class="btn duck-notif-int-btn" data-int="30">30 MIN</button>
+            <button class="btn duck-notif-int-btn" data-int="60">1 H</button>
+            <button class="btn duck-notif-int-btn" data-int="120">2 H</button>
+            <button class="btn duck-notif-int-btn" data-int="240">4 H</button>
+          </div>
+          <div class="duck-notif-row" style="margin-top:8px;">
+            <button class="btn" id="btn-test-duck-notif">▶ TEST MAINTENANT</button>
+            <button class="btn" id="btn-disable-duck-notif">⏏ DÉSACTIVER</button>
+          </div>
+        </div>
+      </div>
+
       <div class="duck-settings-card frame">
         <h3 class="duck-h">💡 ASTUCES</h3>
         <ul class="duck-tips">
@@ -434,37 +459,38 @@
 
 
 <!-- Scripts -->
-<script src="flashcards-data.js?v=59"></script>
-<script src="funfacts-data.js?v=59"></script>
+<script src="flashcards-data.js?v=60"></script>
+<script src="funfacts-data.js?v=60"></script>
 <script>
   if (typeof FUNFACTS_PACKS !== "undefined") {
     FUNFACTS_PACKS.forEach(function(p) { FLASHCARD_PACKS.push(p); });
   }
 </script>
-<script src="programme-data.js?v=59"></script>
-<script src="daily-lessons.js?v=59"></script>
-<script src="memo.js?v=59"></script>
-<script src="srs.js?v=59"></script>
-<script src="srs2.js?v=59"></script>
-<script src="gamification.js?v=59"></script>
-<script src="chapters.js?v=59"></script>
-<script src="categories.js?v=59"></script>
-<script src="app.js?v=59"></script>
-<script src="today.js?v=59"></script>
-<script src="explorer.js?v=59"></script>
-<script src="flashcards.js?v=59"></script>
-<script src="quiz-12coups.js?v=59"></script>
-<script src="revisions.js?v=59"></script>
-<script src="programme.js?v=59"></script>
-<script src="carte.js?v=59"></script>
-<script src="schemas.js?v=59"></script>
-<script src="culture-app.js?v=59"></script>
-<script src="duck.js?v=59"></script>
-<script src="canard-settings.js?v=59"></script>
-<script src="monetisation-mock.js?v=59"></script>
-<script src="social.js?v=59"></script>
-<script src="pack-creator.js?v=59"></script>
-<script src="feedback-survey.js?v=59"></script>
+<script src="programme-data.js?v=60"></script>
+<script src="daily-lessons.js?v=60"></script>
+<script src="memo.js?v=60"></script>
+<script src="srs.js?v=60"></script>
+<script src="srs2.js?v=60"></script>
+<script src="gamification.js?v=60"></script>
+<script src="chapters.js?v=60"></script>
+<script src="categories.js?v=60"></script>
+<script src="app.js?v=60"></script>
+<script src="today.js?v=60"></script>
+<script src="explorer.js?v=60"></script>
+<script src="flashcards.js?v=60"></script>
+<script src="quiz-12coups.js?v=60"></script>
+<script src="revisions.js?v=60"></script>
+<script src="programme.js?v=60"></script>
+<script src="carte.js?v=60"></script>
+<script src="schemas.js?v=60"></script>
+<script src="culture-app.js?v=60"></script>
+<script src="duck.js?v=60"></script>
+<script src="canard-settings.js?v=60"></script>
+<script src="monetisation-mock.js?v=60"></script>
+<script src="social.js?v=60"></script>
+<script src="pack-creator.js?v=60"></script>
+<script src="feedback-survey.js?v=60"></script>
+<script src="duck-notifications.js?v=60"></script>
 
 <!-- ───── PWA : registration du service worker + bouton "Installer l'app" ───── -->
 <script>

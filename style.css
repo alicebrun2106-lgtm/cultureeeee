@@ -2827,3 +2827,25 @@
   .deck-title { font-size: 10px; }
   .btn { padding: 9px 10px; font-size: 10px; }
 }
+
+/* ===== DUCK NOTIFICATIONS UI ===== */
+.duck-notif-status {
+  font-size: 13px;
+  margin: 8px 0 12px;
+}
+.duck-notif-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.duck-notif-int-btn {
+  flex: 1;
+  min-width: 70px;
+  padding: 9px 8px;
+  font-size: 11px;
+  justify-content: center;
+}
+.duck-notif-int-btn.on {
+  background: var(--yellow);
+  box-shadow: 4px 4px 0 var(--ink);
+}

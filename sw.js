@@ -5,7 +5,7 @@
 //   - JS/CSS/assets : cache-first → instant offline, refresh en background
 //   - Si pas de réseau du tout : on sert ce qu'on a en cache
 
-const CACHE_VERSION = "v3";
+const CACHE_VERSION = "v4";
 const CACHE_NAME = "culture-" + CACHE_VERSION;
 
 // Ressources à pré-cacher dès l'install (le minimum pour que l'app se lance offline).
@@ -91,4 +91,25 @@ self.addEventListener("fetch", (event) => {
 // Permet à l'app de demander explicitement de skipWaiting (mise à jour immédiate).
 self.addEventListener("message", (event) => {
   if (event.data === "SKIP_WAITING") self.skipWaiting();
+});
+
+// Clic sur une notification du canard → ouvre l'app sur le bon paquet
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  if (event.action === "dismiss") return;
+
+  const targetUrl = (event.notification.data && event.notification.data.url) || "/";
+  event.waitUntil(
+    self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((clients) => {
+      // Si une fenêtre est déjà ouverte → focus + navigate
+      for (const client of clients) {
+        if ("focus" in client) {
+          client.navigate(targetUrl);
+          return client.focus();
+        }
+      }
+      // Sinon en ouvrir une nouvelle
+      if (self.clients.openWindow) return self.clients.openWindow(targetUrl);
+    })
+  );
 });
