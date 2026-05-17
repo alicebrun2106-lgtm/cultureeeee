@@ -699,16 +699,16 @@
 
   // ── DASHBOARD : Top packs / À bosser / Presque maîtrisé ──
   function renderDashboard(container, enriched) {
-    // Top packs : mastery >= 60, sorted desc
-    const top = enriched.filter((x) => x.m.masteryPercent >= 60)
+    // Tes meilleurs : vraiment maîtrisés (≥90%)
+    const top = enriched.filter((x) => x.m.masteryPercent >= 90)
       .sort((a, b) => b.m.masteryPercent - a.m.masteryPercent)
       .slice(0, 3);
     // À bosser : packs avec le plus de cartes faibles + dues
     const work = enriched.filter((x) => x.m.weakCards > 0 || x.m.dueToday > 0)
       .sort((a, b) => (b.m.weakCards + b.m.dueToday) - (a.m.weakCards + a.m.dueToday))
       .slice(0, 3);
-    // Presque maîtrisé : 70-90%
-    const almost = enriched.filter((x) => x.m.masteryPercent >= 70 && x.m.masteryPercent < 95)
+    // Presque maîtrisé : 70-89% (sous le seuil "meilleurs", pas de chevauchement)
+    const almost = enriched.filter((x) => x.m.masteryPercent >= 70 && x.m.masteryPercent < 90)
       .sort((a, b) => b.m.masteryPercent - a.m.masteryPercent)
       .slice(0, 3);
 
