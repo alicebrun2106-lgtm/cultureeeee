@@ -139,7 +139,7 @@
         // Reset bouton launch
         const launchBtn = document.getElementById("btn-launch-desktop-duck");
         if (launchBtn) {
-          launchBtn.textContent = "▶ JE VEUX LE CANARD SUR MON ÉCRAN";
+          launchBtn.textContent = "JE VEUX LE CANARD SUR MON ÉCRAN";
           launchBtn.classList.remove("duck-launched");
         }
       };
@@ -152,7 +152,7 @@
         launchBtn.textContent = "✓ CANARD ACTIF SUR LE BUREAU";
         launchBtn.classList.add("duck-launched");
       } else {
-        launchBtn.textContent = "▶ JE VEUX LE CANARD SUR MON ÉCRAN";
+        launchBtn.textContent = "JE VEUX LE CANARD SUR MON ÉCRAN";
         launchBtn.classList.remove("duck-launched");
       }
     }

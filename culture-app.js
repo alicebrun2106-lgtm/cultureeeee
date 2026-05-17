@@ -627,7 +627,7 @@
           <div class="daily-review-title">${totalDue} CARTE${totalDue > 1 ? "S" : ""}<br>À REVOIR</div>
           <div class="daily-review-sub">Toutes les cartes dues, mélangées entre paquets</div>
         </div>
-        <button class="btn btn-y btn-big" id="btn-daily-review">▶ COMMENCER</button>
+        <button class="btn btn-y btn-big" id="btn-daily-review">COMMENCER</button>
       `;
     } else {
       dailyBlock.innerHTML = `
