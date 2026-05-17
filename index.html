@@ -22,7 +22,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=VT323&family=Press+Start+2P&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=62">
+<link rel="stylesheet" href="style.css?v=70">
 </head>
 <body>
 
@@ -39,6 +39,27 @@
     <span class="nav-stats-hidden" id="nav-stats" style="display:none">— PAQUETS</span>
   </div>
 </nav>
+
+<!-- Toggle thème clair/sombre -->
+<button id="theme-toggle" class="theme-toggle" type="button" aria-label="Basculer thème clair/sombre" onclick="toggleTheme()">
+  <span class="theme-toggle-icon" id="theme-toggle-icon">🌙</span>
+</button>
+<script>
+  (function() {
+    var saved = localStorage.getItem('culture-theme');
+    if (saved === 'dark') document.documentElement.classList.add('dark');
+  })();
+  function toggleTheme() {
+    var isDark = document.documentElement.classList.toggle('dark');
+    localStorage.setItem('culture-theme', isDark ? 'dark' : 'light');
+    var icon = document.getElementById('theme-toggle-icon');
+    if (icon) icon.textContent = isDark ? '☀️' : '🌙';
+  }
+  document.addEventListener('DOMContentLoaded', function() {
+    var icon = document.getElementById('theme-toggle-icon');
+    if (icon && document.documentElement.classList.contains('dark')) icon.textContent = '☀️';
+  });
+</script>
 
 <!-- ─── BOTTOM TAB BAR (visible uniquement sur mobile) ─── -->
 <nav class="mobile-tabs" id="mobile-tabs">
@@ -462,8 +483,8 @@
 
 
 <!-- Scripts -->
-<script src="flashcards-data.js?v=62"></script>
-<script src="funfacts-data.js?v=62"></script>
+<script src="flashcards-data.js?v=70"></script>
+<script src="funfacts-data.js?v=70"></script>
 <script>
   if (typeof FUNFACTS_PACKS !== "undefined") {
     FUNFACTS_PACKS.forEach(function(p) { FLASHCARD_PACKS.push(p); });
@@ -476,7 +497,7 @@
 <script src="srs2.js?v=62"></script>
 <script src="gamification.js?v=62"></script>
 <script src="chapters.js?v=62"></script>
-<script src="categories.js?v=62"></script>
+<script src="categories.js?v=70"></script>
 <script src="app.js?v=62"></script>
 <script src="today.js?v=62"></script>
 <script src="explorer.js?v=62"></script>

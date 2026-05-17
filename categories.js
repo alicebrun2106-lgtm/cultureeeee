@@ -25,6 +25,7 @@ const CATEGORIES = [
       "histoire-france-bases", "histoire-dates", "histoire-dates-cles",
       "histoire-divers-pdf", "histoire-ancienne-mytho",
       "geopolitique-monde", "presidents-francais", "presidents-usa",
+      "alexandre-le-grand",
     ],
   },
   {
@@ -100,6 +101,7 @@ const CATEGORIES = [
     packIds: [
       "cinema-realisateurs-cultes", "cinema-series", "cinema-tv-pdf",
       "films-cultes", "prix-cinema", "personnages-principaux",
+      "alien-prometheus",
       "musique-tubes-artistes", "musique-albums-cles", "musique-vrais-prenoms",
       "musique-paroles-celebres", "musique-culture-liens",
       "beatles", "rolling-stones", "instruments-musique",

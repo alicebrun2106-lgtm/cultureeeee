@@ -3076,4 +3076,5 @@ const FUNFACTS_PACKS = [
       {front: "Que signifie « arriver à bon port » ?", back: "Atteindre son objectif avec succès", memo: "Comme un navire qui rejoint le port après une traversée."},
     ],
   },
+
 ];
