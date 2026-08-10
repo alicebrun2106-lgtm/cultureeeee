@@ -7,7 +7,10 @@ In Supabase `Authentication -> URL Configuration`:
 - Site URL: `http://localhost:3456`
 - Redirect URL: `http://localhost:3456/**`
 
-When the site is published, add the production domain too.
+For GitHub Pages production:
+
+- Site URL: `https://alicebrun2106-lgtm.github.io/qpuc/`
+- Redirect URL: `https://alicebrun2106-lgtm.github.io/qpuc/**`
 
 ## Google Login
 
@@ -21,6 +24,10 @@ from another project. Copy the exact `Project URL` from Supabase:
 - `Project Settings -> API -> Project URL`
 - Then paste it into `supabase-config.js`
 
+Current project URL:
+
+- `https://zkhnlewpmbetwlauwooz.supabase.co`
+
 In Supabase:
 
 1. Go to `Authentication -> Sign In / Providers`.
@@ -30,6 +37,7 @@ In Supabase:
 In Google Cloud OAuth:
 
 - Authorized JavaScript origin: `http://localhost:3456`
+- Authorized JavaScript origin: `https://alicebrun2106-lgtm.github.io`
 - Authorized redirect URI: copy the callback URL shown by Supabase in the Google provider settings.
 
 ## Public User ID

@@ -6,7 +6,7 @@
 //   - images/assets : cache-first → instant offline, refresh en background
 //   - Si pas de réseau du tout : on sert ce qu'on a en cache
 
-const CACHE_VERSION = "v59";
+const CACHE_VERSION = "v60";
 const CACHE_NAME = "culture-" + CACHE_VERSION;
 
 // Ressources à pré-cacher dès l'install (le minimum pour que l'app se lance offline).
