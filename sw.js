@@ -2,10 +2,11 @@
 // Stratégie :
 //   - HTML (index.html) : network-first → toujours la dernière version si en ligne,
 //     fallback sur le cache si hors ligne
-//   - JS/CSS/assets : cache-first → instant offline, refresh en background
+//   - JS/CSS/manifest : network-first → l'app installée reste alignée avec le site
+//   - images/assets : cache-first → instant offline, refresh en background
 //   - Si pas de réseau du tout : on sert ce qu'on a en cache
 
-const CACHE_VERSION = "v5";
+const CACHE_VERSION = "v59";
 const CACHE_NAME = "culture-" + CACHE_VERSION;
 
 // Ressources à pré-cacher dès l'install (le minimum pour que l'app se lance offline).
@@ -20,7 +21,11 @@ const PRECACHE_URLS = [
   "./assets/duck-1.png",
   "./assets/duck-2.png",
   "./assets/duck-3.png",
-  "./assets/duck-4.png"
+  "./assets/duck-4.png",
+  "./assets/duck-1.webp",
+  "./assets/duck-2.webp",
+  "./assets/duck-3.webp",
+  "./assets/duck-4.webp"
 ];
 
 // ───── INSTALL : précache du minimum vital ─────
@@ -72,7 +77,28 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // Tout le reste (JS, CSS, img) : cache-first avec refresh en background
+  // JS/CSS/manifest : network-first pour éviter qu'une PWA installée garde
+  // une ancienne logique de paquets pendant que le site web a déjà été mis à jour.
+  const isFreshAppShell =
+    req.destination === "script" ||
+    req.destination === "style" ||
+    url.pathname.endsWith("/manifest.json");
+  if (isFreshAppShell) {
+    event.respondWith(
+      fetch(req)
+        .then((res) => {
+          if (res && res.status === 200 && res.type !== "opaque") {
+            const copy = res.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(req, copy));
+          }
+          return res;
+        })
+        .catch(() => caches.match(req))
+    );
+    return;
+  }
+
+  // Images et autres assets : cache-first avec refresh en background.
   event.respondWith(
     caches.match(req).then((cached) => {
       const fetchPromise = fetch(req).then((res) => {

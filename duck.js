@@ -146,6 +146,25 @@
     startMovement();
   }
 
+  function showTemporaryDuckIfDisabled() {
+    ensureDom();
+    if (getState().enabled) return;
+    container.style.display = "";
+    container.className = "duck-container duck-size-" + getState().size;
+    container.style.left = "";
+    container.style.top = "";
+    container.style.right = "30px";
+    container.style.bottom = "30px";
+    container.style.transform = "";
+    refreshDuckSprite();
+  }
+
+  function hideTemporaryDuckIfDisabled() {
+    if (getState().enabled) return;
+    if (bubbleEl) bubbleEl.style.display = "none";
+    if (container) container.style.display = "none";
+  }
+
   // ─── SPRITE LOADING avec fallback chain ───
   function setDuckImage(level, mode) {
     if (!imgEl) return;
@@ -276,10 +295,14 @@
 
   // ─── CARESSE (petted + heart) ───
   function petDuck() {
+    showTemporaryDuckIfDisabled();
     container.classList.remove("petted", "happy", "sad");
     void container.offsetWidth; // re-trigger animation
     container.classList.add("petted");
-    setTimeout(() => container.classList.remove("petted"), 500);
+    setTimeout(() => {
+      container.classList.remove("petted");
+      hideTemporaryDuckIfDisabled();
+    }, 900);
     spawnHeart();
   }
 
@@ -343,8 +366,12 @@
   }
 
   function askQuestion() {
+    showTemporaryDuckIfDisabled();
     const q = pickQuestion();
-    if (!q) return;
+    if (!q) {
+      hideTemporaryDuckIfDisabled();
+      return;
+    }
     currentQuestion = q;
     answered = false;
 
@@ -363,6 +390,7 @@
     });
 
     bubbleEl.querySelector(".duck-bubble-close").onclick = hideBubble;
+    bubbleEl.style.display = "";
     bubbleEl.classList.remove("duck-bubble-hidden");
     positionBubble();
   }
@@ -393,6 +421,7 @@
 
   function hideBubble() {
     bubbleEl.classList.add("duck-bubble-hidden");
+    hideTemporaryDuckIfDisabled();
     currentQuestion = null;
     answered = false;
   }

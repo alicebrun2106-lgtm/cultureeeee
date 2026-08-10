@@ -40,7 +40,6 @@
     "philo-mytho": { svg: "temple", colors: ["k", "k", "k"] },
     maritime: { svg: "globe", colors: ["m", "v", "w"] },
     trivia: { svg: "bars", colors: ["g", "y", "p"] },
-    "douze-coups": { svg: "books", colors: ["y", "p", "l"] },
   };
 
   function deckStyleFor(packId) {
@@ -188,6 +187,7 @@
 
   // ─── COLLECTION : packs ajoutés à "Mes paquets" ───
   const ADDED_KEY = "qpuc-added-packs";
+  const CATALOG_CLEANUP_BACKUP_KEY = "qpuc-added-packs-before-catalog-cleanup";
   function getAddedPacks() {
     try {
       const arr = JSON.parse(localStorage.getItem(ADDED_KEY));
@@ -204,6 +204,35 @@
     const auto = FLASHCARD_PACKS.filter((p) => getStarted(p.id)).map((p) => p.id);
     saveAddedPacks(auto);
   }
+  function moveAutoFilledCatalogBackToDiscover() {
+    try {
+      const arr = getAddedPacks();
+      if (!Array.isArray(arr) || typeof FLASHCARD_PACKS === "undefined") return;
+
+      const catalogIds = new Set(
+        FLASHCARD_PACKS
+          .filter((pack) => pack && !pack.isUserPack)
+          .map((pack) => pack.id)
+      );
+      if (catalogIds.size < 20) return;
+
+      const catalogAdded = arr.filter((id) => catalogIds.has(id));
+      const ratio = catalogAdded.length / catalogIds.size;
+      const looksLikeOldDevAutofill = catalogAdded.length >= 40 && ratio >= 0.7;
+      if (!looksLikeOldDevAutofill) return;
+
+      const kept = arr.filter((id) => !catalogIds.has(id));
+      localStorage.setItem(CATALOG_CLEANUP_BACKUP_KEY, JSON.stringify({
+        at: new Date().toISOString(),
+        reason: "catalog-packs-belong-in-trouver",
+        removed: catalogAdded,
+        kept,
+      }));
+      saveAddedPacks(kept);
+    } catch (e) {
+      console.warn("Catalog cleanup skipped:", e);
+    }
+  }
   function isPackAdded(packId) {
     const arr = getAddedPacks();
     if (arr === null) {
@@ -215,9 +244,13 @@
   function addPack(packId) {
     ensureAddedPacksInit();
     const arr = getAddedPacks() || [];
+    const wasEmpty = arr.length === 0;
     if (!arr.includes(packId)) {
       arr.push(packId);
       saveAddedPacks(arr);
+    }
+    if ((wasEmpty || arr.includes(packId)) && typeof window.markFirstPackAction === "function") {
+      window.markFirstPackAction();
     }
   }
   function removePack(packId) {
@@ -228,6 +261,19 @@
   window.isPackAdded = isPackAdded;
   window.addPack = addPack;
   window.removePack = removePack;
+  window.restoreAllPacks = function () {
+    if (typeof FLASHCARD_PACKS === "undefined") return;
+    ensureAddedPacksInit();
+    FLASHCARD_PACKS.forEach((pack) => addPack(pack.id));
+    if (typeof renderTrouver === "function") renderTrouver();
+    if (typeof renderMesPaquets === "function") renderMesPaquets();
+    goToTab("mes-paquets");
+  };
+
+  function maybeRestoreLocalDevLostCollection() {
+    // Ancienne récupération de dev désactivée : on ne doit jamais ajouter
+    // automatiquement tout le catalogue à la collection d'un utilisateur.
+  }
 
   // ─── CARTES SUPPRIMÉES ───
   // L'utilisateur peut supprimer des cartes trop simples. On garde un set d'IDs
@@ -260,14 +306,31 @@
   window.unmarkCardDeleted = unmarkCardDeleted;
 
   // ─── NAVIGATION ───
+  function isStandaloneApp() {
+    return document.documentElement.classList.contains("standalone-app") ||
+      (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches) ||
+      window.navigator.standalone === true;
+  }
   window.goToTab = function (tab) {
-    // tabs: trouver / mes-paquets / cartes / session / result
+    const aliases = {
+      "today": "trouver",
+      "explorer": "trouver",
+      "cartes": "trouver",
+      "flashcards": "mes-paquets",
+      "revisions": "mes-paquets",
+    };
+    tab = aliases[tab] || tab;
+    if (tab === "canard" && isStandaloneApp()) tab = "trouver";
+    // tabs: trouver / mes-paquets / social / premium / account / canard / session / result
     document.querySelectorAll(".page-section").forEach((s) => s.classList.remove("active"));
     document.querySelectorAll(".screen").forEach((s) => s.classList.remove("active"));
     const map = {
       "trouver": "page-trouver",
       "mes-paquets": "page-mes-paquets",
       "social": "page-social",
+      "premium": "page-premium",
+      "account": "page-account",
+      "canard": "page-canard",
       "session": "page-session",
       "result": "page-result",
     };
@@ -281,6 +344,7 @@
     if (tab === "trouver") renderTrouver();
     else if (tab === "mes-paquets") renderMesPaquets();
     else if (tab === "social" && typeof window.renderSocial === "function") window.renderSocial();
+    else if (tab === "account" && window.CultureAuth && typeof window.CultureAuth.render === "function") window.CultureAuth.render();
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -324,14 +388,14 @@
     else footRight = mastery + "%";
 
     const niv = Math.min(5, 1 + Math.floor(mastery / 20));
-    const name = pack.name.toUpperCase();
+    const name = String(pack.name || "").toUpperCase();
     // Split sur les tirets longs (avec espaces autour) UNIQUEMENT, pas sur les espaces.
     // Évite de découper "ACTEURS & RÉALISATEURS" en morceaux séparés et de perdre la suite.
     let titleHtml;
     if (name.length > 24 && / [—–-] /.test(name)) {
-      titleHtml = name.split(/ [—–-] /).join("<br>");
+      titleHtml = name.split(/ [—–-] /).map(escapeHtml).join("<br>");
     } else {
-      titleHtml = name;
+      titleHtml = escapeHtml(name);
     }
     // Classe pour titre long → réduit la police côté CSS
     const longTitleClass = name.length > 24 ? " deck-title-long" : "";
@@ -368,8 +432,13 @@
       : "";
 
     // Status pill (only when started)
+    const statusLabel = String(m.statusLabel || "");
     const statusPill = m.isStarted
-      ? `<span class="deck-status deck-status-${slugify(m.statusLabel)}">${m.statusLabel}</span>`
+      ? `<span class="deck-status deck-status-${slugify(statusLabel)}">${escapeHtml(statusLabel)}</span>`
+      : "";
+    const visibility = (pack.visibility === "public" || pack.isPublic === true) ? "public" : "private";
+    const privacyPill = pack.isUserPack
+      ? `<span class="deck-privacy deck-privacy-${visibility}">${visibility === "public" ? "PUBLIC" : "PRIVÉ"}</span>`
       : "";
 
     // Mini stats line (only when started)
@@ -392,7 +461,7 @@
         </svg>
       </div>
       <div class="deck-body">
-        <div class="deck-cat">${cat}${statusPill}</div>
+        <div class="deck-cat">${escapeHtml(cat)}${statusPill}${privacyPill}</div>
         <div class="deck-title${longTitleClass}">${titleHtml}</div>
         <div class="deck-meta">${metaHtml}</div>
         ${miniStats}
@@ -415,10 +484,8 @@
           spawnAddBurst(div);
           setTimeout(() => {
             div.classList.remove("deck-just-added");
-            // Re-render the deck card in place to update all visuals
-            const replacement = buildDeck(pack, { showAddBtn: true });
-            replacement.classList.add("deck-fade-in");
-            div.replaceWith(replacement);
+            // Sur Trouver, un paquet ajouté disparaît de la liste à explorer.
+            if (typeof renderTrouver === "function") renderTrouver();
           }, 900);
         };
       }
@@ -430,9 +497,14 @@
       if (removeBtn) {
         removeBtn.onclick = (e) => {
           e.stopPropagation();
-          const ok = confirm(`Retirer "${pack.name}" de tes paquets ?\n\nTa progression (cartes apprises) sera conservée si tu le rajoutes plus tard.`);
+          const isUserPack = !!pack.isUserPack;
+          const message = isUserPack
+            ? `Supprimer définitivement ton paquet "${pack.name}" ?\n\nLes cartes de ce paquet perso seront supprimées de cet appareil.`
+            : `Retirer "${pack.name}" de tes paquets ?\n\nTa progression (cartes apprises) sera conservée si tu le rajoutes plus tard.`;
+          const ok = confirm(message);
           if (!ok) return;
-          removePack(pack.id);
+          if (isUserPack && typeof window.deleteUserPack === "function") window.deleteUserPack(pack.id);
+          else removePack(pack.id);
           // Animation de sortie + refresh
           div.style.transition = "transform 0.25s ease, opacity 0.25s ease";
           div.style.transform = "scale(0.85)";
@@ -471,7 +543,21 @@
   }
 
   function slugify(s) {
-    return s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9]+/g, "-");
+    return String(s || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9]+/g, "-");
+  }
+
+  function escapeHtml(value) {
+    return String(value || "").replace(/[&<>"']/g, (char) => ({
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "'": "&#39;",
+    }[char]));
+  }
+
+  function escapeAttr(value) {
+    return escapeHtml(value).replace(/`/g, "&#96;");
   }
 
   // ─── TROUVER PAGE ───
@@ -481,6 +567,16 @@
   // Seed pour ordonner aléatoirement mais de façon stable pendant la session
   let trouverSeed = Math.floor(Math.random() * 100000) + 1;
   window.shuffleTrouver = function () { trouverSeed = Math.floor(Math.random() * 100000) + 1; visibleCount = 24; renderTrouver(); };
+  window.clearTrouverSearch = function () {
+    const input = document.getElementById("search-trouver");
+    const clearBtn = document.getElementById("search-clear");
+    if (input) input.value = "";
+    searchQuery = "";
+    visibleCount = 24;
+    if (clearBtn) clearBtn.style.display = "none";
+    renderTrouver();
+    if (input) input.focus();
+  };
 
   // Normalise une chaîne (sans accents, lowercase) pour matcher sur la recherche.
   function norm(s) {
@@ -503,17 +599,13 @@
     });
     if (clearBtn) {
       clearBtn.addEventListener("click", () => {
-        input.value = "";
-        searchQuery = "";
-        clearBtn.style.display = "none";
-        visibleCount = 24;
-        renderTrouver();
-        input.focus();
+        window.clearTrouverSearch();
       });
     }
   }
 
   function renderTrouver() {
+    if (typeof window.renderDailyLearning === "function") window.renderDailyLearning();
     setupSearchBar();
     const grid = document.getElementById("deck-grid-all");
     if (!grid) return;
@@ -542,28 +634,44 @@
       });
     }
 
-    // Order : non-ajoutés en premier (variety), puis ajoutés à la fin
-    // À l'intérieur de chaque groupe : ordre stable par hash du pack id (variété par session)
+    // Trouver sert à découvrir : les paquets déjà dans Mes paquets sont masqués.
+    packs = packs.filter((p) => !isPackAdded(p.id));
+
+    // Ordre stable par hash du pack id (variété par session).
     const seed = trouverSeed; // stable seed during this session of Trouver browsing
     function pseudoHash(id) {
       let h = seed;
       for (let i = 0; i < id.length; i++) h = ((h * 31 + id.charCodeAt(i)) | 0);
       return Math.abs(h);
     }
-    packs.sort((a, b) => {
-      const aa = isPackAdded(a.id), bb = isPackAdded(b.id);
-      if (aa !== bb) return aa ? 1 : -1; // non-ajoutés d'abord
-      return pseudoHash(a.id) - pseudoHash(b.id);
-    });
+    packs.sort((a, b) => pseudoHash(a.id) - pseudoHash(b.id));
 
     const total = packs.length;
-    document.getElementById("banner-count-trouver").textContent = total + " PAQUETS";
-    document.getElementById("nav-stats").textContent = FLASHCARD_PACKS.length + " PAQUETS";
+    grid.classList.toggle("deck-grid-compact", total > 0 && total <= 6);
+    document.getElementById("banner-count-trouver").textContent =
+      total + " PAQUET" + (total > 1 ? "S" : "") + " À DÉCOUVRIR";
+    document.getElementById("nav-stats").textContent =
+      total + " À DÉCOUVRIR";
 
     const slice = packs.slice(0, visibleCount);
     slice.forEach((p) => grid.appendChild(buildDeck(p, { showAddBtn: true })));
 
     const btnMore = document.getElementById("btn-show-more");
+    if (total === 0) {
+      grid.innerHTML = `
+        <div class="frame trouver-empty">
+          <h3 class="pixel">DÉJÀ DANS TES PAQUETS</h3>
+          <p class="mono">Il n'y a pas de nouveau paquet à ajouter avec ce filtre. Tes paquets sont dans l'onglet Mes paquets.</p>
+          <div class="trouver-empty-actions">
+            <a href="#" class="btn btn-y" onclick="goToTab('mes-paquets'); return false;">OUVRIR MES PAQUETS</a>
+            <button class="btn" onclick="window.clearTrouverSearch()">RÉINITIALISER</button>
+          </div>
+        </div>
+      `;
+      if (btnMore) btnMore.style.display = "none";
+      return;
+    }
+
     if (slice.length < total) {
       btnMore.style.display = "";
       btnMore.textContent = `VOIR PLUS (${total - slice.length} RESTANTS)`;
@@ -572,6 +680,7 @@
       btnMore.style.display = "none";
     }
   }
+  window.renderTrouver = renderTrouver;
 
   function renderFilterBar() {
     const bar = document.getElementById("filter-bar");
@@ -606,8 +715,11 @@
         <div class="frame" style="padding: 40px; text-align: center;">
           <div style="font-size: 56px; margin-bottom: 16px;">📭</div>
           <h3 class="pixel" style="font-size:16px; margin-bottom:14px;">TA COLLECTION EST VIDE</h3>
-          <p class="mono" style="font-size:14px; margin-bottom:20px; font-style:italic;">Ajoute tes premiers paquets depuis l'onglet TROUVER.</p>
-          <a href="#" class="btn btn-y" onclick="goToTab('trouver'); return false;">EXPLORER LES PAQUETS</a>
+          <p class="mono" style="font-size:14px; margin-bottom:20px; font-style:italic;">Ajoute tes premiers paquets depuis l'onglet TROUVER, ou crée ton propre paquet.</p>
+          <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
+            <a href="#" class="btn btn-y" onclick="goToTab('trouver'); return false;">EXPLORER</a>
+            <button class="btn" onclick="window.openPackCreator()">CRÉER MON PAQUET</button>
+          </div>
         </div>
       `;
       return;
@@ -618,14 +730,23 @@
 
     // ── DAILY REVIEW BLOCK (top, very visible) ──
     const totalDue = enriched.reduce((s, x) => s + x.m.dueToday, 0);
+    const totalNew = enriched.reduce((s, x) => s + x.m.newCards, 0);
+    const dailyTotal = totalDue + totalNew;
     const dailyBlock = document.createElement("div");
     dailyBlock.className = "daily-review-block";
-    if (totalDue > 0) {
+    if (dailyTotal > 0) {
+      const titleCount = (totalDue > 0 && (totalDue >= 20 || totalNew === 0))
+        ? totalDue
+        : Math.min(dailyTotal, 20);
+      const titleLabel = totalDue > 0 && totalNew > 0 ? "À FAIRE" : (totalDue > 0 ? "À REVOIR" : "À APPRENDRE");
+      const sub = totalDue > 0
+        ? (totalNew > 0 ? "Cartes dues d'abord, puis nouvelles cartes si la session est courte" : "Toutes les cartes dues, mélangées entre paquets")
+        : "Tes paquets sont là : on relance l'apprentissage avec des cartes nouvelles";
       dailyBlock.innerHTML = `
         <div class="daily-review-left">
           <div class="daily-review-eyebrow">RÉVISION DU JOUR</div>
-          <div class="daily-review-title">${totalDue} CARTE${totalDue > 1 ? "S" : ""}<br>À REVOIR</div>
-          <div class="daily-review-sub">Toutes les cartes dues, mélangées entre paquets</div>
+          <div class="daily-review-title">${titleCount} CARTE${titleCount > 1 ? "S" : ""}<br>${titleLabel}</div>
+          <div class="daily-review-sub">${sub}</div>
         </div>
         <button class="btn btn-y btn-big" id="btn-daily-review">COMMENCER</button>
       `;
@@ -640,7 +761,7 @@
       `;
     }
     container.appendChild(dailyBlock);
-    if (totalDue > 0) {
+    if (dailyTotal > 0) {
       setTimeout(() => {
         const b = document.getElementById("btn-daily-review");
         if (b) b.onclick = startDailyMixedReview;
@@ -696,6 +817,7 @@
       container.appendChild(section);
     }
   }
+  window.renderMesPaquets = renderMesPaquets;
 
   // ── DASHBOARD : Top packs / À bosser / Presque maîtrisé ──
   function renderDashboard(container, enriched) {
@@ -745,36 +867,49 @@
   }
 
   // ── DAILY MIXED REVIEW SESSION ──
-  // Mélange toutes les cartes dues aujourd'hui, à travers tous les paquets,
-  // qui ont été vues au moins une fois. Exclut les cartes totalement nouvelles.
+  // Mélange les cartes dues, puis complète avec des nouvelles cartes si besoin.
+  // Important après migration/restauration : une collection pleine mais sans SRS
+  // ne doit pas afficher une révision vide.
   function startDailyMixedReview() {
     if (typeof FLASHCARD_PACKS === "undefined") return;
     const due = [];
+    const fresh = [];
     const deletedSet = getDeletedSet();
-    FLASHCARD_PACKS.forEach((pack) => {
+    const added = getAddedPacks();
+    const sourcePacks = Array.isArray(added) && added.length
+      ? FLASHCARD_PACKS.filter((pack) => added.includes(pack.id))
+      : FLASHCARD_PACKS;
+    sourcePacks.forEach((pack) => {
       pack.cards.forEach((card, idx) => {
         const key = pack.id + ":" + idx;
         if (deletedSet.has(key)) return;
         const p = SRS2.getCardProgress(key);
-        if (!p || p.state === "new") return; // jamais vue → exclue
+        const item = {
+          front: card.front, back: card.back, memo: card.memo || null,
+          srsKey: key, cardIdx: idx,
+          pack, packId: pack.id,
+        };
+        if (!p || p.state === "new") {
+          fresh.push(item);
+          return;
+        }
         if (SRS2.isDueNow(p)) {
-          due.push({
-            front: card.front, back: card.back, memo: card.memo || null,
-            srsKey: key, cardIdx: idx,
-            pack, packId: pack.id,
-          });
+          due.push(item);
         }
       });
     });
-    if (due.length === 0) return;
     shuffle(due);
+    shuffle(fresh);
+    const newLimit = due.length > 0 ? Math.max(0, 20 - due.length) : 20;
+    const dailyCards = due.concat(fresh.slice(0, newLimit));
+    if (dailyCards.length === 0) return;
 
     session = {
       pack: null,           // multi-pack
       packId: "__daily__",
       isDailyReview: true,
-      allCards: due,
-      queue: due.map((_, i) => i),
+      allCards: dailyCards,
+      queue: dailyCards.map((_, i) => i),
       index: 0,
       flipped: false,
       results: { again: 0, hard: 0, good: 0, easy: 0 },
@@ -929,7 +1064,7 @@
       if (trimmed.length < 4) return match;
       // OK : on wrap
       const enc = encodeURIComponent(trimmed.replace(/\s+/g, "_"));
-      return `<span class="kw" data-kw="${enc}" data-label="${trimmed.replace(/"/g, "&quot;")}">${match}</span>`;
+      return `<span class="kw" data-kw="${enc}" data-label="${escapeAttr(trimmed)}">${match}</span>`;
     });
   }
 
@@ -1079,10 +1214,10 @@
     const wikiUrl = "https://fr.wikipedia.org/wiki/" + enc;
     const searchUrl = "https://www.google.com/search?q=" + enc;
     kwPopoverEl.innerHTML = `
-      <div class="kw-pop-title">${label}</div>
+      <div class="kw-pop-title">${escapeHtml(label)}</div>
       <div class="kw-pop-actions">
-        <a href="${wikiUrl}" target="_blank" rel="noopener" class="kw-pop-btn kw-pop-wiki">📖 Wikipédia →</a>
-        <a href="${searchUrl}" target="_blank" rel="noopener" class="kw-pop-btn kw-pop-search">🔍 Rechercher</a>
+        <a href="${escapeAttr(wikiUrl)}" target="_blank" rel="noopener" class="kw-pop-btn kw-pop-wiki">📖 Wikipédia →</a>
+        <a href="${escapeAttr(searchUrl)}" target="_blank" rel="noopener" class="kw-pop-btn kw-pop-search">🔍 Rechercher</a>
       </div>
     `;
     // Position above the keyword
@@ -1139,8 +1274,28 @@
   }
 
   // ─── INIT ON LOAD ───
+  let handledInitialOpenSession = false;
+  function handleInitialOpenSession() {
+    if (handledInitialOpenSession) return;
+    const params = new URLSearchParams(window.location.search);
+    const packId = params.get("openSession");
+    if (!packId || typeof FLASHCARD_PACKS === "undefined") return;
+    const pack = FLASHCARD_PACKS.find((p) => p.id === packId);
+    if (!pack) return;
+    handledInitialOpenSession = true;
+    addPack(packId);
+    startFlashcardSession(packId);
+    params.delete("openSession");
+    const nextUrl = window.location.pathname + (params.toString() ? "?" + params.toString() : "") + window.location.hash;
+    window.history.replaceState({}, "", nextUrl);
+  }
+  window.handleInitialOpenSession = handleInitialOpenSession;
+
   function init() {
+    maybeRestoreLocalDevLostCollection();
+    moveAutoFilledCatalogBackToDiscover();
     goToTab("trouver");
+    setTimeout(handleInitialOpenSession, 0);
   }
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", init);

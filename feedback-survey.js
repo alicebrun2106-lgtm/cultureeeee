@@ -4,7 +4,7 @@
 //
 // Comportement :
 //   - Affiche un modal au clic sur une feature "coming soon"
-//   - 3 questions : usage, prix, commentaire
+//   - question d'intérêt + commentaire
 //   - Sauvegarde dans localStorage (pour l'user) + POST vers Formspree (pour Alice)
 //   - Toast "Merci !" puis fermeture
 
@@ -28,15 +28,8 @@
   // featureKey : id unique (ex: "livre-cartes")
   // featureName : titre lisible
   // featureDesc : description courte
-  // priceProposed : prix qu'on TEST (ex: "4,99€/mois" ou "0,99€ par livre")
-  // priceSub : prix abo alternatif (optionnel, ex: "Inclus dans Premium 4,99€/mois")
-  function openSurvey(featureKey, featureName, featureDesc, priceProposed, priceSub) {
+  function openSurvey(featureKey, featureName, featureDesc) {
     closeSurvey();
-
-    const priceBlock = priceSub
-      ? `<div class="fb-price-main">${escapeHtml(priceProposed)}</div>
-         <div class="fb-price-sub">ou ${escapeHtml(priceSub)}</div>`
-      : `<div class="fb-price-main">${escapeHtml(priceProposed)}</div>`;
 
     const modal = document.createElement("div");
     modal.id = "fb-survey-modal";
@@ -49,33 +42,28 @@
         <h2 class="mock-title">${escapeHtml(featureName)}</h2>
         <p class="mock-sub">${escapeHtml(featureDesc)}</p>
 
-        <div class="fb-price-card">
-          <div class="fb-price-label">💰 PRIX</div>
-          ${priceBlock}
-        </div>
-
         <div class="fb-divider"></div>
 
         <p class="fb-intro">
-          <strong>À ce prix, tu prendrais ?</strong>
+          <strong>Ça t'intéresse ?</strong>
         </p>
 
         <div class="fb-question">
           <div class="fb-options fb-options-vert">
-            <button type="button" class="fb-opt" data-q="reaction" data-v="oui">👍 Oui, à ce prix je prends</button>
-            <button type="button" class="fb-opt" data-q="reaction" data-v="peut-etre">🤔 Peut-être, j'essaierais</button>
-            <button type="button" class="fb-opt" data-q="reaction" data-v="trop-cher">💸 Intéressé(e), mais trop cher</button>
-            <button type="button" class="fb-opt" data-q="reaction" data-v="pas-interesse">👎 Pas intéressé(e) même gratuit</button>
+            <button type="button" class="fb-opt" data-q="reaction" data-v="oui">👍 Oui, je veux tester</button>
+            <button type="button" class="fb-opt" data-q="reaction" data-v="peut-etre">🤔 Peut-être</button>
+            <button type="button" class="fb-opt" data-q="reaction" data-v="priorite-basse">🕒 Intéressant, mais pas prioritaire</button>
+            <button type="button" class="fb-opt" data-q="reaction" data-v="pas-interesse">👎 Pas intéressé(e)</button>
           </div>
         </div>
 
         <div class="fb-question">
           <label class="fb-label">Une question ou un commentaire ?</label>
-          <textarea id="fb-comment" class="mock-input fb-textarea" placeholder="Ex : je préférerais payer une fois sans abonnement / je veux essayer avant de payer / …"></textarea>
+          <textarea id="fb-comment" class="mock-input fb-textarea" placeholder="Ex : je veux tester avec mes cours / je veux plutôt une app mobile / cette idée ne me sert pas..."></textarea>
         </div>
 
         <div class="fb-actions">
-          <button class="btn btn-y fb-submit" onclick="window.fbSubmitSurvey('${featureKey}', '${escapeJs(priceProposed)}')">💌 ENVOYER</button>
+          <button class="btn btn-y fb-submit" onclick="window.fbSubmitSurvey('${escapeJs(featureKey)}')">💌 ENVOYER</button>
         </div>
 
         <p class="fb-foot">Tes réponses sont anonymes. Aide-nous à coder ce qui te sert vraiment.</p>
@@ -99,7 +87,7 @@
     if (m) m.remove();
   }
 
-  async function submitSurvey(featureKey, priceTested) {
+  async function submitSurvey(featureKey) {
     const modal = document.getElementById("fb-survey-modal");
     if (!modal) return;
     const reaction = modal.querySelector('.fb-opt[data-q="reaction"].on');
@@ -112,7 +100,6 @@
 
     const vote = {
       feature: featureKey,
-      price_tested: priceTested,
       reaction: reaction.dataset.v,
       comment: comment.trim(),
       timestamp: new Date().toISOString(),
@@ -140,6 +127,84 @@
     toast("Merci ! Ton avis est précieux 🦆");
   }
 
+  function getPremiumFeedbackFields() {
+    const selected = document.querySelector(".premium-choice.on");
+    return {
+      interest: selected ? selected.dataset.interest : "",
+      email: (document.getElementById("premium-feedback-email")?.value || "").trim(),
+      message: (document.getElementById("premium-feedback-message")?.value || "").trim(),
+    };
+  }
+
+  function setPremiumFeedbackStatus(message, isError) {
+    const el = document.getElementById("premium-feedback-status");
+    if (!el) return;
+    el.textContent = message || "";
+    el.classList.toggle("is-error", !!isError);
+  }
+
+  function premiumSelectInterest(button) {
+    document.querySelectorAll(".premium-choice").forEach((b) => b.classList.remove("on"));
+    if (button) button.classList.add("on");
+    setPremiumFeedbackStatus("");
+  }
+
+  async function submitPremiumFeedback(event) {
+    if (event && event.preventDefault) event.preventDefault();
+    const fields = getPremiumFeedbackFields();
+    if (!fields.interest) {
+      setPremiumFeedbackStatus("Choisis d'abord ton niveau d'intérêt.", true);
+      return;
+    }
+    if (!fields.message) {
+      setPremiumFeedbackStatus("Écris au moins une phrase de feedback.", true);
+      return;
+    }
+
+    const vote = {
+      feature: "premium-general-feedback",
+      reaction: fields.interest,
+      email: fields.email,
+      comment: fields.message,
+      timestamp: new Date().toISOString(),
+      page: location.href,
+      ua: navigator.userAgent,
+    };
+    saveVote(vote);
+    setPremiumFeedbackStatus("Envoi en cours...");
+
+    try {
+      const res = await fetch(FORMSPREE_ENDPOINT, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Accept": "application/json" },
+        body: JSON.stringify(vote),
+      });
+      if (!res.ok) throw new Error("HTTP " + res.status);
+      setPremiumFeedbackStatus("Merci, c'est envoyé.");
+      const form = document.getElementById("premium-feedback-form");
+      if (form) form.reset();
+      document.querySelectorAll(".premium-choice").forEach((b) => b.classList.remove("on"));
+      toast("Feedback envoyé. Merci !");
+    } catch (e) {
+      const subject = encodeURIComponent("Feedback Premium CULTURE!!!");
+      const body = encodeURIComponent(
+        "Intérêt : " + fields.interest + "\n" +
+        "Email : " + (fields.email || "-") + "\n\n" +
+        fields.message
+      );
+      const mailto = "mailto:alicebrun2106@gmail.com?subject=" + subject + "&body=" + body;
+      const el = document.getElementById("premium-feedback-status");
+      if (el) {
+        el.textContent = "Envoi auto bloqué. ";
+        el.classList.add("is-error");
+        const link = document.createElement("a");
+        link.href = mailto;
+        link.textContent = "Envoyer par email";
+        el.appendChild(link);
+      }
+    }
+  }
+
   // ─── Admin : visualiser tous les votes locaux ───
   function showAdminVotes() {
     const all = loadVotes();
@@ -148,7 +213,7 @@
       return;
     }
     const txt = "VOTES LOCAUX (" + all.length + ") :\n\n" + all.map((v, i) =>
-      `[${i+1}] ${v.feature}\n  Prix testé: ${v.price_tested || "n/a"} → ${v.reaction || v.usage || "?"}\n  ` + (v.comment ? `Commentaire: ${v.comment}\n  ` : "") + `Date: ${v.timestamp}`
+      `[${i+1}] ${v.feature}\n  Réaction: ${v.reaction || v.usage || "?"}\n  ` + (v.comment ? `Commentaire: ${v.comment}\n  ` : "") + `Date: ${v.timestamp}`
     ).join("\n\n");
     alert(txt);
   }
@@ -176,4 +241,6 @@
   window.fbCloseSurvey = closeSurvey;
   window.fbSubmitSurvey = submitSurvey;
   window.fbShowAdminVotes = showAdminVotes;
+  window.premiumSelectInterest = premiumSelectInterest;
+  window.submitPremiumFeedback = submitPremiumFeedback;
 })();

@@ -6,15 +6,47 @@
   const USER_PACKS_KEY = "qpuc-user-packs";
   const PACK_EXTRAS_KEY = "qpuc-pack-extras"; // { packId: [{front, back, memo}, ...] }
 
+  function isLegacyDevPack(pack) {
+    const id = String((pack && pack.id) || "").toLowerCase();
+    const name = String((pack && pack.name) || "").toLowerCase();
+    return id.includes("codex-test") ||
+      id.includes("test-paquet-codex") ||
+      name === "test paquet codex" ||
+      name.includes("test paquet codex");
+  }
+
   function loadUserPacks() {
-    try { return JSON.parse(localStorage.getItem(USER_PACKS_KEY) || "[]"); } catch { return []; }
+    try {
+      const packs = JSON.parse(localStorage.getItem(USER_PACKS_KEY) || "[]");
+      return Array.isArray(packs) ? packs.filter((pack) => !isLegacyDevPack(pack)) : [];
+    } catch { return []; }
   }
   function saveUserPacks(packs) { localStorage.setItem(USER_PACKS_KEY, JSON.stringify(packs)); }
+
+  function cleanupLegacyDevPacks() {
+    try {
+      const raw = JSON.parse(localStorage.getItem(USER_PACKS_KEY) || "[]");
+      if (!Array.isArray(raw)) return;
+      const cleaned = raw.filter((pack) => !isLegacyDevPack(pack));
+      if (cleaned.length !== raw.length) saveUserPacks(cleaned);
+    } catch {
+      // Rien à nettoyer si l'ancien stockage est illisible.
+    }
+  }
 
   function loadExtras() {
     try { return JSON.parse(localStorage.getItem(PACK_EXTRAS_KEY) || "{}"); } catch { return {}; }
   }
   function saveExtras(e) { localStorage.setItem(PACK_EXTRAS_KEY, JSON.stringify(e)); }
+  function getGlobalPacks() {
+    if (typeof FLASHCARD_PACKS !== "undefined") return FLASHCARD_PACKS;
+    if (typeof window.FLASHCARD_PACKS !== "undefined") return window.FLASHCARD_PACKS;
+    return null;
+  }
+  function refreshPackViews() {
+    if (typeof window.renderTrouver === "function") window.renderTrouver();
+    if (typeof window.renderMesPaquets === "function") window.renderMesPaquets();
+  }
 
   // ─── Modal helper ───
   function openModal(html, opts = {}) {
@@ -36,11 +68,12 @@
 
   // ─── Création d'un paquet ───
   function openCreator(prefill) {
-    const draft = prefill || { name: "", icon: "📦", description: "", cards: [{ front: "", back: "", memo: "" }] };
+    const draft = normalizeUserPackDraft(prefill || { name: "", icon: "📦", description: "", visibility: "private", cards: [{ front: "", back: "", memo: "" }] });
     renderCreator(draft);
   }
 
   function renderCreator(draft) {
+    const visibility = normalizeVisibility(draft);
     openModal(`
       <h2 class="mock-title">+ CRÉER MON PAQUET</h2>
       <p class="mock-sub">Donne-lui un nom, un emoji, et ajoute tes cartes une par une.</p>
@@ -48,16 +81,23 @@
       <label class="mock-label">NOM DU PAQUET</label>
       <input id="pc-name" class="mock-input" value="${escapeAttr(draft.name)}" placeholder="Ex : Mes pièges en histoire" maxlength="60">
 
-      <div class="pc-row-2">
-        <div>
-          <label class="mock-label">EMOJI</label>
-          <input id="pc-icon" class="mock-input" value="${escapeAttr(draft.icon)}" maxlength="2">
-        </div>
-        <div>
-          <label class="mock-label">DESCRIPTION COURTE</label>
-          <input id="pc-desc" class="mock-input" value="${escapeAttr(draft.description)}" placeholder="Une phrase qui résume le paquet" maxlength="120">
-        </div>
+      <label class="mock-label">EMOJI</label>
+      <input id="pc-icon" class="mock-input pc-icon-input" value="${escapeAttr(draft.icon)}" maxlength="2">
+
+      <label class="mock-label">VISIBILITÉ</label>
+      <div class="pc-visibility-row" role="radiogroup" aria-label="Visibilité du paquet">
+        <label class="pc-visibility-option">
+          <input type="radio" name="pc-visibility" value="private" ${visibility === "private" ? "checked" : ""}>
+          <span class="pc-visibility-title">PRIVÉ</span>
+          <span class="pc-visibility-sub">Seulement dans tes paquets. Invisible chez les amis et dans les paquets à voler.</span>
+        </label>
+        <label class="pc-visibility-option">
+          <input type="radio" name="pc-visibility" value="public" ${visibility === "public" ? "checked" : ""}>
+          <span class="pc-visibility-title">PUBLIC</span>
+          <span class="pc-visibility-sub">Visible dans le social et partageable avec les autres joueurs.</span>
+        </label>
       </div>
+      <p class="pc-safety-note">Les paquets publics sont filtrés automatiquement avant d'être visibles aux autres.</p>
 
       <label class="mock-label">CARTES</label>
       <div id="pc-cards" class="pc-cards"></div>
@@ -114,7 +154,9 @@
     const draft = window.__pcDraft;
     const name = document.getElementById("pc-name").value.trim();
     const icon = document.getElementById("pc-icon").value.trim() || "📦";
-    const desc = document.getElementById("pc-desc").value.trim();
+    const desc = "";
+    const visibilityInput = document.querySelector('input[name="pc-visibility"]:checked');
+    const visibility = visibilityInput && visibilityInput.value === "public" ? "public" : "private";
 
     if (!name) { toast("Donne un nom à ton paquet."); return; }
     const validCards = draft.cards.filter((c) => c.front.trim() && c.back.trim());
@@ -129,12 +171,25 @@
       difficulty: "perso",
       reversible: true,
       isUserPack: true,
+      visibility,
+      isPublic: visibility === "public",
       cards: validCards.map((c) => ({
         front: c.front.trim(),
         back: c.back.trim(),
         memo: (c.memo || "").trim()
       }))
     };
+
+    if (visibility === "public") {
+      const safetyResult = checkPublicSafety(pack);
+      if (!safetyResult.ok) {
+        const safety = window.CultureContentSafety;
+        toast(safety && typeof safety.summarize === "function"
+          ? safety.summarize(safetyResult)
+          : "Ce paquet ne peut pas être public. Mets-le en privé ou reformule.");
+        return;
+      }
+    }
 
     // Update si existant, sinon push
     const idx = userPacks.findIndex((p) => p.id === pack.id);
@@ -144,24 +199,26 @@
 
     // Inject dans FLASHCARD_PACKS pour que tout le reste de l'app le voit
     injectUserPacksIntoGlobal();
+    if (typeof window.addPack === "function") window.addPack(pack.id);
 
     closeModal();
-    toast(`Paquet "${name}" sauvegardé.`);
-    // Refresh la page Trouver
-    if (typeof window.renderTrouver === "function") window.renderTrouver();
+    toast(`Paquet "${name}" sauvegardé en ${visibility === "public" ? "public" : "privé"}.`);
+    refreshPackViews();
   }
 
   // ─── Ajout de cartes à un paquet auto-généré ───
   function openAddCardsTo(packId) {
-    if (typeof FLASHCARD_PACKS === "undefined") return;
-    const pack = FLASHCARD_PACKS.find((p) => p.id === packId) || loadUserPacks().find((p) => p.id === packId);
+    const packs = getGlobalPacks();
+    if (!packs) return;
+    const pack = packs.find((p) => p.id === packId) || loadUserPacks().find((p) => p.id === packId);
     if (!pack) { toast("Paquet introuvable."); return; }
 
     const extras = loadExtras()[packId] || [];
+    const safePackId = escapeJs(packId);
 
     openModal(`
       <h2 class="mock-title">+ AJOUTER DES CARTES</h2>
-      <p class="mock-sub">Paquet : <strong>${pack.icon || "📦"} ${escapeHtml(pack.name)}</strong></p>
+      <p class="mock-sub">Paquet : <strong>${escapeHtml(pack.icon || "📦")} ${escapeHtml(pack.name)}</strong></p>
       <p class="mock-muted">Ces cartes s'ajoutent à celles du paquet. Tu peux les ajouter une par une.</p>
 
       <div id="extras-list">
@@ -170,7 +227,7 @@
             <div><strong>${escapeHtml(c.front)}</strong></div>
             <div class="extras-back">→ ${escapeHtml(c.back)}</div>
             ${c.memo ? `<div class="extras-memo">${escapeHtml(c.memo)}</div>` : ""}
-            <button class="pc-del" onclick="window.packCreatorRemoveExtra('${packId}', ${i})">✕</button>
+            <button class="pc-del" onclick="window.packCreatorRemoveExtra('${safePackId}', ${i})">✕</button>
           </div>
         `).join("")}
       </div>
@@ -185,7 +242,7 @@
 
       <div class="pc-actions">
         <button class="btn" onclick="window.closePackCreator()">FERMER</button>
-        <button class="btn btn-y" onclick="window.packCreatorSaveExtra('${packId}')">+ AJOUTER</button>
+        <button class="btn btn-y" onclick="window.packCreatorSaveExtra('${safePackId}')">+ AJOUTER</button>
       </div>
     `, { wide: true });
   }
@@ -203,6 +260,7 @@
 
     // Injecte ces extras dans FLASHCARD_PACKS pour que la session les voie
     injectExtrasIntoGlobal();
+    refreshPackViews();
 
     toast("Carte ajoutée.");
     openAddCardsTo(packId); // refresh
@@ -213,23 +271,41 @@
     extras[packId].splice(i, 1);
     saveExtras(extras);
     injectExtrasIntoGlobal();
+    refreshPackViews();
     openAddCardsTo(packId);
+  }
+
+  function deleteUserPack(packId) {
+    const packs = loadUserPacks().filter((p) => p.id !== packId);
+    saveUserPacks(packs);
+    const extras = loadExtras();
+    delete extras[packId];
+    saveExtras(extras);
+    if (typeof window.removePack === "function") window.removePack(packId);
+    injectUserPacksIntoGlobal();
+    injectExtrasIntoGlobal();
+    refreshPackViews();
+    toast("Paquet supprimé.");
   }
 
   // ─── Injection des paquets/extras dans la donnée globale ───
   // Idempotent : on retire d'abord puis on rajoute. Marqueur isUserPack pour le repérer.
   function injectUserPacksIntoGlobal() {
-    if (typeof window.FLASHCARD_PACKS === "undefined") return;
+    const packs = getGlobalPacks();
+    if (!packs) return;
     // Retire d'anciens paquets perso (marqueur isUserPack)
-    window.FLASHCARD_PACKS = window.FLASHCARD_PACKS.filter((p) => !p.isUserPack);
+    for (let i = packs.length - 1; i >= 0; i--) {
+      if (packs[i] && packs[i].isUserPack) packs.splice(i, 1);
+    }
     // Réinjecte depuis localStorage
-    const userPacks = loadUserPacks();
-    for (const p of userPacks) window.FLASHCARD_PACKS.push(p);
+    const userPacks = loadUserPacks().map(normalizeUserPackDraft);
+    for (const p of userPacks) packs.push(p);
   }
   function injectExtrasIntoGlobal() {
-    if (typeof window.FLASHCARD_PACKS === "undefined") return;
+    const packs = getGlobalPacks();
+    if (!packs) return;
     const extras = loadExtras();
-    for (const pack of window.FLASHCARD_PACKS) {
+    for (const pack of packs) {
       // On retire d'abord les anciens extras (marquant via _extra) puis on réinjecte
       pack.cards = pack.cards.filter((c) => !c._extra);
       const list = extras[pack.id];
@@ -255,6 +331,29 @@
     return String(s || "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   }
   function escapeAttr(s) { return escapeHtml(s).replace(/`/g, "&#96;"); }
+  function escapeJs(s) {
+    return String(s || "").replace(/\\/g, "\\\\").replace(/'/g, "\\'").replace(/\n/g, "\\n").replace(/\r/g, "\\r");
+  }
+  function normalizeVisibility(pack) {
+    if (!pack) return "private";
+    if (pack.visibility === "public" || pack.isPublic === true) return "public";
+    return "private";
+  }
+  function normalizeUserPackDraft(pack) {
+    const normalized = { ...pack };
+    normalized.visibility = normalizeVisibility(normalized);
+    normalized.isPublic = normalized.visibility === "public";
+    normalized.isUserPack = true;
+    normalized.cards = Array.isArray(normalized.cards) && normalized.cards.length
+      ? normalized.cards
+      : [{ front: "", back: "", memo: "" }];
+    return normalized;
+  }
+  function checkPublicSafety(pack) {
+    const safety = window.CultureContentSafety;
+    if (!safety || typeof safety.checkPack !== "function") return { ok: true, reasons: [] };
+    return safety.checkPack(pack);
+  }
 
   // ─── Exports ───
   window.openPackCreator           = openCreator;
@@ -266,11 +365,15 @@
   window.openAddCardsToPack        = openAddCardsTo;
   window.packCreatorSaveExtra      = saveExtra;
   window.packCreatorRemoveExtra    = removeExtra;
+  window.deleteUserPack            = deleteUserPack;
 
   // Au chargement, on injecte ce qui existe en localStorage dans la donnée globale
   function initInject() {
+    cleanupLegacyDevPacks();
     injectUserPacksIntoGlobal();
     injectExtrasIntoGlobal();
+    refreshPackViews();
+    if (typeof window.handleInitialOpenSession === "function") window.handleInitialOpenSession();
   }
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", initInject);

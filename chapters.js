@@ -25,7 +25,7 @@ const CHAPTERS = [
     packIds: [
       "capitales-monde", "fleuves-monde", "monuments-monde", "monnaies-monde",
       "presidents-usa", "geopolitique-monde", "institutions-internationales",
-      "histoire-ancienne-mytho",
+      "histoire-ancienne-mytho", "alexandre-le-grand",
     ],
   },
   {
@@ -36,9 +36,11 @@ const CHAPTERS = [
     packIds: [
       "termes-medicaux", "suffixes-medicaux", "sciences-medecine-quiz", "sciences-medecine-pdf",
       "sciences-etonnantes", "corps-humain", "corps-humain-insolite", "os-anatomie",
+      "quiz-confirme-medecine-anatomie", "quiz-confirme-psychologie-societe",
       "mathematiques-celebres", "maths-sciences-bases",
       "inventions", "inventions-objets-quotidien", "inventeurs-celebres",
-      "botanique", "geologie-geo",
+      "botanique", "botanique-plantes-fruits", "geologie-geo",
+      "daily-black-holes",
       "animaux-insolites", "animaux-insolites-2", "animaux-noms-alternatifs", "familles-animaux",
     ],
   },
@@ -64,7 +66,8 @@ const CHAPTERS = [
     packIds: [
       "cinema-realisateurs-cultes", "cinema-series", "cinema-tv-pdf",
       "films-cultes", "prix-cinema", "personnages-principaux",
-      "cinema-francais", "acteurs-cultes-monde",
+      "cinema-francais", "acteurs-cultes-monde", "alien-prometheus",
+      "quiz-confirme-series-tv", "quiz-confirme-cinema-acteurs",
     ],
   },
   {
@@ -124,15 +127,8 @@ const CHAPTERS = [
     packIds: [
       "trivia-curiosites-monde", "records-chiffres-insolites", "records-stats",
       "funfacts-culture-g", "questions-pieges", "tissus-divers",
-      "idees-recues-misconceptions",
+      "idees-recues-misconceptions", "quiz-confirme-culture-generale",
     ],
-  },
-  {
-    id: "douze-coups",
-    name: "12 Coups de Midi",
-    icon: "📺",
-    description: "Questions et fun facts du jeu de Jean-Luc Reichmann",
-    packIds: ["12-coups-midi"],
   },
 ];
 

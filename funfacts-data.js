@@ -1,6 +1,6 @@
 // Fun Facts — Packs pour les 12 Coups de Midi
 // Infos insolites, culture générale flash, régions, gastronomie
-const FUNFACTS_PACKS = [
+var FUNFACTS_PACKS = [
 
   // ===== 1. ANIMAUX INSOLITES =====
   {
@@ -596,7 +596,7 @@ const FUNFACTS_PACKS = [
 
   // --- BOTANIQUE ---
   {
-    id: "botanique",
+    id: "botanique-plantes-fruits",
     name: "Botanique : plantes & fruits",
     icon: "🌿",
     description: "Noms de plantes, fruits exotiques, arbres et champignons",
@@ -2710,7 +2710,7 @@ const FUNFACTS_PACKS = [
       {front: "Quels sont les vrais noms des Daft Punk ?", back: "Thomas Bangalter et Guy-Manuel de Homem-Christo", memo: "Duo français, toujours masqués."},
       {front: "Qui a chanté « Mistral gagnant » ?", back: "Renaud (Renaud Séchan)", memo: "Le « loubard » de la chanson française."},
       {front: "Qui a écrit « Je te promets » et « Envole-moi » ?", back: "Jean-Jacques Goldman", memo: "Aussi compositeur pour Céline Dion."},
-      {front: "Qui a chanté « Je l'aime à mourir » (1979) ?", back: "Francis Cabrel", memo: "Originaire d'Astaffort (Lot-et-Garonne)."},
+      {front: "Quel groupe français a sorti « Un autre monde » (1984) ?", back: "Téléphone", memo: "Titre phare de l'album du même nom, avec Jean-Louis Aubert."},
       {front: "Quel est le vrai nom de Charles Aznavour ?", back: "Shahnour Varinag Aznavourian", memo: "D'origine arménienne. 1 400+ chansons."},
       {front: "Quel groupe français de new wave est mené par Nicola Sirkis ?", back: "Indochine", memo: "Premier hit : L'Aventurier (1982)."},
     ],
@@ -3074,6 +3074,141 @@ const FUNFACTS_PACKS = [
       {front: "Que signifie « tenir le cap » ?", back: "Rester fidèle à ses objectifs malgré les difficultés", memo: "Le cap = la direction du navire."},
       {front: "Que signifie « c'est un vrai cap Horn » ?", back: "C'est une épreuve très difficile", memo: "Le cap Horn : tempêtes, vagues géantes, courants."},
       {front: "Que signifie « arriver à bon port » ?", back: "Atteindre son objectif avec succès", memo: "Comme un navire qui rejoint le port après une traversée."},
+    ],
+  },
+
+  // ====== QUIZ CONFIRMÉ — SÉRIES TV ======
+  {
+    id: "quiz-confirme-series-tv",
+    name: "Séries télévisées",
+    icon: "📺",
+    description: "Quiz confirmé : questions courtes façon live sur les séries cultes",
+    difficulty: "intermediaire",
+    cards: [
+      {front: "Qui interprète Doug Ross dans la série « Urgences » ?", back: "George Clooney", memo: "Le rôle du pédiatre Doug Ross a lancé sa carrière mondiale."},
+      {front: "Comment se prénomme le chat noir de « Sabrina, l'apprentie sorcière » ?", back: "Salem", memo: "Son nom complet est Salem Saberhagen."},
+      {front: "Dans quelle ville fictive se déroule « Stranger Things » ?", back: "Hawkins", memo: "Hawkins est située dans l'Indiana dans la série."},
+      {front: "Qui est le patron de la branche Scranton dans « The Office » US ?", back: "Michael Scott", memo: "Il est joué par Steve Carell."},
+      {front: "Quelle série met en scène le publicitaire Don Draper ?", back: "Mad Men", memo: "La série se déroule dans le monde de la pub new-yorkaise des années 1960."},
+      {front: "Dans « Breaking Bad », quel est le prénom de l'associé de Walter White ?", back: "Jesse", memo: "Jesse Pinkman est interprété par Aaron Paul."},
+      {front: "Quel acteur joue Tony Soprano dans « Les Soprano » ?", back: "James Gandolfini", memo: "Il a reçu plusieurs Emmy Awards pour ce rôle."},
+      {front: "Dans « Friends », comment s'appelle le singe de Ross ?", back: "Marcel", memo: "Marcel apparaît dans les premières saisons."},
+      {front: "Dans « Game of Thrones », quelle famille a pour emblème un loup-garou ?", back: "La maison Stark", memo: "Leur devise : « Winter is coming »."},
+      {front: "Qui raconte une grande partie de « La Casa de Papel » ?", back: "Tokyo", memo: "Tokyo est à la fois personnage et narratrice."},
+      {front: "Quel est le prénom du frère que Michael Scofield veut sauver dans « Prison Break » ?", back: "Lincoln", memo: "Lincoln Burrows est condamné à mort au début de la série."},
+      {front: "Quels sont les deux agents principaux de « X-Files » ?", back: "Mulder et Scully", memo: "Fox Mulder et Dana Scully enquêtent sur le paranormal."},
+      {front: "Dans « Twin Peaks », qui est retrouvée morte au début de la série ?", back: "Laura Palmer", memo: "La question « Qui a tué Laura Palmer ? » a marqué la pop culture."},
+      {front: "Quelle série médicale suit Meredith Grey ?", back: "Grey's Anatomy", memo: "Le titre joue sur l'ouvrage d'anatomie « Gray's Anatomy »."},
+      {front: "Dans « Dr House », quel est le prénom du docteur House ?", back: "Gregory", memo: "Gregory House est joué par Hugh Laurie."},
+    ],
+  },
+
+  // ====== QUIZ CONFIRMÉ — CINÉMA & ACTEURS ======
+  {
+    id: "quiz-confirme-cinema-acteurs",
+    name: "Cinéma & acteurs",
+    icon: "🎬",
+    description: "Quiz confirmé : acteurs, réalisateurs et films cultes en questions directes",
+    difficulty: "intermediaire",
+    cards: [
+      {front: "Quel acteur interprète Neo dans « Matrix » ?", back: "Keanu Reeves", memo: "Neo est l'anagramme de One, « l'élu »."},
+      {front: "Qui réalise « Pulp Fiction » ?", back: "Quentin Tarantino", memo: "Le film obtient la Palme d'or à Cannes en 1994."},
+      {front: "Quel acteur incarne Travis Bickle dans « Taxi Driver » ?", back: "Robert De Niro", memo: "La réplique « You talkin' to me? » vient de ce film."},
+      {front: "Quel est le premier acteur à jouer James Bond au cinéma ?", back: "Sean Connery", memo: "Il apparaît dans « James Bond 007 contre Dr No » en 1962."},
+      {front: "Dans quel film entend-on « Je suis ton père » ?", back: "L'Empire contre-attaque", memo: "C'est l'épisode V de Star Wars."},
+      {front: "Qui réalise « Titanic » en 1997 ?", back: "James Cameron", memo: "Il réalise aussi « Avatar » et « Terminator 2 »."},
+      {front: "Quelle actrice joue Hermione Granger dans la saga Harry Potter ?", back: "Emma Watson", memo: "Elle est choisie enfant pour le premier film sorti en 2001."},
+      {front: "Qui réalise le film sud-coréen « Parasite » ?", back: "Bong Joon-ho", memo: "Le film remporte la Palme d'or puis l'Oscar du meilleur film."},
+      {front: "Dans quel Disney entend-on « Hakuna Matata » ?", back: "Le Roi lion", memo: "L'expression vient du swahili et signifie « pas de souci »."},
+      {front: "Quel acteur joue Jack Sparrow dans « Pirates des Caraïbes » ?", back: "Johnny Depp", memo: "Le personnage est devenu le symbole de la saga."},
+      {front: "Dans quelle saga apparaît Gollum ?", back: "Le Seigneur des anneaux", memo: "On le voit aussi dans « Le Hobbit »."},
+      {front: "Quelle actrice joue Amélie Poulain ?", back: "Audrey Tautou", memo: "Le film de Jean-Pierre Jeunet sort en 2001."},
+      {front: "Quel film de Spielberg met en scène un requin géant ?", back: "Les Dents de la mer", memo: "Le titre original est « Jaws »."},
+      {front: "Quel acteur joue le Joker dans le film « Joker » de 2019 ?", back: "Joaquin Phoenix", memo: "Il reçoit l'Oscar du meilleur acteur pour ce rôle."},
+      {front: "Quel compositeur est très associé aux films de Tim Burton ?", back: "Danny Elfman", memo: "Il compose notamment pour « Batman » et « Edward aux mains d'argent »."},
+    ],
+  },
+
+  // ====== QUIZ CONFIRMÉ — MÉDECINE & ANATOMIE ======
+  {
+    id: "quiz-confirme-medecine-anatomie",
+    name: "Médecine & anatomie",
+    icon: "🩺",
+    description: "Quiz confirmé : questions rapides sur le corps humain et les bases médicales",
+    difficulty: "intermediaire",
+    cards: [
+      {front: "Quel organe produit principalement l'insuline ?", back: "Le pancréas", memo: "L'insuline est sécrétée par les cellules bêta des îlots de Langerhans."},
+      {front: "Quel est le plus long os du corps humain ?", back: "Le fémur", memo: "Il se trouve dans la cuisse."},
+      {front: "Quelle est la plus grosse artère du corps humain ?", back: "L'aorte", memo: "Elle part du ventricule gauche du coeur."},
+      {front: "Quel est le plus petit os du corps humain ?", back: "L'étrier", memo: "Il se situe dans l'oreille moyenne."},
+      {front: "Quelle partie du cerveau coordonne l'équilibre et les mouvements ?", back: "Le cervelet", memo: "Cerebellum en latin signifie « petit cerveau »."},
+      {front: "Quels vaisseaux ramènent le sang vers le coeur ?", back: "Les veines", memo: "Les artères partent du coeur, les veines y reviennent."},
+      {front: "Comment s'appelle l'inflammation de l'appendice ?", back: "L'appendicite", memo: "Elle peut nécessiter une appendicectomie."},
+      {front: "Quel organe filtre le sang pour produire l'urine ?", back: "Le rein", memo: "Les reins filtrent en continu le plasma sanguin."},
+      {front: "Comment appelle-t-on le muscle du coeur ?", back: "Le myocarde", memo: "Myo = muscle, cardio = coeur."},
+      {front: "Quelles cellules transportent l'oxygène dans le sang ?", back: "Les globules rouges", memo: "Ils contiennent l'hémoglobine."},
+      {front: "Quelles cellules participent à la coagulation du sang ?", back: "Les plaquettes", memo: "On les appelle aussi thrombocytes."},
+      {front: "Quelle membrane entoure les poumons ?", back: "La plèvre", memo: "Elle facilite le glissement des poumons contre la cage thoracique."},
+      {front: "Dans quel organe se trouvent les cordes vocales ?", back: "Le larynx", memo: "Le larynx est la « boîte vocale »."},
+      {front: "Quelle hormone est associée au sommeil ?", back: "La mélatonine", memo: "Elle est sécrétée surtout la nuit."},
+      {front: "Quel est le nom des cellules nerveuses ?", back: "Les neurones", memo: "Ils transmettent l'information sous forme de signaux électriques et chimiques."},
+    ],
+  },
+
+  // ====== QUIZ CONFIRMÉ — PSYCHO & SOCIÉTÉ ======
+  {
+    id: "quiz-confirme-psychologie-societe",
+    name: "Psycho & société",
+    icon: "🧠",
+    description: "Quiz confirmé : psychologie, expériences célèbres et concepts de société",
+    difficulty: "expert",
+    cards: [
+      {front: "À quel psychologue américain doit-on l'expérience sur la soumission à l'autorité ?", back: "Stanley Milgram", memo: "L'expérience de Milgram est menée au début des années 1960."},
+      {front: "Quel psychologue est associé à l'expérience de la prison de Stanford ?", back: "Philip Zimbardo", memo: "L'étude date de 1971."},
+      {front: "Quel chercheur est lié au conditionnement classique avec des chiens ?", back: "Ivan Pavlov", memo: "Le réflexe de Pavlov est devenu une expression courante."},
+      {front: "Qui est associé à la théorie de l'attachement ?", back: "John Bowlby", memo: "Mary Ainsworth a ensuite développé la situation étrange."},
+      {front: "Quel psychologue a donné son nom à la pyramide des besoins ?", back: "Abraham Maslow", memo: "La pyramide est une représentation populaire de sa théorie."},
+      {front: "Qui formule la théorie de la dissonance cognitive ?", back: "Leon Festinger", memo: "Elle décrit le malaise entre croyances et actions contradictoires."},
+      {front: "Quel psychologue est associé à l'effet de simple exposition ?", back: "Robert Zajonc", memo: "Plus on voit souvent un stimulus, plus on tend à l'apprécier."},
+      {front: "Qui étudie l'impuissance apprise ?", back: "Martin Seligman", memo: "Le concept est ensuite lié à la psychologie positive."},
+      {front: "Comment appelle-t-on le fait de moins aider quand il y a beaucoup de témoins ?", back: "L'effet du témoin", memo: "Il est étudié par Latané et Darley."},
+      {front: "Quel biais fait surestimer la personnalité et sous-estimer la situation ?", back: "L'erreur fondamentale d'attribution", memo: "Classique en psychologie sociale."},
+      {front: "Quel effet désigne le fait que les moins compétents se surestiment ?", back: "L'effet Dunning-Kruger", memo: "Nommé d'après David Dunning et Justin Kruger."},
+      {front: "Quel économiste popularise le concept de « nudge » avec Cass Sunstein ?", back: "Richard Thaler", memo: "Le nudge influence sans interdire."},
+      {front: "Comment appelle-t-on la tendance d'un groupe à chercher le consensus au détriment du jugement critique ?", back: "La pensée de groupe", memo: "Le concept est associé à Irving Janis."},
+      {front: "Quel psychologue popularise l'état de concentration optimale appelé « flow » ?", back: "Mihaly Csikszentmihalyi", memo: "Le flow apparaît quand le défi et les compétences sont bien équilibrés."},
+      {front: "Que signifie QI ?", back: "Quotient intellectuel", memo: "C'est un score standardisé, pas une mesure totale de l'intelligence."},
+    ],
+  },
+
+  // ====== QUIZ CONFIRMÉ — CULTURE GÉNÉRALE ======
+  {
+    id: "quiz-confirme-culture-generale",
+    name: "Culture générale express",
+    icon: "🎯",
+    description: "Quiz confirmé : questions de culture générale courtes, nettes et variées",
+    difficulty: "intermediaire",
+    cards: [
+      {front: "Quelle est la capitale du Canada ?", back: "Ottawa", memo: "Ce n'est ni Toronto ni Montréal."},
+      {front: "Quel est le symbole chimique de l'or ?", back: "Au", memo: "Du latin aurum."},
+      {front: "Qui a peint « Guernica » ?", back: "Pablo Picasso", memo: "Le tableau dénonce le bombardement de Guernica en 1937."},
+      {front: "Qui a écrit « 1984 » ?", back: "George Orwell", memo: "Le roman est publié en 1949."},
+      {front: "Quelle est la plus grande planète du Système solaire ?", back: "Jupiter", memo: "C'est une géante gazeuse."},
+      {front: "Quelle est la monnaie du Japon ?", back: "Le yen", memo: "Son symbole est ¥."},
+      {front: "Quel océan se trouve entre l'Afrique et l'Australie ?", back: "L'océan Indien", memo: "Il borde aussi l'Inde, Madagascar et l'Indonésie."},
+      {front: "Quelle femme reçoit deux prix Nobel dans deux disciplines scientifiques différentes ?", back: "Marie Curie", memo: "Physique en 1903, chimie en 1911."},
+      {front: "Dans quelle ville italienne se trouve la tour penchée ?", back: "Pise", memo: "La tour est le campanile de la cathédrale."},
+      {front: "Quel dieu nordique manie le marteau Mjöllnir ?", back: "Thor", memo: "Mjöllnir est son marteau mythologique."},
+      {front: "Dans quelle ville se trouve le musée du Prado ?", back: "Madrid", memo: "C'est l'un des grands musées d'art européens."},
+      {front: "Qui a écrit « Le Petit Prince » ?", back: "Antoine de Saint-Exupéry", memo: "Le livre paraît en 1943."},
+      {front: "Quel instrument compte généralement 88 touches ?", back: "Le piano", memo: "52 touches blanches et 36 noires sur un piano moderne."},
+      {front: "Quel pays est traditionnellement associé à l'invention du papier ?", back: "La Chine", memo: "Cai Lun est souvent cité pour l'amélioration du procédé au IIe siècle."},
+      {front: "Qui a peint « La Joconde » ?", back: "Léonard de Vinci", memo: "Le tableau est exposé au Louvre."},
+      {front: "Quel pays a pour capitale Reykjavik ?", back: "L'Islande", memo: "C'est la capitale la plus septentrionale d'un État souverain."},
+      {front: "Quel métal liquide à température ambiante a pour symbole Hg ?", back: "Le mercure", memo: "Hg vient de hydrargyrum."},
+      {front: "Quel écrivain français crée le personnage de Jean Valjean ?", back: "Victor Hugo", memo: "Jean Valjean est le héros des « Misérables »."},
+      {front: "Quelle planète est surnommée la planète rouge ?", back: "Mars", memo: "Sa couleur vient de l'oxyde de fer présent à sa surface."},
+      {front: "Quel pays a remporté la Coupe du monde de football 2018 ?", back: "La France", memo: "Finale : France 4-2 Croatie."},
     ],
   },
 

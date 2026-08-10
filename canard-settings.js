@@ -2,6 +2,10 @@
 // Bouton "Je veux le canard sur mon écran" + tous les contrôles (skin, taille, timer, visibilité)
 
 (function () {
+  const LEGACY_DESKTOP_ACTIVE_KEY = "qpuc-desktop-active";
+  const DESKTOP_LAUNCH_AT_KEY = "qpuc-desktop-launch-at";
+  const RECENT_LAUNCH_MS = 2 * 60 * 1000;
+
   // Déclencheur fiable du protocole canard:// — l'iframe est bloquée par
   // certains navigateurs depuis HTTPS, donc on clique sur un <a> caché.
   function triggerCanard(url) {
@@ -13,12 +17,38 @@
     setTimeout(() => a.remove(), 500);
   }
 
+  function clearFakeDesktopActiveState() {
+    localStorage.removeItem(LEGACY_DESKTOP_ACTIVE_KEY);
+  }
+
+  function getRecentLaunchAttempt() {
+    const ts = Number(localStorage.getItem(DESKTOP_LAUNCH_AT_KEY) || 0);
+    return Number.isFinite(ts) && ts > 0 && Date.now() - ts < RECENT_LAUNCH_MS;
+  }
+
+  function setLaunchButtonIdle(btn) {
+    btn.textContent = getRecentLaunchAttempt()
+      ? "RELANCER LE CANARD SUR LE BUREAU"
+      : "JE VEUX LE CANARD SUR MON ÉCRAN";
+    btn.classList.toggle("duck-launching", getRecentLaunchAttempt());
+    btn.classList.remove("duck-launched");
+    btn.disabled = false;
+  }
+
   function refresh() {
-    if (typeof Duck === "undefined") return;
-    const s = Duck.getState();
-    const LEVEL = Duck.LEVEL_INFO;
-    const currentLvl = Duck.currentLevel();
-    const autoLvl = Duck.levelFromScore(s.score);
+    clearFakeDesktopActiveState();
+    const duck = window.Duck;
+    if (!duck) {
+      const launchBtn = document.getElementById("btn-launch-desktop-duck");
+      if (launchBtn && launchBtn.dataset.launching !== "1") {
+        setLaunchButtonIdle(launchBtn);
+      }
+      return;
+    }
+    const s = duck.getState();
+    const LEVEL = duck.LEVEL_INFO;
+    const currentLvl = duck.currentLevel();
+    const autoLvl = duck.levelFromScore(s.score);
 
     // Score display
     const scoreEl = document.getElementById("duck-score-display");
@@ -59,8 +89,8 @@
         `;
         card.onclick = () => {
           if (locked) return;
-          Duck.update({ forcedLevel: i });
-          Duck.render();
+          duck.update({ forcedLevel: i });
+          duck.render();
           refresh();
         };
         row.appendChild(card);
@@ -72,8 +102,8 @@
     if (autoEl) {
       autoEl.checked = !s.forcedLevel;
       autoEl.onchange = () => {
-        if (autoEl.checked) Duck.update({ forcedLevel: null });
-        Duck.render();
+        if (autoEl.checked) duck.update({ forcedLevel: null });
+        duck.render();
         refresh();
       };
     }
@@ -82,8 +112,8 @@
     document.querySelectorAll(".duck-size-btn").forEach((b) => {
       b.classList.toggle("on", b.dataset.size === s.size);
       b.onclick = () => {
-        Duck.update({ size: b.dataset.size });
-        Duck.render();
+        duck.update({ size: b.dataset.size });
+        duck.render();
         triggerCanard("canard://size-" + b.dataset.size);
         refresh();
       };
@@ -94,8 +124,8 @@
       const val = parseInt(b.dataset.interval, 10);
       b.classList.toggle("on", val === s.intervalMin);
       b.onclick = () => {
-        Duck.update({ intervalMin: val });
-        Duck.render();
+        duck.update({ intervalMin: val });
+        duck.render();
         triggerCanard("canard://interval-" + val);
         refresh();
       };
@@ -106,7 +136,7 @@
     if (nameEl) {
       nameEl.value = s.name || "";
       nameEl.oninput = () => {
-        Duck.update({ name: nameEl.value.trim() });
+        duck.update({ name: nameEl.value.trim() });
         // Update label preview si nom donné
         const lbl = document.getElementById("duck-skin-label");
         if (lbl) {
@@ -121,7 +151,7 @@
     if (resetBtn) {
       resetBtn.onclick = () => {
         if (!confirm("Reset le score à 0 ? (web + bureau)")) return;
-        Duck.resetScore();
+        duck.resetScore();
         triggerCanard("canard://reset-score");
         refresh();
       };
@@ -132,29 +162,23 @@
     if (deactivateBtn) {
       deactivateBtn.onclick = () => {
         if (!confirm("Désactiver le canard ? (ferme l'app desktop)")) return;
-        Duck.update({ enabled: false });
-        Duck.render();
+        duck.update({ enabled: false });
+        duck.render();
         triggerCanard("canard://quit");
-        localStorage.removeItem("qpuc-desktop-active");
+        clearFakeDesktopActiveState();
+        localStorage.removeItem(DESKTOP_LAUNCH_AT_KEY);
         // Reset bouton launch
         const launchBtn = document.getElementById("btn-launch-desktop-duck");
         if (launchBtn) {
-          launchBtn.textContent = "JE VEUX LE CANARD SUR MON ÉCRAN";
-          launchBtn.classList.remove("duck-launched");
+          setLaunchButtonIdle(launchBtn);
         }
       };
     }
 
-    // Bouton launch : update label si desktop actif
+    // Bouton launch : ne jamais afficher "actif" sans confirmation desktop.
     const launchBtn = document.getElementById("btn-launch-desktop-duck");
-    if (launchBtn) {
-      if (localStorage.getItem("qpuc-desktop-active") === "1") {
-        launchBtn.textContent = "✓ CANARD ACTIF SUR LE BUREAU";
-        launchBtn.classList.add("duck-launched");
-      } else {
-        launchBtn.textContent = "JE VEUX LE CANARD SUR MON ÉCRAN";
-        launchBtn.classList.remove("duck-launched");
-      }
+    if (launchBtn && launchBtn.dataset.launching !== "1") {
+      setLaunchButtonIdle(launchBtn);
     }
   }
 
@@ -166,17 +190,24 @@
     if (!btn) return;
     btn.onclick = () => {
       const hint = document.getElementById("duck-launch-hint");
+      clearFakeDesktopActiveState();
+      localStorage.setItem(DESKTOP_LAUNCH_AT_KEY, String(Date.now()));
       triggerCanard("canard://launch");
       // Cache le canard web (le desktop prend le relais)
-      if (typeof Duck !== "undefined") {
-        Duck.update({ enabled: false });
-        Duck.render();
+      if (window.Duck) {
+        window.Duck.update({ enabled: false });
+        window.Duck.render();
       }
-      localStorage.setItem("qpuc-desktop-active", "1");
       if (hint) hint.style.display = "";
-      btn.textContent = "✓ CANARD LANCÉ SUR LE BUREAU";
-      btn.classList.add("duck-launched");
-      setTimeout(refresh, 100);
+      btn.dataset.launching = "1";
+      btn.disabled = true;
+      btn.textContent = "OUVERTURE DU CANARD...";
+      btn.classList.add("duck-launching");
+      btn.classList.remove("duck-launched");
+      setTimeout(() => {
+        delete btn.dataset.launching;
+        refresh();
+      }, 1400);
     };
   }
 
@@ -201,4 +232,5 @@
   } else {
     setTimeout(() => { refresh(); setupLaunchButton(); }, 200);
   }
+  setTimeout(() => { setupLaunchButton(); refresh(); }, 1000);
 })();

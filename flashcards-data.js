@@ -1,5 +1,5 @@
 // Flashcards QPUC - Packs de révision
-const FLASHCARD_PACKS = [
+var FLASHCARD_PACKS = [
   {
     id: "chefs-lieux",
     name: "Chefs-lieux des départements",

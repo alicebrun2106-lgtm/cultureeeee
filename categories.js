@@ -37,8 +37,10 @@ const CATEGORIES = [
     packIds: [
       "termes-medicaux", "suffixes-medicaux", "sciences-medecine-quiz", "sciences-medecine-pdf",
       "sciences-etonnantes", "corps-humain", "corps-humain-insolite", "os-anatomie",
+      "quiz-confirme-medecine-anatomie", "quiz-confirme-psychologie-societe",
       "mathematiques-celebres", "maths-sciences-bases",
       "inventions", "inventions-objets-quotidien", "inventeurs-celebres",
+      "daily-black-holes",
     ],
   },
   {
@@ -78,7 +80,7 @@ const CATEGORIES = [
     packIds: [
       "politique-france-recente", "presidents-francais", "presidents-usa",
       "institutions-france", "institutions-internationales",
-      "geopolitique-monde", "philosophie",
+      "geopolitique-monde", "philosophie", "etudes-societales-recentes",
     ],
   },
   {
@@ -101,12 +103,13 @@ const CATEGORIES = [
     packIds: [
       "cinema-realisateurs-cultes", "cinema-series", "cinema-tv-pdf",
       "films-cultes", "prix-cinema", "personnages-principaux",
-      "alien-prometheus",
+      "cinema-francais", "acteurs-cultes-monde", "alien-prometheus",
+      "quiz-confirme-series-tv", "quiz-confirme-cinema-acteurs",
       "musique-tubes-artistes", "musique-albums-cles", "musique-vrais-prenoms",
       "musique-paroles-celebres", "musique-culture-liens",
       "beatles", "rolling-stones", "instruments-musique",
       "musique-pop", "musique-bases", "musique-classique", "musique-classique-variete",
-      "musique-groupes",
+      "musique-groupes", "chansons-francaises",
       "pop-culture-fr", "pop-culture-bases", "actu-societe",
     ],
   },
@@ -118,9 +121,10 @@ const CATEGORIES = [
     description: "Records, fun facts, animaux, vie quotidienne",
     packIds: [
       "animaux-insolites", "animaux-insolites-2", "animaux-noms-alternatifs", "familles-animaux",
-      "botanique",
+      "botanique", "botanique-plantes-fruits",
       "trivia-curiosites-monde", "records-chiffres-insolites", "records-stats",
-      "funfacts-culture-g", "questions-pieges", "tissus-divers",
+      "funfacts-culture-g", "questions-pieges", "tissus-divers", "idees-recues-misconceptions",
+      "quiz-confirme-culture-generale",
       "vie-quotidienne-admin", "stats-france",
       "gastronomie", "gastronomie-pdf", "gastronomie-techniques", "vins-cepages",
       "navigation-maritime", "voile-regates",

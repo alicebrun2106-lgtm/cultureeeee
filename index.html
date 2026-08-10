@@ -12,6 +12,7 @@
 
 <!-- Opt-out du mode sombre forcé par Samsung/Chrome/etc. Le site est light-only. -->
 <meta name="color-scheme" content="light only">
+<meta name="supported-color-schemes" content="light">
 
 <!-- iOS : install via "Sur l'écran d'accueil" depuis Safari -->
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -22,7 +23,20 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=VT323&family=Press+Start+2P&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=73">
+<link rel="stylesheet" href="style.css?v=98">
+<script>
+  (function () {
+    var standalone = window.matchMedia && window.matchMedia("(display-mode: standalone)").matches;
+    var appPreview = false;
+    try {
+      var params = new URLSearchParams(window.location.search);
+      appPreview = params.get("app") === "1" || params.get("mode") === "app";
+    } catch (e) {}
+    if (standalone || window.navigator.standalone === true || appPreview) {
+      document.documentElement.classList.add("standalone-app");
+    }
+  })();
+</script>
 </head>
 <body>
 
@@ -34,7 +48,9 @@
       <a href="#" data-tab="trouver" class="active" onclick="goToTab('trouver'); return false;">TROUVER</a>
       <a href="#" data-tab="mes-paquets" onclick="goToTab('mes-paquets'); return false;">MES PAQUETS</a>
       <a href="#" data-tab="social" onclick="goToTab('social'); return false;">SOCIAL</a>
-      <a href="#" data-tab="canard" onclick="goToTab('canard'); return false;">🦆 CANARD</a>
+      <a href="#" data-tab="premium" onclick="goToTab('premium'); return false;">PREMIUM</a>
+      <a href="#" data-tab="account" onclick="goToTab('account'); return false;">COMPTE</a>
+      <a href="#" data-tab="canard" class="site-only" onclick="goToTab('canard'); return false;">🦆 CANARD</a>
     </div>
     <span class="nav-stats-hidden" id="nav-stats" style="display:none">— PAQUETS</span>
   </div>
@@ -55,9 +71,58 @@
     var icon = document.getElementById('theme-toggle-icon');
     if (icon) icon.textContent = isDark ? '☀️' : '🌙';
   }
+  function scrollToPacks() {
+    var target = document.getElementById('section-trouver');
+    if (!target) return;
+    if (window.history && window.history.pushState) {
+      window.history.pushState(null, '', '#section-trouver');
+    } else {
+      window.location.hash = 'section-trouver';
+    }
+    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+  function openAccountSignup() {
+    if (window.CultureAuth && typeof window.CultureAuth.setMode === 'function') {
+      window.CultureAuth.setMode('signup');
+    }
+    if (typeof window.goToTab === 'function') window.goToTab('account');
+  }
+  function refreshLandingAuthNudge() {
+    var el = document.getElementById('landing-auth-nudge');
+    if (!el) return;
+    var signedIn = !!(window.CultureAuth && typeof window.CultureAuth.isSignedIn === 'function' && window.CultureAuth.isSignedIn());
+    var shouldSuggestLogin = localStorage.getItem('qpuc-onboarding-auth-after-pack') === '1';
+    el.hidden = signedIn || !shouldSuggestLogin;
+  }
+  function markFirstPackAction() {
+    localStorage.setItem('qpuc-onboarding-auth-after-pack', '1');
+    refreshLandingAuthNudge();
+  }
+  function openStarterPackCreator() {
+    if (typeof window.openPackCreator === 'function') {
+      window.openPackCreator();
+      return;
+    }
+    var fallback = document.getElementById('btn-create-pack-main');
+    if (fallback) fallback.click();
+  }
+  window.scrollToPacks = scrollToPacks;
+  window.openAccountSignup = openAccountSignup;
+  window.refreshLandingAuthNudge = refreshLandingAuthNudge;
+  window.markFirstPackAction = markFirstPackAction;
+  window.openStarterPackCreator = openStarterPackCreator;
   document.addEventListener('DOMContentLoaded', function() {
     var icon = document.getElementById('theme-toggle-icon');
     if (icon && document.documentElement.classList.contains('dark')) icon.textContent = '☀️';
+    var addBtn = document.getElementById('start-add-packs');
+    var createBtn = document.getElementById('start-create-pack');
+    var downBtn = document.getElementById('start-down-packs');
+    var accountBtn = document.getElementById('start-account-signup');
+    if (addBtn) addBtn.addEventListener('click', scrollToPacks);
+    if (createBtn) createBtn.addEventListener('click', openStarterPackCreator);
+    if (downBtn) downBtn.addEventListener('click', scrollToPacks);
+    if (accountBtn) accountBtn.addEventListener('click', openAccountSignup);
+    refreshLandingAuthNudge();
   });
 </script>
 
@@ -75,7 +140,15 @@
     <span class="mtab-icon">👥</span>
     <span class="mtab-label">SOCIAL</span>
   </a>
-  <a href="#" data-tab="canard" class="mtab" onclick="goToTab('canard'); return false;">
+  <a href="#" data-tab="premium" class="mtab" onclick="goToTab('premium'); return false;">
+    <span class="mtab-icon">★</span>
+    <span class="mtab-label">PREMIUM</span>
+  </a>
+  <a href="#" data-tab="account" class="mtab" onclick="goToTab('account'); return false;">
+    <span class="mtab-icon">☻</span>
+    <span class="mtab-label">COMPTE</span>
+  </a>
+  <a href="#" data-tab="canard" class="mtab site-only" onclick="goToTab('canard'); return false;">
     <span class="mtab-icon">🦆</span>
     <span class="mtab-label">CANARD</span>
   </a>
@@ -97,39 +170,41 @@
 
         <div class="hero-grid">
           <div class="hero-left">
-            <div class="hero-eyebrow">UN PEU DE CULTURE CHAQUE JOUR</div>
-            <div class="hero-cta-row">
-              <a href="#trouver" class="btn btn-y btn-big" onclick="document.getElementById('section-trouver').scrollIntoView({behavior:'smooth'}); return false;">EXPLORER LES PAQUETS</a>
-              <a href="#" class="btn btn-l btn-big" onclick="goToTab('mes-paquets'); return false;">MES PAQUETS</a>
+            <div class="start-panel" id="start-panel">
+              <div class="start-kicker">COMMENCE ICI</div>
+              <div class="start-actions">
+                <a class="btn btn-y btn-big" id="start-add-packs" href="#section-trouver" onclick="scrollToPacks(); return false;">AJOUTER DES PAQUETS ↓</a>
+                <button class="btn btn-l btn-big" id="start-create-pack" type="button" onclick="openStarterPackCreator()">CRÉER DIRECT</button>
+              </div>
+              <a class="start-down" id="start-down-packs" href="#section-trouver" onclick="scrollToPacks(); return false;" aria-label="Aller aux paquets">↓</a>
+              <div class="start-auth-nudge" id="landing-auth-nudge" hidden>
+                <span>Pour garder tes paquets et ta progression sur tous tes appareils, connecte-toi.</span>
+                <button class="btn" id="start-account-signup" type="button" onclick="openAccountSignup()">SE CONNECTER</button>
+              </div>
             </div>
           </div>
 
-          <div class="hero-right">
-            <div class="hero-fig-tag fig">[fig.1.1] — TROU NOIR</div>
-            <svg viewBox="0 0 600 460" preserveAspectRatio="xMidYMid slice" shape-rendering="crispEdges" style="width:100%; height:100%; display:block;">
-              <rect width="600" height="460" fill="#0a0a0a"/>
-              <g fill="#fff">
-                <rect x="40" y="40" width="3" height="3"/><rect x="120" y="22" width="2" height="2"/><rect x="220" y="58" width="2" height="2"/><rect x="360" y="44" width="3" height="3"/><rect x="480" y="78" width="2" height="2"/><rect x="550" y="36" width="3" height="3"/><rect x="80" y="160" width="2" height="2"/><rect x="500" y="180" width="3" height="3"/><rect x="60" y="290" width="2" height="2"/><rect x="160" y="350" width="3" height="3"/><rect x="260" y="410" width="2" height="2"/><rect x="420" y="370" width="2" height="2"/><rect x="520" y="320" width="3" height="3"/><rect x="580" y="240" width="2" height="2"/><rect x="320" y="40" width="2" height="2"/><rect x="20" y="220" width="2" height="2"/><rect x="540" y="420" width="2" height="2"/>
-              </g>
-              <g transform="translate(300 240)">
-                <ellipse rx="220" ry="58" fill="none" stroke="#ffd84a" stroke-width="6"/>
-                <ellipse rx="200" ry="42" fill="none" stroke="#ff8fb0" stroke-width="4"/>
-                <ellipse rx="180" ry="30" fill="none" stroke="#c8e85b" stroke-width="2"/>
-                <ellipse rx="110" ry="110" fill="#0a0a0a" stroke="#fff" stroke-width="2"/>
-              </g>
-              <g shape-rendering="crispEdges">
-                <rect x="430" y="120" width="120" height="4" fill="#ffd84a"/>
-                <rect x="430" y="120" width="4" height="60" fill="#ffd84a"/>
-                <rect x="426" y="180" width="12" height="4" fill="#ffd84a"/>
-              </g>
-              <g font-family="Space Mono, monospace" fill="#fff" font-size="12">
-                <text x="438" y="112">SINGULARITÉ →</text>
-              </g>
-            </svg>
-            <div class="hero-caption">
+          <div
+            class="hero-right daily-visual-card"
+            id="daily-visual-card"
+            role="button"
+            tabindex="0"
+            onclick="openDailyLearningDetail()"
+            onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault(); openDailyLearningDetail();}"
+          >
+            <div class="hero-fig-tag fig" id="daily-visual-tag">[fig.1.1] — APPRENTISSAGE</div>
+            <div class="daily-visual-art" id="daily-visual-art" aria-hidden="true"></div>
+            <div class="hero-caption" id="daily-visual-caption">
               <strong>fig.1.1</strong> &nbsp;·&nbsp; Trou noir supermassif · l'horizon piège même la lumière.
             </div>
+            <div class="daily-visual-overlay">
+              <div class="daily-visual-kicker">APPRENTISSAGE DU JOUR</div>
+              <div class="daily-visual-title" id="daily-visual-title">Trous noirs</div>
+              <span class="daily-visual-cta">APPRENDRE PLUS</span>
+            </div>
           </div>
+
+          <div id="daily-learning-slot" class="daily-learning-slot"></div>
         </div>
       </div>
     </div>
@@ -141,7 +216,7 @@
       <h2>TROUVER DES PAQUETS</h2>
       <div class="bar"></div>
       <span class="fig" id="banner-count-trouver">— PAQUETS</span>
-      <button class="btn btn-y btn-shuffle" onclick="openPackCreator()" title="Créer un nouveau paquet">+ CRÉER MON PAQUET</button>
+      <button class="btn btn-y btn-shuffle" id="btn-create-pack-main" onclick="openPackCreator()" title="Créer un nouveau paquet">+ CRÉER MON PAQUET</button>
       <button class="btn btn-shuffle" onclick="shuffleTrouver()" title="Mélanger l'affichage">🔀 MÉLANGER</button>
     </div>
 
@@ -186,7 +261,7 @@
 <!-- ============================================================
      PAGE: CANARD
 ============================================================ -->
-<section id="page-canard" class="page-section">
+<section id="page-canard" class="page-section site-only">
   <section class="container">
     <div class="section-banner">
       <h2>🦆 MON CANARD</h2>
@@ -206,7 +281,8 @@
           <button class="btn btn-y btn-big" id="btn-launch-desktop-duck">JE VEUX LE CANARD SUR MON ÉCRAN</button>
         </div>
         <div class="duck-launch-hint" id="duck-launch-hint" style="display:none">
-          Si rien ne se passe, ouvre <strong>Finder → Applications → "Canard de bureau"</strong>,
+          Si rien ne se passe, le navigateur intégré peut bloquer l'ouverture. Ouvre
+          <strong>Finder → Applications → "Canard de bureau"</strong>,
           ou tape <strong>Cmd+Espace</strong> puis "canard".
         </div>
 
@@ -310,6 +386,83 @@
 
 
 <!-- ============================================================
+     PAGE: PREMIUM
+============================================================ -->
+<section id="page-premium" class="page-section">
+  <section class="container">
+    <div class="section-banner">
+      <h2>PREMIUM</h2>
+      <div class="bar"></div>
+      <span class="fig">COMING SOON · TEST DEMANDE</span>
+    </div>
+
+    <div class="premium-hero frame">
+      <div>
+        <div class="premium-kicker">VERSION PREMIUM</div>
+        <h3>Qu'est-ce qui t'intéresse ?</h3>
+        <p>
+          Ces options ne sont pas encore ouvertes. Le but ici est simple :
+          mesurer ce que les gens veulent vraiment avant de construire la version payante.
+        </p>
+      </div>
+    </div>
+
+    <div class="premium-grid">
+      <article class="premium-card frame">
+        <div class="premium-card-top">
+          <span class="premium-icon">📄</span>
+          <span class="premium-badge">COMING SOON</span>
+        </div>
+        <h3>Upload document → flashcards</h3>
+        <p>Tu poses un PDF, un cours, une fiche ou un extrait de livre. L'app extrait les notions importantes et prépare un paquet de flashcards.</p>
+        <button class="btn btn-y" onclick="openFeatureSurvey('doc-to-cards', 'Upload document → flashcards', 'Importer un document et générer automatiquement un paquet de flashcards prêt à réviser.')">ÇA M'INTÉRESSE</button>
+      </article>
+
+      <article class="premium-card frame">
+        <div class="premium-card-top">
+          <span class="premium-icon">🤖</span>
+          <span class="premium-badge">COMING SOON</span>
+        </div>
+        <h3>Générer des paquets avec l'IA</h3>
+        <p>Tu donnes un sujet, un niveau et un style. L'app te propose un paquet complet, modifiable, avec réponses et moyens mnémotechniques.</p>
+        <button class="btn btn-y" onclick="openFeatureSurvey('ai-pack-generator', 'Générer des paquets avec l\u0027IA', 'Créer automatiquement des paquets de flashcards à partir d’un sujet ou d’un objectif.')">ÇA M'INTÉRESSE</button>
+      </article>
+
+      <article class="premium-card frame">
+        <div class="premium-card-top">
+          <span class="premium-icon">🦆</span>
+          <span class="premium-badge">COMING SOON</span>
+        </div>
+        <h3>Skins du canard et animaux</h3>
+        <p>Débloquer des skins, changer le canard en autre animal, personnaliser son style, son nom, ses animations et ses petites interventions.</p>
+        <button class="btn btn-y" onclick="openFeatureSurvey('duck-skins-animals', 'Skins du canard et animaux', 'Débloquer des skins pour le canard ou changer complètement d’animal de compagnon.')">ÇA M'INTÉRESSE</button>
+      </article>
+    </div>
+
+    <div class="premium-feedback frame">
+      <div>
+        <div class="premium-kicker">FEEDBACK</div>
+        <h3>Dis-moi ce qui t'intéresse</h3>
+        <p>Ton message est envoyé à Alice. Tu peux dire ce que tu utiliserais, ce que tu n'utiliserais jamais, ou ce qu'il manque.</p>
+      </div>
+
+      <form id="premium-feedback-form" class="premium-feedback-form" onsubmit="submitPremiumFeedback(event)">
+        <div class="premium-choice-row" role="radiogroup" aria-label="Intérêt premium">
+          <button type="button" class="premium-choice" data-interest="oui" onclick="premiumSelectInterest(this)">Très intéressé(e)</button>
+          <button type="button" class="premium-choice" data-interest="peut-etre" onclick="premiumSelectInterest(this)">Peut-être</button>
+          <button type="button" class="premium-choice" data-interest="non" onclick="premiumSelectInterest(this)">Pas pour moi</button>
+        </div>
+        <input id="premium-feedback-email" class="mock-input" type="email" placeholder="ton email (optionnel)">
+        <textarea id="premium-feedback-message" class="mock-input premium-feedback-textarea" placeholder="Ton avis : idée prioritaire, document que tu uploaderais, animal que tu voudrais..."></textarea>
+        <button class="btn btn-y" type="submit">ENVOYER LE FEEDBACK</button>
+        <p id="premium-feedback-status" class="premium-feedback-status" aria-live="polite"></p>
+      </form>
+    </div>
+  </section>
+</section>
+
+
+<!-- ============================================================
      PAGE: CARTES (carte de France & schémas)
 ============================================================ -->
 <section id="page-social" class="page-section">
@@ -317,18 +470,33 @@
     <div class="section-banner">
       <h2>SOCIAL</h2>
       <div class="bar"></div>
-      <span class="fig">SCOREBOARD · DÉFIS · PAQUETS À VOLER</span>
+      <span class="fig">SCOREBOARD · PAQUETS PUBLICS</span>
     </div>
 
-    <!-- Onglets internes : Général / Par paquet / Défis / Paquets à voler -->
+    <!-- Onglets internes : Général / Par paquet / Paquets publics -->
     <div class="social-tabs">
       <button class="social-tab on" data-stab="general" onclick="window.socialSwitchTab('general', this)">SCOREBOARD GÉNÉRAL</button>
       <button class="social-tab" data-stab="bypack"  onclick="window.socialSwitchTab('bypack', this)">PAR PAQUET</button>
-      <button class="social-tab" data-stab="defis"   onclick="window.socialSwitchTab('defis', this)">DÉFIS</button>
-      <button class="social-tab" data-stab="steal"   onclick="window.socialSwitchTab('steal', this)">PAQUETS À VOLER</button>
+      <button class="social-tab" data-stab="steal"   onclick="window.socialSwitchTab('steal', this)">PAQUETS PUBLICS</button>
     </div>
 
     <div id="social-content" class="social-content"></div>
+  </section>
+</section>
+
+
+<!-- ============================================================
+     PAGE: COMPTE
+============================================================ -->
+<section id="page-account" class="page-section">
+  <section class="container">
+    <div class="section-banner">
+      <h2>COMPTE</h2>
+      <div class="bar"></div>
+      <span class="fig">PROGRESSION & PROFIL</span>
+    </div>
+
+    <div id="account-content" class="account-content"></div>
   </section>
 </section>
 
@@ -441,82 +609,39 @@
 <div id="screen-explorer" class="screen"></div>
 <div id="screen-cartes" class="screen"></div>
 
-
-<footer>
-  <div class="footer-inner">
-    <div class="footer-col">
-      <h4>CULTURE!!!</h4>
-      <p style="font-family:'Space Mono', monospace; font-style:italic; font-size:13px; line-height:1.6; margin:0;">
-        Un zine quotidien qui se prend pour une app. Imprimé en pixels.
-      </p>
-    </div>
-    <div class="footer-col">
-      <h4>APP</h4>
-      <ul>
-        <li><a href="#" onclick="goToTab('trouver'); return false;">Trouver</a></li>
-        <li><a href="#" onclick="goToTab('mes-paquets'); return false;">Mes paquets</a></li>
-        <li><a href="#" onclick="goToTab('cartes'); return false;">Cartes</a></li>
-      </ul>
-    </div>
-    <div class="footer-col">
-      <h4>À PROPOS</h4>
-      <ul>
-        <li><a href="#">Manifeste</a></li>
-        <li><a href="#">Journal</a></li>
-        <li><a href="#">Contact</a></li>
-      </ul>
-    </div>
-    <div class="footer-col">
-      <h4>LÉGAL</h4>
-      <ul>
-        <li><a href="#">Conditions</a></li>
-        <li><a href="#">Confidentialité</a></li>
-        <li><a href="#">Cookies</a></li>
-      </ul>
-    </div>
-  </div>
-  <div class="footer-inner colophon">
-    <span>© 2026 CULTURE!!! · ISSUE Nº 142</span>
-    <span>★ MADE WITH PIXELS IN PARIS ★</span>
-  </div>
-</footer>
-
-
 <!-- Scripts -->
-<script src="flashcards-data.js?v=73"></script>
-<script src="funfacts-data.js?v=73"></script>
+<script src="flashcards-data.js?v=74"></script>
+<script src="funfacts-data.js?v=79"></script>
 <script>
   if (typeof FUNFACTS_PACKS !== "undefined") {
     FUNFACTS_PACKS.forEach(function(p) { FLASHCARD_PACKS.push(p); });
   }
 </script>
 <script src="programme-data.js?v=62"></script>
-<script src="daily-lessons.js?v=62"></script>
+<script src="daily-lessons.js?v=69"></script>
 <script src="memo.js?v=62"></script>
 <script src="srs.js?v=62"></script>
 <script src="srs2.js?v=62"></script>
 <script src="gamification.js?v=62"></script>
-<script src="chapters.js?v=62"></script>
-<script src="categories.js?v=73"></script>
+<script src="chapters.js?v=77"></script>
+<script src="categories.js?v=76"></script>
 <script src="app.js?v=62"></script>
-<script src="today.js?v=62"></script>
-<script src="explorer.js?v=62"></script>
-<script src="flashcards.js?v=62"></script>
 <script src="quiz-12coups.js?v=62"></script>
-<script src="revisions.js?v=62"></script>
 <script src="programme.js?v=62"></script>
 <script src="carte.js?v=62"></script>
 <script src="schemas.js?v=62"></script>
-<script src="culture-app.js?v=62"></script>
-<script src="duck.js?v=62"></script>
-<script src="canard-settings.js?v=62"></script>
-<script src="monetisation-mock.js?v=62"></script>
-<script src="social.js?v=62"></script>
-<script src="pack-creator.js?v=62"></script>
-<script src="feedback-survey.js?v=62"></script>
+<script src="culture-app.js?v=96"></script>
+<script src="duck.js?v=63"></script>
+<script src="canard-settings.js?v=64"></script>
+<script src="content-safety.js?v=1"></script>
+<script src="social.js?v=68"></script>
+<script src="pack-creator.js?v=79"></script>
+<script src="supabase-config.js?v=76"></script>
+<script src="auth.js?v=87"></script>
+<script src="feedback-survey.js?v=64"></script>
 <script src="duck-notifications.js?v=62"></script>
 
-<!-- ───── PWA : registration du service worker + bouton "Installer l'app" ───── -->
+<!-- ───── PWA : registration silencieuse du service worker ───── -->
 <script>
 // EMERGENCY RESET : si tu mets ?reset=1 dans l'URL, on tue tous les SW et caches.
 // Utilise ça si la page reste bloquée sur une ancienne version.
@@ -567,111 +692,6 @@
         })
         .catch((err) => console.warn("SW registration failed:", err));
     });
-  }
-
-  // Détection : déjà installée → on n'affiche rien
-  const isStandalone = window.matchMedia("(display-mode: standalone)").matches
-    || window.navigator.standalone === true;
-  if (isStandalone) return;
-
-  // L'event "beforeinstallprompt" arrive sur Chrome/Edge/Android. On le garde
-  // pour pouvoir le déclencher au clic du bouton.
-  let deferredInstallPrompt = null;
-  window.addEventListener("beforeinstallprompt", (e) => {
-    e.preventDefault();
-    deferredInstallPrompt = e;
-  });
-  window.addEventListener("appinstalled", () => {
-    deferredInstallPrompt = null;
-    const btn = document.getElementById("pwa-install-btn");
-    if (btn) btn.remove();
-  });
-
-  // Crée et affiche le bouton flottant dès que possible
-  function createInstallButton() {
-    if (document.getElementById("pwa-install-btn")) return;
-    const btn = document.createElement("button");
-    btn.id = "pwa-install-btn";
-    btn.className = "pwa-install-btn";
-    btn.innerHTML = "📲 INSTALLER L'APP";
-    btn.title = "Installer CULTURE!!! sur ton appareil";
-    btn.addEventListener("click", openInstallModal);
-    document.body.appendChild(btn);
-  }
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", createInstallButton);
-  } else {
-    createInstallButton();
-  }
-
-  // ───── MODAL : explique l'install selon le navigateur ─────
-  function openInstallModal() {
-    // Si Chrome/Edge a déjà préparé le prompt natif : on le déclenche direct
-    if (deferredInstallPrompt) {
-      deferredInstallPrompt.prompt();
-      deferredInstallPrompt.userChoice.then((choice) => {
-        if (choice.outcome === "accepted") {
-          const btn = document.getElementById("pwa-install-btn");
-          if (btn) btn.remove();
-        }
-        deferredInstallPrompt = null;
-      });
-      return;
-    }
-
-    // Sinon (iOS, Firefox, anciens navigateurs…) : on ouvre un modal explicatif
-    const ua = navigator.userAgent;
-    const isIOS = /iPad|iPhone|iPod/.test(ua) && !window.MSStream;
-    const isAndroid = /Android/.test(ua);
-    const isMac = /Macintosh/.test(ua);
-    const isMobile = isIOS || isAndroid || /Mobile/.test(ua);
-
-    const modal = document.createElement("div");
-    modal.id = "pwa-install-modal";
-    modal.className = "pwa-modal-backdrop";
-    modal.innerHTML = `
-      <div class="pwa-modal frame">
-        <button class="pwa-modal-close" aria-label="Fermer">×</button>
-        <h2 class="pwa-modal-title">📲 INSTALLER CULTURE!!!</h2>
-        <p class="pwa-modal-sub">Mets l'app sur l'écran d'accueil pour la lancer en un clic, même sans internet.</p>
-
-        <div class="pwa-section ${isIOS ? "pwa-section-active" : ""}">
-          <h3>🍎 iPhone / iPad (Safari)</h3>
-          <ol>
-            <li>Touche l'icône <strong>Partager</strong>
-              <span class="pwa-ios-share-icon">⤴</span> en bas de l'écran</li>
-            <li>Fais défiler et touche <strong>« Sur l'écran d'accueil »</strong></li>
-            <li>Touche <strong>« Ajouter »</strong> en haut à droite</li>
-            <li>L'icône CULTURE!!! apparaît sur ton écran d'accueil</li>
-          </ol>
-          <p class="pwa-warn">⚠️ Ça ne marche que dans <strong>Safari</strong>, pas dans Chrome/Firefox iOS.</p>
-        </div>
-
-        <div class="pwa-section ${isAndroid ? "pwa-section-active" : ""}">
-          <h3>🤖 Android (Chrome/Edge/Samsung Internet)</h3>
-          <ol>
-            <li>Touche le menu <strong>⋮</strong> en haut à droite</li>
-            <li>Touche <strong>« Installer l'application »</strong> ou <strong>« Ajouter à l'écran d'accueil »</strong></li>
-            <li>Confirme</li>
-          </ol>
-        </div>
-
-        <div class="pwa-section ${isMac && !isMobile ? "pwa-section-active" : ""}">
-          <h3>💻 Mac / Windows (Chrome / Edge / Brave)</h3>
-          <ol>
-            <li>Cherche l'icône <strong>⊕</strong> dans la barre d'adresse</li>
-            <li>Ou : menu <strong>⋮</strong> → <strong>« Installer CULTURE!!! »</strong></li>
-            <li>Confirme</li>
-          </ol>
-          <p class="pwa-warn">⚠️ Safari Mac ne supporte pas l'installation PWA.</p>
-        </div>
-
-        <p class="pwa-modal-foot">Tu auras une icône, une appli plein écran (sans la barre du navigateur), et ça marche <strong>même sans réseau</strong>.</p>
-      </div>
-    `;
-    modal.addEventListener("click", (e) => { if (e.target === modal) modal.remove(); });
-    modal.querySelector(".pwa-modal-close").addEventListener("click", () => modal.remove());
-    document.body.appendChild(modal);
   }
 })();
 </script>
