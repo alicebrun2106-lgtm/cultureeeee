@@ -9,8 +9,8 @@ In Supabase `Authentication -> URL Configuration`:
 
 For GitHub Pages production:
 
-- Site URL: `https://alicebrun2106-lgtm.github.io/qpuc/`
-- Redirect URL: `https://alicebrun2106-lgtm.github.io/qpuc/**`
+- Site URL: `https://alicebrun2106-lgtm.github.io/cultureeeee/`
+- Redirect URL: `https://alicebrun2106-lgtm.github.io/cultureeeee/**`
 
 ## Google Login
 
