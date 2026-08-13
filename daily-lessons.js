@@ -332,76 +332,151 @@ const DAILY_VISUAL_META = {
     words: ["trous noirs", "trou noir"],
     tag: "[fig.1.1] — TROU NOIR",
     caption: "Trou noir supermassif · l'horizon piège même la lumière.",
+    image: "assets/daily/black-hole.jpg",
+    alt: "Première image d'un trou noir, au centre de la galaxie Messier 87",
+    credit: "Event Horizon Telescope Collaboration · CC BY 4.0",
+    source: "https://commons.wikimedia.org/wiki/File:Black_hole_-_Messier_87.jpg",
+    position: "center center",
   },
   impressionism: {
     words: ["impressionnisme"],
     tag: "[fig.1.1] — IMPRESSION",
     caption: "Monet, lumière changeante et touches rapides.",
+    image: "assets/daily/impressionism.jpg",
+    alt: "Impression, soleil levant, tableau de Claude Monet",
+    credit: "Claude Monet · domaine public",
+    source: "https://commons.wikimedia.org/wiki/File:Monet_-_Impression,_Sunrise.jpg",
+    position: "center center",
   },
   revolution: {
     words: ["revolution francaise", "révolution française"],
     tag: "[fig.1.1] — 1789",
     caption: "La Bastille, les droits et la chute de l'Ancien Régime.",
+    image: "assets/daily/french-revolution.jpg",
+    alt: "La prise de la Bastille le 14 juillet 1789, peinture de Charles Thévenin",
+    credit: "Charles Thévenin · The Met · CC0",
+    source: "https://commons.wikimedia.org/wiki/File:The_Storming_of_the_Bastille_on_14_July_1789_(Prise_de_la_Bastille_le_14_juillet_1789)_MET_DP820481.jpg",
+    position: "center center",
   },
   dna: {
     words: ["adn"],
     tag: "[fig.1.1] — DOUBLE HÉLICE",
     caption: "Quatre lettres pour coder l'information du vivant.",
+    image: "assets/daily/dna-model.jpg",
+    alt: "Pièce originale du modèle moléculaire d'ADN de Crick et Watson, 1953",
+    credit: "Science Museum, Londres · CC BY-SA 2.0",
+    source: "https://commons.wikimedia.org/wiki/File:Template_from_Crick_and_Watson%E2%80%99s_DNA_molecular_model,_1953._(9660573227).jpg",
+    position: "center center",
   },
   bigBang: {
     words: ["big bang"],
     tag: "[fig.1.1] — EXPANSION",
     caption: "L'univers grandit depuis 13,8 milliards d'années.",
+    image: "assets/daily/deep-field.jpg",
+    alt: "Champ ultra-profond de Hubble montrant des milliers de galaxies",
+    credit: "NASA et ESA · domaine public",
+    source: "https://commons.wikimedia.org/wiki/File:Hubble_ultra_deep_field.jpg",
+    position: "center center",
   },
   picasso: {
     words: ["picasso"],
     tag: "[fig.1.1] — CUBISME",
-    caption: "Un visage en fragments pour changer le regard.",
+    caption: "Pablo Picasso photographié en 1908, au début du cubisme.",
+    image: "assets/daily/picasso.jpg",
+    alt: "Portrait photographique de Pablo Picasso en 1908",
+    credit: "Auteur inconnu, 1908 · domaine public",
+    source: "https://commons.wikimedia.org/wiki/File:Portrait_de_Picasso,_1908.jpg",
+    position: "center 24%",
   },
   republic: {
     words: ["ve republique", "ve république"],
     tag: "[fig.1.1] — VE RÉPUBLIQUE",
     caption: "Un président fort, une Constitution née en 1958.",
+    image: "assets/daily/de-gaulle.jpg",
+    alt: "Portrait photographique du général Charles de Gaulle",
+    credit: "U.S. Office of War Information · domaine public",
+    source: "https://commons.wikimedia.org/wiki/File:De_Gaulle-OWI_(cropped)-(c).jpg",
+    position: "center 24%",
   },
   oceans: {
     words: ["oceans", "océans"],
     tag: "[fig.1.1] — ABYSSES",
     caption: "Les océans couvrent 71% de la planète.",
+    image: "assets/daily/oceans.jpg",
+    alt: "La Terre et ses océans photographiés par l'équipage d'Apollo 17",
+    credit: "NASA / équipage d'Apollo 17 · domaine public",
+    source: "https://commons.wikimedia.org/wiki/File:The_Earth_seen_from_Apollo_17.jpg",
+    position: "center center",
   },
   shakespeare: {
     words: ["shakespeare"],
     tag: "[fig.1.1] — GLOBE",
     caption: "Théâtre, sonnets et mots inventés.",
+    image: "assets/daily/shakespeare.jpg",
+    alt: "Portrait Chandos de William Shakespeare",
+    credit: "Attribué à John Taylor · domaine public",
+    source: "https://commons.wikimedia.org/wiki/File:Shakespeare.jpg",
+    position: "center 20%",
   },
   mozart: {
     words: ["mozart"],
     tag: "[fig.1.1] — K.626",
     caption: "Prodige, opéras et Requiem inachevé.",
+    image: "assets/daily/mozart.jpg",
+    alt: "Portrait de Wolfgang Amadeus Mozart peint par Barbara Krafft",
+    credit: "Barbara Krafft, 1819 · domaine public",
+    source: "https://commons.wikimedia.org/wiki/File:Barbara_Krafft_-_Portr%C3%A4t_Wolfgang_Amadeus_Mozart_(1819).jpg",
+    position: "center 18%",
   },
   volcanoes: {
     words: ["volcans", "volcan"],
     tag: "[fig.1.1] — MAGMA",
     caption: "La Terre respire par ses volcans.",
+    image: "assets/daily/volcano.jpg",
+    alt: "Panache de l'éruption du mont Saint Helens le 18 mai 1980",
+    credit: "Donald A. Swanson / USGS · domaine public",
+    source: "https://commons.wikimedia.org/wiki/File:MSH80_eruption_mount_st_helens_plume_05-18-80-edit.jpg",
+    position: "center center",
   },
   napoleon: {
     words: ["napoleon", "napoléon"],
     tag: "[fig.1.1] — EMPIRE",
     caption: "Du 18 brumaire à Waterloo.",
+    image: "assets/daily/napoleon.jpg",
+    alt: "Napoléon dans son cabinet de travail, peinture de Jacques-Louis David",
+    credit: "Jacques-Louis David · domaine public",
+    source: "https://commons.wikimedia.org/wiki/File:Jacques-Louis_David_-_The_Emperor_Napoleon_in_His_Study_at_the_Tuileries_-_Google_Art_Project.jpg",
+    position: "center 22%",
   },
   evolution: {
     words: ["evolution", "évolution"],
     tag: "[fig.1.1] — SÉLECTION",
     caption: "Des mutations, du temps, et la sélection naturelle.",
+    image: "assets/daily/darwin.jpg",
+    alt: "Portrait photographique de Charles Darwin vers 1875",
+    credit: "Elliott & Fry · domaine public",
+    source: "https://commons.wikimedia.org/wiki/File:Charles_Darwin_photograph_by_Elliott_and_Fry,_circa_1875.jpg",
+    position: "center 18%",
   },
   coldWar: {
     words: ["guerre froide"],
     tag: "[fig.1.1] — BLOC EST/OUEST",
     caption: "Deux blocs, Berlin, l'espace et la dissuasion nucléaire.",
+    image: "assets/daily/berlin-wall.jpg",
+    alt: "Le mur de Berlin photographié en novembre 1961",
+    credit: "U.S. National Archives · domaine public",
+    source: "https://commons.wikimedia.org/wiki/File:Berlin_Wall_1961-11-20.jpg",
+    position: "center center",
   },
   brain: {
     words: ["cerveau"],
     tag: "[fig.1.1] — SYNAPSES",
     caption: "86 milliards de neurones pour penser et apprendre.",
+    image: "assets/daily/brain-mri.jpg",
+    alt: "Coupe sagittale d'un cerveau humain observée par IRM",
+    credit: "everyone's idle · CC BY-SA 2.0",
+    source: "https://commons.wikimedia.org/wiki/File:MRI_brain_sagittal_section.jpg",
+    position: "center center",
   },
 };
 
@@ -625,8 +700,45 @@ function getDailyLessonVisual(lesson) {
     key,
     tag: custom.tag || meta.tag,
     caption: custom.caption || meta.caption,
+    image: custom.image || meta.image || "",
+    alt: custom.alt || meta.alt || getDailyLessonSubject(lesson),
+    credit: custom.credit || meta.credit || "",
+    source: custom.source || meta.source || "",
+    position: custom.position || meta.position || "center center",
     svg: custom.svg || renderDailyVisualSvg(key),
   };
+}
+
+function isSafeDailyImagePosition(value) {
+  return /^(?:left|center|right|\d{1,3}%)(?:\s+(?:top|center|bottom|\d{1,3}%))?$/.test(String(value || "").trim().toLowerCase());
+}
+
+function renderDailyHeroVisual(art, visualData) {
+  if (!art) return;
+  const image = String(visualData.image || "").trim();
+  if (!image) {
+    art.setAttribute("aria-hidden", "true");
+    art.innerHTML = visualData.svg;
+    return;
+  }
+
+  const position = isSafeDailyImagePosition(visualData.position) ? visualData.position : "center center";
+  art.removeAttribute("aria-hidden");
+  art.style.setProperty("--daily-image-position", position);
+  art.innerHTML = `
+    <img class="daily-visual-photo" src="${escapeDailyHtml(image)}" alt="${escapeDailyHtml(visualData.alt)}" decoding="async" fetchpriority="high">
+    <div class="daily-visual-fallback" aria-hidden="true" hidden>${visualData.svg}</div>
+  `;
+
+  const img = art.querySelector(".daily-visual-photo");
+  const fallback = art.querySelector(".daily-visual-fallback");
+  if (img && fallback) {
+    img.addEventListener("error", () => {
+      img.hidden = true;
+      fallback.hidden = false;
+      art.setAttribute("aria-hidden", "true");
+    }, { once: true });
+  }
 }
 
 function setDailyLearningOpen(open, shouldScroll) {
@@ -690,6 +802,11 @@ function renderDailyLearning() {
         <div class="daily-learning-facts">
           ${(lesson.factoids || []).map((fact) => `<div class="daily-learning-fact">→ ${escapeDailyHtml(fact)}</div>`).join("")}
         </div>
+        ${visualData.credit && visualData.source ? `
+          <a class="daily-learning-image-source" href="${escapeDailyHtml(visualData.source)}" target="_blank" rel="noopener noreferrer">
+            IMAGE DU JOUR · ${escapeDailyHtml(visualData.credit)}
+          </a>
+        ` : ""}
         <div class="daily-learning-resources">${resourceHtml}</div>
         <div class="daily-pack-box">
           <div>
@@ -710,14 +827,22 @@ function renderDailyLearning() {
   const tag = document.getElementById("daily-visual-tag");
   if (tag) tag.textContent = visualData.tag;
   const art = document.getElementById("daily-visual-art");
-  if (art) art.innerHTML = visualData.svg;
+  renderDailyHeroVisual(art, visualData);
   const visualTitle = document.getElementById("daily-visual-title");
   if (visualTitle) visualTitle.textContent = subject;
   const visual = document.getElementById("daily-visual-card");
   if (visual) visual.setAttribute("aria-label", "Apprendre plus sur " + subject);
   const caption = document.getElementById("daily-visual-caption");
   if (caption) {
-    caption.innerHTML = `<strong>fig.1.1</strong> &nbsp;·&nbsp; ${escapeDailyHtml(visualData.caption)}`;
+    const credit = visualData.credit && visualData.source
+      ? `<a class="daily-visual-credit" href="${escapeDailyHtml(visualData.source)}" target="_blank" rel="noopener noreferrer">Photo : ${escapeDailyHtml(visualData.credit)}</a>`
+      : "";
+    caption.innerHTML = `<span><strong>fig.1.1</strong> &nbsp;·&nbsp; ${escapeDailyHtml(visualData.caption)}</span>${credit}`;
+    const creditLink = caption.querySelector(".daily-visual-credit");
+    if (creditLink) {
+      creditLink.addEventListener("click", (event) => event.stopPropagation());
+      creditLink.addEventListener("keydown", (event) => event.stopPropagation());
+    }
   }
   refreshDailyPackButtons();
 }
