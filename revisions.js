@@ -174,11 +174,11 @@
     }
 
     let dueHtml = "";
-    packs.forEach(p => { if (p.due > 0) dueHtml += '<div class="rev-pack-item"><span class="rev-pack-name">' + p.title + '</span><span class="rev-pack-count due">' + p.due + '</span></div>'; });
+    packs.forEach(p => { if (p.due > 0) dueHtml += '<div class="rev-pack-item"><span class="rev-pack-name">' + escapeHtml(p.title) + '</span><span class="rev-pack-count due">' + p.due + '</span></div>'; });
     dueList.innerHTML = dueHtml || '<div class="rev-pack-empty">Aucune carte due</div>';
 
     let mastHtml = "";
-    packs.forEach(p => { if (p.scheduled > 0) mastHtml += '<div class="rev-pack-item"><span class="rev-pack-name">' + p.title + '</span><span class="rev-pack-count scheduled">✓ ' + p.scheduled + ' — ' + formatNextReview(p.nextDate) + '</span></div>'; });
+    packs.forEach(p => { if (p.scheduled > 0) mastHtml += '<div class="rev-pack-item"><span class="rev-pack-name">' + escapeHtml(p.title) + '</span><span class="rev-pack-count scheduled">✓ ' + p.scheduled + ' — ' + formatNextReview(p.nextDate) + '</span></div>'; });
     masteredList.innerHTML = mastHtml || '<div class="rev-pack-empty">—</div>';
   }
 
@@ -281,4 +281,10 @@
     const badge = document.getElementById("rev-home-badge");
     if (badge) { badge.textContent = due; badge.style.display = due > 0 ? "" : "none"; }
   };
+
+  function escapeHtml(value) {
+    return String(value || "").replace(/[&<>"']/g, (char) => ({
+      "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
+    }[char]));
+  }
 })();

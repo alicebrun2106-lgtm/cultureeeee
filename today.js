@@ -275,7 +275,7 @@
       <div class="ts-progress-bar"><div class="ts-progress-fill" style="width:${pct}%"></div></div>
       <div class="ts-step-label">📚 FLASHCARD ${sess.fcIndex + 1} / ${sess.flashcards.length}</div>
       <div class="ts-card" id="ts-card">
-        <div class="ts-pack-name">${item.pack.name}</div>
+        <div class="ts-pack-name">${escapeHtml(item.pack.name)}</div>
         <div class="ts-card-front">${escapeHtml(item.card.front)}</div>
         <div class="ts-card-back" id="ts-card-back" style="display:none">
           <div class="ts-card-divider"></div>

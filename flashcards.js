@@ -100,9 +100,9 @@
     }
 
     card.innerHTML = `
-      <div class="pack-icon">${pack.icon || "📚"}</div>
+      <div class="pack-icon">${escapeHtml(pack.icon || "📚")}</div>
       <div class="pack-info">
-        <div class="pack-name">${pack.name}</div>
+        <div class="pack-name">${escapeHtml(pack.name)}</div>
         <div class="pack-progress-bar"><div class="pack-progress-fill" style="width:${mastery}%;background:${barColor}"></div></div>
         <div class="pack-bottom-row">
           ${statusText}
@@ -552,5 +552,11 @@
       const j = Math.floor(Math.random() * (i + 1));
       [arr[i], arr[j]] = [arr[j], arr[i]];
     }
+  }
+
+  function escapeHtml(value) {
+    return String(value || "").replace(/[&<>"']/g, (char) => ({
+      "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
+    }[char]));
   }
 })();

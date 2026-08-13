@@ -45,20 +45,30 @@ end $$;
 
 alter table public.profiles enable row level security;
 alter table public.user_state enable row level security;
+alter table public.profiles force row level security;
+alter table public.user_state force row level security;
+
+revoke all on public.profiles from anon;
+revoke all on public.user_state from anon;
+grant select, insert, update, delete on public.profiles to authenticated;
+grant select, insert, update, delete on public.user_state to authenticated;
 
 drop policy if exists "profiles_select_public" on public.profiles;
 create policy "profiles_select_public"
   on public.profiles for select
+  to authenticated
   using (true);
 
 drop policy if exists "profiles_upsert_own" on public.profiles;
 create policy "profiles_upsert_own"
   on public.profiles for all
+  to authenticated
   using (auth.uid() = user_id)
   with check (auth.uid() = user_id);
 
 drop policy if exists "user_state_own" on public.user_state;
 create policy "user_state_own"
   on public.user_state for all
+  to authenticated
   using (auth.uid() = user_id)
   with check (auth.uid() = user_id);

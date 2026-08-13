@@ -18,8 +18,13 @@
     "qpuc-prog-srs",
   ];
   const RAW_STRING_KEYS = new Set(["qpuc-social-my-name"]);
-  const SDK_URL = "https://esm.sh/@supabase/supabase-js@2";
+  const SDK_URL = "https://esm.sh/@supabase/supabase-js@2.112.3";
   const SYNC_TABLE = "user_state";
+  const PRODUCTION_ORIGIN = "https://canardculture.com";
+  const MAX_BACKUP_BYTES = 1024 * 1024;
+  const MAX_PACKS = 500;
+  const MAX_CARDS_PER_PACK = 1000;
+  const MAX_TEXT_LENGTH = 6000;
 
   let clientPromise = null;
   let session = null;
@@ -71,18 +76,94 @@
   function buildLocalSnapshot() {
     const state = {};
     SNAPSHOT_KEYS.forEach((key) => { state[key] = readStoredValue(key, null); });
-    return {
+    return sanitizeSnapshot({
       version: 1,
       savedAt: new Date().toISOString(),
       state,
+    });
+  }
+
+  function sanitizeText(value, maxLength = MAX_TEXT_LENGTH) {
+    return String(value == null ? "" : value)
+      .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, "")
+      .slice(0, maxLength);
+  }
+
+  function sanitizeCard(card) {
+    if (!card || typeof card !== "object") return null;
+    const front = sanitizeText(card.front, 1000).trim();
+    const back = sanitizeText(card.back, 2000).trim();
+    if (!front || !back) return null;
+    return {
+      front,
+      back,
+      memo: sanitizeText(card.memo, 2000).trim(),
+      _extra: card._extra === true,
     };
   }
 
-  function restoreSnapshot(snapshot) {
-    if (!snapshot || !snapshot.state) throw new Error("Sauvegarde cloud invalide.");
+  function sanitizePack(pack) {
+    if (!pack || typeof pack !== "object") return null;
+    const cards = (Array.isArray(pack.cards) ? pack.cards : [])
+      .slice(0, MAX_CARDS_PER_PACK)
+      .map(sanitizeCard)
+      .filter(Boolean);
+    if (!cards.length) return null;
+    const visibility = pack.visibility === "public" ? "public" : "private";
+    return {
+      id: sanitizeText(pack.id, 120).replace(/[^a-zA-Z0-9_-]/g, "-") || ("user-" + Date.now()),
+      name: sanitizeText(pack.name, 60).trim() || "Paquet sans nom",
+      icon: sanitizeText(pack.icon, 8).trim() || "📦",
+      description: sanitizeText(pack.description, 500).trim(),
+      difficulty: "perso",
+      reversible: pack.reversible !== false,
+      isUserPack: true,
+      visibility,
+      isPublic: visibility === "public",
+      cards,
+    };
+  }
+
+  function sanitizeSnapshot(snapshot) {
+    if (!snapshot || typeof snapshot !== "object" || !snapshot.state || typeof snapshot.state !== "object") {
+      throw new Error("Sauvegarde cloud invalide.");
+    }
+    const clean = { version: 1, savedAt: new Date().toISOString(), state: {} };
     SNAPSHOT_KEYS.forEach((key) => {
-      if (Object.prototype.hasOwnProperty.call(snapshot.state, key)) {
-        writeStoredValue(key, snapshot.state[key]);
+      if (!Object.prototype.hasOwnProperty.call(snapshot.state, key)) return;
+      const value = snapshot.state[key];
+      if (key === "qpuc-user-packs") {
+        clean.state[key] = (Array.isArray(value) ? value : [])
+          .slice(0, MAX_PACKS)
+          .map(sanitizePack)
+          .filter(Boolean);
+      } else if (key === "qpuc-pack-extras") {
+        const extras = {};
+        if (value && typeof value === "object" && !Array.isArray(value)) {
+          Object.entries(value).slice(0, MAX_PACKS).forEach(([packId, cards]) => {
+            const safeId = sanitizeText(packId, 120).replace(/[^a-zA-Z0-9_-]/g, "-");
+            if (!safeId) return;
+            extras[safeId] = (Array.isArray(cards) ? cards : [])
+              .slice(0, MAX_CARDS_PER_PACK)
+              .map(sanitizeCard)
+              .filter(Boolean);
+          });
+        }
+        clean.state[key] = extras;
+      } else if (key === "qpuc-social-my-name") {
+        clean.state[key] = sanitizeText(value, 32).trim();
+      } else if (value === null || typeof value === "string" || typeof value === "number" || typeof value === "boolean" || Array.isArray(value) || typeof value === "object") {
+        clean.state[key] = value;
+      }
+    });
+    return clean;
+  }
+
+  function restoreSnapshot(snapshot) {
+    const cleanSnapshot = sanitizeSnapshot(snapshot);
+    SNAPSHOT_KEYS.forEach((key) => {
+      if (Object.prototype.hasOwnProperty.call(cleanSnapshot.state, key)) {
+        writeStoredValue(key, cleanSnapshot.state[key]);
       }
     });
   }
@@ -170,7 +251,7 @@
               <input id="account-import-backup" type="file" accept="application/json,.json" hidden>
             </div>
           </details>
-          <div class="account-status">${statusMessage}</div>
+          <div class="account-status">${escapeHtml(statusMessage)}</div>
         </div>
         ${accountSummaryHtml()}
       `;
@@ -194,7 +275,7 @@
           <button class="btn btn-y" onclick="window.CultureAuth.syncNow()" ${disabled}>SAUVEGARDER MA PROGRESSION</button>
           <button class="btn" onclick="window.CultureAuth.restoreFromCloud()" ${disabled}>RÉCUPÉRER LE CLOUD</button>
         </div>
-        <div class="account-status">${statusMessage}</div>
+        <div class="account-status">${escapeHtml(statusMessage)}</div>
         <details class="account-details">
           <summary>Profil public</summary>
           <form class="account-form account-form-stack account-profile-form" id="account-profile-form">
@@ -255,6 +336,9 @@
   }
 
   function getRedirectTo() {
+    if (window.location.hostname === "canardculture.com" || window.location.hostname === "www.canardculture.com") {
+      return PRODUCTION_ORIGIN + "/";
+    }
     return window.location.origin + window.location.pathname;
   }
 
@@ -511,14 +595,16 @@
     if (!session || !session.user) return;
     try {
       const client = await getClient();
-      const name =
+      const name = sanitizeText(
         displayName ||
         localStorage.getItem("qpuc-social-my-name") ||
         session.user.user_metadata?.display_name ||
         session.user.user_metadata?.full_name ||
         session.user.user_metadata?.name ||
         session.user.email?.split("@")[0] ||
-        "TOI";
+        "TOI",
+        32
+      ).trim() || "TOI";
       const publicHandle =
         normalizeHandle(handle) ||
         normalizeHandle(profile && profile.handle) ||
@@ -544,7 +630,7 @@
   async function updateProfile(e) {
     e.preventDefault();
     if (!session || !session.user) return setStatus("Connecte-toi d'abord.");
-    const displayName = (document.getElementById("account-profile-name")?.value || "").trim();
+    const displayName = sanitizeText(document.getElementById("account-profile-name")?.value || "", 32).trim();
     const handle = normalizeHandle(document.getElementById("account-profile-handle")?.value || "");
     if (!displayName) return setStatus("Choisis un nom affiché.");
     if (!handle) return setStatus("Choisis un identifiant public.");
@@ -652,6 +738,11 @@
   function importLocalBackup(e) {
     const file = e && e.target && e.target.files ? e.target.files[0] : null;
     if (!file) return;
+    if (file.size > MAX_BACKUP_BYTES) {
+      setStatus("Import refusé : la sauvegarde dépasse 1 Mo.");
+      e.target.value = "";
+      return;
+    }
     const reader = new FileReader();
     reader.onload = () => {
       try {
@@ -665,6 +756,7 @@
       }
     };
     reader.readAsText(file);
+    e.target.value = "";
   }
 
   async function signOut() {

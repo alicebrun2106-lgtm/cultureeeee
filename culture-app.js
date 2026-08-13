@@ -843,26 +843,29 @@
     if (top.length > 0) {
       html += `<div class="dashboard-col"><div class="dash-title">⭐ TES MEILLEURS</div><ul class="dash-list">`;
       top.forEach((x) => {
-        html += `<li onclick="startFlashcardSession('${x.pack.id}')"><span class="dash-pack-name">${x.pack.name}</span><span class="dash-pack-pct">${x.m.masteryPercent}%</span></li>`;
+        html += `<li data-pack-id="${escapeAttr(x.pack.id)}"><span class="dash-pack-name">${escapeHtml(x.pack.name)}</span><span class="dash-pack-pct">${x.m.masteryPercent}%</span></li>`;
       });
       html += `</ul></div>`;
     }
     if (work.length > 0) {
       html += `<div class="dashboard-col dash-col-work"><div class="dash-title">🔥 À BOSSER</div><ul class="dash-list">`;
       work.forEach((x) => {
-        html += `<li onclick="startFlashcardSession('${x.pack.id}')"><span class="dash-pack-name">${x.pack.name}</span><span class="dash-pack-due">${x.m.dueToday > 0 ? x.m.dueToday + " due" : x.m.weakCards + " faibles"}</span></li>`;
+        html += `<li data-pack-id="${escapeAttr(x.pack.id)}"><span class="dash-pack-name">${escapeHtml(x.pack.name)}</span><span class="dash-pack-due">${x.m.dueToday > 0 ? x.m.dueToday + " due" : x.m.weakCards + " faibles"}</span></li>`;
       });
       html += `</ul></div>`;
     }
     if (almost.length > 0) {
       html += `<div class="dashboard-col dash-col-almost"><div class="dash-title">🎯 PRESQUE MAÎTRISÉ</div><ul class="dash-list">`;
       almost.forEach((x) => {
-        html += `<li onclick="startFlashcardSession('${x.pack.id}')"><span class="dash-pack-name">${x.pack.name}</span><span class="dash-pack-pct">${x.m.masteryPercent}%</span></li>`;
+        html += `<li data-pack-id="${escapeAttr(x.pack.id)}"><span class="dash-pack-name">${escapeHtml(x.pack.name)}</span><span class="dash-pack-pct">${x.m.masteryPercent}%</span></li>`;
       });
       html += `</ul></div>`;
     }
     html += `</div>`;
     dash.innerHTML = html;
+    dash.querySelectorAll("[data-pack-id]").forEach((item) => {
+      item.addEventListener("click", () => startFlashcardSession(item.dataset.packId));
+    });
     container.appendChild(dash);
   }
 

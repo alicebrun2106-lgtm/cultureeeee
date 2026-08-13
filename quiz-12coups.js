@@ -167,7 +167,7 @@
       groups[level].forEach(pack => {
         const btn = document.createElement("button");
         btn.className = "quiz-theme-btn";
-        btn.innerHTML = `<span>${pack.icon}</span> ${pack.name} <span class="quiz-theme-count">${pack.cards.length} q</span>`;
+        btn.innerHTML = `<span>${escapeHtml(pack.icon)}</span> ${escapeHtml(pack.name)} <span class="quiz-theme-count">${pack.cards.length} q</span>`;
         btn.onclick = () => startQuiz("theme", pack.id);
         container.appendChild(btn);
       });
@@ -234,7 +234,7 @@
     q.choices.forEach((choice, i) => {
       const btn = document.createElement("button");
       btn.className = "quiz-choice-btn";
-      btn.innerHTML = `<span class="quiz-choice-letter">${letters[i]}</span><span class="quiz-choice-text">${choice}</span>`;
+      btn.innerHTML = `<span class="quiz-choice-letter">${letters[i]}</span><span class="quiz-choice-text">${escapeHtml(choice)}</span>`;
       btn.onclick = () => selectAnswer(i);
       choicesContainer.appendChild(btn);
     });
@@ -297,23 +297,23 @@
     const fb = document.getElementById("quiz-feedback");
     function getMemoHtml() {
       // Priority 1: memo from the card itself
-      if (q.memo) return '<div class="quiz-memo-tip">🧠 ' + q.memo + '</div>';
+      if (q.memo) return '<div class="quiz-memo-tip">🧠 ' + escapeHtml(q.memo) + '</div>';
       // Priority 2: MEMO module lookup
       if (typeof MEMO !== "undefined") {
         const m = MEMO.generateMemo(q.question, q.choices[q.correctIndex]);
-        if (m) return '<div class="quiz-memo-tip">' + m + '</div>';
+        if (m) return '<div class="quiz-memo-tip">' + escapeHtml(m) + '</div>';
       }
       return "";
     }
     if (timeout) {
-      fb.innerHTML = "⏰ Temps écoulé ! La réponse était : <strong>" + q.choices[q.correctIndex] + "</strong>" + getMemoHtml();
+      fb.innerHTML = "⏰ Temps écoulé ! La réponse était : <strong>" + escapeHtml(q.choices[q.correctIndex]) + "</strong>" + getMemoHtml();
       fb.className = "quiz-feedback quiz-feedback-wrong";
     } else if (correct) {
       const mh = getMemoHtml();
       fb.innerHTML = "✅ Bonne réponse !" + (mh ? mh : "");
       fb.className = "quiz-feedback quiz-feedback-correct";
     } else {
-      fb.innerHTML = "❌ Raté ! La bonne réponse était : <strong>" + q.choices[q.correctIndex] + "</strong>" + getMemoHtml();
+      fb.innerHTML = "❌ Raté ! La bonne réponse était : <strong>" + escapeHtml(q.choices[q.correctIndex]) + "</strong>" + getMemoHtml();
       fb.className = "quiz-feedback quiz-feedback-wrong";
     }
 
@@ -352,7 +352,7 @@
       wrong.forEach(a => {
         const div = document.createElement("div");
         div.className = "quiz-review-item";
-        div.innerHTML = `<div class="quiz-review-q">${a.question}</div><div class="quiz-review-a">→ ${a.choices[a.correctIndex]}</div>`;
+        div.innerHTML = `<div class="quiz-review-q">${escapeHtml(a.question)}</div><div class="quiz-review-a">→ ${escapeHtml(a.choices[a.correctIndex])}</div>`;
         reviewContainer.appendChild(div);
       });
     }
@@ -371,6 +371,12 @@
 
   window.backToQuizModes = function () { initQuiz12Coups(); };
   window.replayQuiz = function () { startQuiz(quiz.mode); };
+
+  function escapeHtml(value) {
+    return String(value || "").replace(/[&<>"']/g, (char) => ({
+      "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
+    }[char]));
+  }
 
   // Keyboard: A/B/C/D or 1/2/3/4
   document.addEventListener("keydown", function (e) {

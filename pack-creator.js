@@ -5,6 +5,11 @@
 (function () {
   const USER_PACKS_KEY = "qpuc-user-packs";
   const PACK_EXTRAS_KEY = "qpuc-pack-extras"; // { packId: [{front, back, memo}, ...] }
+  const MAX_PACKS = 500;
+  const MAX_CARDS_PER_PACK = 1000;
+  const MAX_FRONT_LENGTH = 1000;
+  const MAX_BACK_LENGTH = 2000;
+  const MAX_MEMO_LENGTH = 2000;
 
   function isLegacyDevPack(pack) {
     const id = String((pack && pack.id) || "").toLowerCase();
@@ -18,10 +23,22 @@
   function loadUserPacks() {
     try {
       const packs = JSON.parse(localStorage.getItem(USER_PACKS_KEY) || "[]");
-      return Array.isArray(packs) ? packs.filter((pack) => !isLegacyDevPack(pack)) : [];
+      return Array.isArray(packs)
+        ? packs
+          .filter((pack) => !isLegacyDevPack(pack))
+          .slice(0, MAX_PACKS)
+          .map(normalizeUserPackDraft)
+          .filter((pack) => pack.name && pack.cards.some((card) => card.front && card.back))
+        : [];
     } catch { return []; }
   }
-  function saveUserPacks(packs) { localStorage.setItem(USER_PACKS_KEY, JSON.stringify(packs)); }
+  function saveUserPacks(packs) {
+    const clean = (Array.isArray(packs) ? packs : [])
+      .slice(0, MAX_PACKS)
+      .map(normalizeUserPackDraft)
+      .filter((pack) => pack.name && pack.cards.some((card) => card.front && card.back));
+    localStorage.setItem(USER_PACKS_KEY, JSON.stringify(clean));
+  }
 
   function cleanupLegacyDevPacks() {
     try {
@@ -35,9 +52,9 @@
   }
 
   function loadExtras() {
-    try { return JSON.parse(localStorage.getItem(PACK_EXTRAS_KEY) || "{}"); } catch { return {}; }
+    try { return sanitizeExtras(JSON.parse(localStorage.getItem(PACK_EXTRAS_KEY) || "{}")); } catch { return {}; }
   }
-  function saveExtras(e) { localStorage.setItem(PACK_EXTRAS_KEY, JSON.stringify(e)); }
+  function saveExtras(e) { localStorage.setItem(PACK_EXTRAS_KEY, JSON.stringify(sanitizeExtras(e))); }
   function getGlobalPacks() {
     if (typeof FLASHCARD_PACKS !== "undefined") return FLASHCARD_PACKS;
     if (typeof window.FLASHCARD_PACKS !== "undefined") return window.FLASHCARD_PACKS;
@@ -125,17 +142,21 @@
           ${draft.cards.length > 1 ? `<button class="pc-del" onclick="window.packCreatorRemoveCard(${i})" title="Supprimer">✕</button>` : ""}
         </div>
         <label class="mock-label">RECTO (question)</label>
-        <input class="mock-input" data-i="${i}" data-f="front" value="${escapeAttr(card.front)}" oninput="window.packCreatorUpdateCard(${i}, 'front', this.value)" placeholder="Ex : Capitale du Pérou ?">
+        <input class="mock-input" data-i="${i}" data-f="front" value="${escapeAttr(card.front)}" oninput="window.packCreatorUpdateCard(${i}, 'front', this.value)" placeholder="Ex : Capitale du Pérou ?" maxlength="${MAX_FRONT_LENGTH}">
         <label class="mock-label">VERSO (réponse)</label>
-        <input class="mock-input" data-i="${i}" data-f="back" value="${escapeAttr(card.back)}" oninput="window.packCreatorUpdateCard(${i}, 'back', this.value)" placeholder="Ex : Lima">
+        <input class="mock-input" data-i="${i}" data-f="back" value="${escapeAttr(card.back)}" oninput="window.packCreatorUpdateCard(${i}, 'back', this.value)" placeholder="Ex : Lima" maxlength="${MAX_BACK_LENGTH}">
         <label class="mock-label">MOYEN MNÉMOTECHNIQUE (optionnel)</label>
-        <input class="mock-input" data-i="${i}" data-f="memo" value="${escapeAttr(card.memo || '')}" oninput="window.packCreatorUpdateCard(${i}, 'memo', this.value)" placeholder="Astuce pour s'en souvenir">
+        <input class="mock-input" data-i="${i}" data-f="memo" value="${escapeAttr(card.memo || '')}" oninput="window.packCreatorUpdateCard(${i}, 'memo', this.value)" placeholder="Astuce pour s'en souvenir" maxlength="${MAX_MEMO_LENGTH}">
       </div>
     `).join("");
   }
 
   function addCard() {
     const draft = window.__pcDraft;
+    if (draft.cards.length >= MAX_CARDS_PER_PACK) {
+      toast("Ce paquet a atteint la limite de cartes.");
+      return;
+    }
     draft.cards.push({ front: "", back: "", memo: "" });
     renderCards();
   }
@@ -146,25 +167,26 @@
   }
   function updateCard(i, field, value) {
     const draft = window.__pcDraft;
-    if (!draft.cards[i]) return;
-    draft.cards[i][field] = value;
+    if (!draft.cards[i] || !["front", "back", "memo"].includes(field)) return;
+    const maxLength = field === "front" ? MAX_FRONT_LENGTH : field === "back" ? MAX_BACK_LENGTH : MAX_MEMO_LENGTH;
+    draft.cards[i][field] = cleanText(value, maxLength);
   }
 
   function saveCreator() {
     const draft = window.__pcDraft;
-    const name = document.getElementById("pc-name").value.trim();
-    const icon = document.getElementById("pc-icon").value.trim() || "📦";
+    const name = cleanText(document.getElementById("pc-name").value, 60).trim();
+    const icon = cleanText(document.getElementById("pc-icon").value, 8).trim() || "📦";
     const desc = "";
     const visibilityInput = document.querySelector('input[name="pc-visibility"]:checked');
     const visibility = visibilityInput && visibilityInput.value === "public" ? "public" : "private";
 
     if (!name) { toast("Donne un nom à ton paquet."); return; }
-    const validCards = draft.cards.filter((c) => c.front.trim() && c.back.trim());
+    const validCards = draft.cards.slice(0, MAX_CARDS_PER_PACK).map(cleanCard).filter(Boolean);
     if (!validCards.length) { toast("Ajoute au moins une carte (recto + verso)."); return; }
 
     const userPacks = loadUserPacks();
     const pack = {
-      id: draft.id || ("user-" + Date.now()),
+      id: cleanPackId(draft.id) || ("user-" + Date.now()),
       name,
       icon,
       description: desc,
@@ -173,11 +195,7 @@
       isUserPack: true,
       visibility,
       isPublic: visibility === "public",
-      cards: validCards.map((c) => ({
-        front: c.front.trim(),
-        back: c.back.trim(),
-        memo: (c.memo || "").trim()
-      }))
+      cards: validCards
     };
 
     if (visibility === "public") {
@@ -234,11 +252,11 @@
 
       <hr class="pc-hr">
       <label class="mock-label">RECTO (question)</label>
-      <input id="extra-front" class="mock-input" placeholder="Ex : Année de la chute du Mur de Berlin ?">
+      <input id="extra-front" class="mock-input" placeholder="Ex : Année de la chute du Mur de Berlin ?" maxlength="${MAX_FRONT_LENGTH}">
       <label class="mock-label">VERSO (réponse)</label>
-      <input id="extra-back" class="mock-input" placeholder="Ex : 1989">
+      <input id="extra-back" class="mock-input" placeholder="Ex : 1989" maxlength="${MAX_BACK_LENGTH}">
       <label class="mock-label">MNÉMO (optionnel)</label>
-      <input id="extra-memo" class="mock-input" placeholder="Astuce pour s'en souvenir">
+      <input id="extra-memo" class="mock-input" placeholder="Astuce pour s'en souvenir" maxlength="${MAX_MEMO_LENGTH}">
 
       <div class="pc-actions">
         <button class="btn" onclick="window.closePackCreator()">FERMER</button>
@@ -248,14 +266,20 @@
   }
 
   function saveExtra(packId) {
-    const front = document.getElementById("extra-front").value.trim();
-    const back = document.getElementById("extra-back").value.trim();
-    const memo = document.getElementById("extra-memo").value.trim();
-    if (!front || !back) { toast("Recto + verso obligatoires."); return; }
+    const card = cleanCard({
+      front: document.getElementById("extra-front").value,
+      back: document.getElementById("extra-back").value,
+      memo: document.getElementById("extra-memo").value,
+    });
+    if (!card) { toast("Recto + verso obligatoires."); return; }
 
     const extras = loadExtras();
     if (!extras[packId]) extras[packId] = [];
-    extras[packId].push({ front, back, memo });
+    if (extras[packId].length >= MAX_CARDS_PER_PACK) {
+      toast("Ce paquet a atteint la limite de cartes ajoutées.");
+      return;
+    }
+    extras[packId].push(card);
     saveExtras(extras);
 
     // Injecte ces extras dans FLASHCARD_PACKS pour que la session les voie
@@ -334,18 +358,62 @@
   function escapeJs(s) {
     return String(s || "").replace(/\\/g, "\\\\").replace(/'/g, "\\'").replace(/\n/g, "\\n").replace(/\r/g, "\\r");
   }
+  function cleanText(value, maxLength) {
+    return String(value == null ? "" : value)
+      .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, "")
+      .slice(0, maxLength);
+  }
+  function cleanPackId(value) {
+    return cleanText(value, 120).replace(/[^a-zA-Z0-9_-]/g, "-");
+  }
+  function cleanCard(card) {
+    if (!card || typeof card !== "object") return null;
+    const front = cleanText(card.front, MAX_FRONT_LENGTH).trim();
+    const back = cleanText(card.back, MAX_BACK_LENGTH).trim();
+    if (!front || !back) return null;
+    return {
+      front,
+      back,
+      memo: cleanText(card.memo, MAX_MEMO_LENGTH).trim(),
+      _extra: card._extra === true,
+    };
+  }
+  function sanitizeExtras(value) {
+    const clean = {};
+    if (!value || typeof value !== "object" || Array.isArray(value)) return clean;
+    Object.entries(value).slice(0, MAX_PACKS).forEach(([packId, cards]) => {
+      const safeId = cleanPackId(packId);
+      if (!safeId) return;
+      clean[safeId] = (Array.isArray(cards) ? cards : [])
+        .slice(0, MAX_CARDS_PER_PACK)
+        .map(cleanCard)
+        .filter(Boolean);
+    });
+    return clean;
+  }
   function normalizeVisibility(pack) {
     if (!pack) return "private";
     if (pack.visibility === "public" || pack.isPublic === true) return "public";
     return "private";
   }
   function normalizeUserPackDraft(pack) {
-    const normalized = { ...pack };
+    const normalized = pack && typeof pack === "object" ? { ...pack } : {};
+    normalized.id = cleanPackId(normalized.id);
+    normalized.name = cleanText(normalized.name, 60).trim();
+    normalized.icon = cleanText(normalized.icon, 8).trim() || "📦";
+    normalized.description = cleanText(normalized.description, 500).trim();
+    normalized.difficulty = "perso";
+    normalized.reversible = normalized.reversible !== false;
     normalized.visibility = normalizeVisibility(normalized);
     normalized.isPublic = normalized.visibility === "public";
     normalized.isUserPack = true;
     normalized.cards = Array.isArray(normalized.cards) && normalized.cards.length
-      ? normalized.cards
+      ? normalized.cards.slice(0, MAX_CARDS_PER_PACK).map((card) => ({
+        front: cleanText(card && card.front, MAX_FRONT_LENGTH),
+        back: cleanText(card && card.back, MAX_BACK_LENGTH),
+        memo: cleanText(card && card.memo, MAX_MEMO_LENGTH),
+        _extra: card && card._extra === true,
+      }))
       : [{ front: "", back: "", memo: "" }];
     return normalized;
   }
