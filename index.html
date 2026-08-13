@@ -23,7 +23,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=VT323&family=Press+Start+2P&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=98">
+<link rel="stylesheet" href="style.css?v=99">
 <script>
   (function () {
     var standalone = window.matchMedia && window.matchMedia("(display-mode: standalone)").matches;
@@ -59,6 +59,9 @@
 <!-- Toggle thème clair/sombre -->
 <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Basculer thème clair/sombre" onclick="toggleTheme()">
   <span class="theme-toggle-icon" id="theme-toggle-icon">🌙</span>
+</button>
+<button id="sound-toggle" class="sound-toggle" type="button" aria-label="Couper les sons" aria-pressed="true" onclick="CultureSound.toggle()">
+  <span id="sound-toggle-icon">🔊</span>
 </button>
 <script>
   (function() {
@@ -625,6 +628,7 @@
 <script src="gamification.js?v=62"></script>
 <script src="chapters.js?v=77"></script>
 <script src="categories.js?v=76"></script>
+<script src="sounds.js?v=1"></script>
 <script src="app.js?v=62"></script>
 <script src="quiz-12coups.js?v=62"></script>
 <script src="programme.js?v=62"></script>

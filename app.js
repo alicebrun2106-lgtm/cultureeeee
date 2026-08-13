@@ -71,15 +71,7 @@ function updateStats() {
 }
 
 function playSound(type) {
-  try {
-    const ctx = new (window.AudioContext || window.webkitAudioContext)();
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    osc.connect(gain); gain.connect(ctx.destination); gain.gain.value = 0.15;
-    if (type === "correct") { osc.frequency.value = 880; osc.type = "sine"; osc.start(); setTimeout(() => { osc.frequency.value = 1100; }, 100); setTimeout(() => { osc.stop(); ctx.close(); }, 200); }
-    else if (type === "wrong") { osc.frequency.value = 200; osc.type = "square"; osc.start(); setTimeout(() => { osc.stop(); ctx.close(); }, 300); }
-    else if (type === "win") { osc.frequency.value = 523; osc.type = "sine"; osc.start(); setTimeout(() => { osc.frequency.value = 659; }, 150); setTimeout(() => { osc.frequency.value = 784; }, 300); setTimeout(() => { osc.frequency.value = 1047; }, 450); setTimeout(() => { osc.stop(); ctx.close(); }, 600); }
-  } catch (e) {}
+  if (window.CultureSound) window.CultureSound.play(type);
 }
 
 // --- Navigation ---

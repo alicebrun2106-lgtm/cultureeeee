@@ -279,6 +279,7 @@
     const q = quiz.questions[quiz.current];
     const correct = choiceIndex === q.correctIndex;
     const timeout = choiceIndex === -1;
+    if (window.CultureSound) window.CultureSound.play(correct ? "correct" : "wrong");
 
     if (correct) quiz.score++;
 

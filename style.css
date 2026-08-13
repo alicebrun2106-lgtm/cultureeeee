@@ -35,10 +35,33 @@
     line-height: 1;
     transition: transform 0.06s, box-shadow 0.06s;
   }
+  .sound-toggle {
+    position: fixed;
+    top: 62px;
+    right: 12px;
+    z-index: 100;
+    width: 40px;
+    height: 40px;
+    border: 3px solid var(--ink);
+    background: #fff;
+    box-shadow: 3px 3px 0 var(--ink);
+    color: #0a0a0a;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    font-size: 17px;
+    line-height: 1;
+    transition: transform 0.06s, box-shadow 0.06s;
+  }
+  .sound-toggle:hover { transform: translate(1px, 1px); box-shadow: 2px 2px 0 var(--ink); }
+  .sound-toggle:active { transform: translate(3px, 3px); box-shadow: 0 0 0 var(--ink); }
   .theme-toggle:hover { transform: translate(1px, 1px); box-shadow: 2px 2px 0 var(--ink); }
   .theme-toggle:active { transform: translate(3px, 3px); box-shadow: 0 0 0 var(--ink); }
   @media (max-width: 768px) {
     .theme-toggle { top: 8px; right: 8px; width: 34px; height: 34px; font-size: 15px; }
+    .sound-toggle { top: 50px; right: 8px; width: 34px; height: 34px; font-size: 14px; }
   }
 
   /* ─── MODE SOMBRE (toggle manuel via html.dark) ─── */
@@ -95,6 +118,12 @@
   html.dark .nav-links a:hover,
   html.dark .nav-links a.active { border-bottom-color: #f0e8d8 !important; }
   html.dark .theme-toggle {
+    background: #2a2025;
+    border-color: #f0e8d8;
+    box-shadow: 3px 3px 0 #000;
+    color: #f0e8d8;
+  }
+  html.dark .sound-toggle {
     background: #2a2025;
     border-color: #f0e8d8;
     box-shadow: 3px 3px 0 #000;

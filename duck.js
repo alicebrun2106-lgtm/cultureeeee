@@ -406,6 +406,7 @@
       else if (i === idx) b.classList.add("wrong");
     });
     if (idx === q.correct) {
+      if (window.CultureSound) window.CultureSound.play("correct");
       const s = getState();
       const newScore = s.score + 1;
       update({ score: newScore });
@@ -414,6 +415,7 @@
       refreshDuckSprite();
       if (typeof window.refreshDuckUI === "function") window.refreshDuckUI();
     } else {
+      if (window.CultureSound) window.CultureSound.play("wrong");
       reactSad();
     }
     setTimeout(hideBubble, 2200);

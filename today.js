@@ -288,6 +288,7 @@
       </div>
     `;
     document.getElementById("btn-ts-flip").onclick = () => {
+      if (window.CultureSound) window.CultureSound.play("flip");
       document.getElementById("ts-card-back").style.display = "";
       document.getElementById("ts-actions").innerHTML = `
         <button class="btn-quality btn-again" data-q="1"><span class="quality-key">1</span> À revoir</button>
@@ -302,6 +303,7 @@
   }
 
   function rateFC(quality) {
+    if (window.CultureSound) window.CultureSound.rating(quality);
     const item = sess.flashcards[sess.fcIndex];
     const state = SRS.getState(SRS_KEY, item.key);
     const newState = SRS.update(state, quality);
@@ -377,6 +379,7 @@
     if (sess.quizAnswered) return;
     sess.quizAnswered = true;
     const isCorrect = answer === item.correct;
+    if (window.CultureSound) window.CultureSound.play(isCorrect ? "correct" : "wrong");
     if (isCorrect) {
       sess.quizCorrect++;
       btn.classList.add("btn-quiz-correct");

@@ -286,6 +286,7 @@
   }
 
   window.revealFicheCard = function () {
+    if (window.CultureSound) window.CultureSound.play("flip");
     const card = ficheCards[ficheCardIndex];
     document.getElementById("prog-fc-reveal").textContent = card.r;
     document.getElementById("prog-fc-prompt").textContent = card.mode === "qa" ? "Réponse" : "";

@@ -1070,6 +1070,7 @@
 
   window.flipFlashcard = function () {
     if (!session || session.flipped) return;
+    if (window.CultureSound) window.CultureSound.play("flip");
     session.flipped = true;
     const c = session.allCards[session.queue[session.index]];
     document.getElementById("session-card-answer").innerHTML = highlightKeywords(c.back);
@@ -1098,6 +1099,7 @@
 
   window.rateFlashcard = function (quality) {
     if (!session || !session.flipped) return;
+    if (window.CultureSound) window.CultureSound.rating(quality);
     const c = session.allCards[session.queue[session.index]];
     const grade = qualityToGrade(quality);
     // SRS2 : récupère progress + schedule + save

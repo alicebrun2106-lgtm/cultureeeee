@@ -424,6 +424,7 @@
 
   window.flipFlashcard = function () {
     if (session.flipped) return;
+    if (window.CultureSound) window.CultureSound.play("flip");
     session.flipped = true;
     const card = session.allCards[session.queue[session.index]];
     document.getElementById("fc-card-back").textContent = card.back;
@@ -439,6 +440,7 @@
   };
 
   window.rateFlashcard = function (quality) {
+    if (window.CultureSound) window.CultureSound.rating(quality);
     const { allCards, queue, index, packId, pack } = session;
     const card = allCards[queue[index]];
     const state = SRS.getState(SRS_KEY, card.srsKey);

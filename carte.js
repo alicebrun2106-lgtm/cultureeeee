@@ -574,10 +574,12 @@
     var correct = quizQueue[quizIndex];
     var paths = document.querySelectorAll(".carte2-region");
     if (clickedId === correct.id) {
+      if (window.CultureSound) window.CultureSound.play("correct");
       quizScore++;
       paths.forEach(function(p) { if (p.getAttribute("data-id") === clickedId) { p.setAttribute("stroke","#2ecc71"); p.setAttribute("stroke-width","4"); p.setAttribute("opacity","1"); } });
       document.getElementById("carte2-info").innerHTML = '<div style="text-align:center;padding:20px;font-size:20px;color:#2ecc71">✅ Bravo !</div>';
     } else {
+      if (window.CultureSound) window.CultureSound.play("wrong");
       paths.forEach(function(p) {
         if (p.getAttribute("data-id") === clickedId) { p.setAttribute("stroke","#e74c3c"); p.setAttribute("stroke-width","4"); }
         if (p.getAttribute("data-id") === correct.id) { p.setAttribute("stroke","#2ecc71"); p.setAttribute("stroke-width","4"); p.setAttribute("opacity","1"); }
@@ -614,6 +616,7 @@
 
   function checkChefQuiz(answer, correct, cc) {
     var isCorrect = answer === correct;
+    if (window.CultureSound) window.CultureSound.play(isCorrect ? "correct" : "wrong");
     if (isCorrect) quizScore++;
     cc.querySelectorAll(".quiz-choice-btn").forEach(function(btn) {
       btn.disabled = true;

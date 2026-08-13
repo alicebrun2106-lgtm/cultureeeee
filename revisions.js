@@ -209,6 +209,7 @@
   }
 
   window.revealRevisionCard = function () {
+    if (window.CultureSound) window.CultureSound.play("flip");
     const c = revCards[revIndex];
     document.getElementById("rev-fc-prompt").textContent = "Réponse";
     let answer = c.r;
@@ -220,6 +221,7 @@
   };
 
   window.rateRevisionCard = function (quality) {
+    if (window.CultureSound) window.CultureSound.rating(quality);
     // quality: 1=again, 3=hard, 4=good, 5=easy
     const card = revCards[revIndex];
 
