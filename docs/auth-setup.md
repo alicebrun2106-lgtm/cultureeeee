@@ -9,8 +9,9 @@ In Supabase `Authentication -> URL Configuration`:
 
 For GitHub Pages production:
 
-- Site URL: `https://alicebrun2106-lgtm.github.io/cultureeeee/`
-- Redirect URL: `https://alicebrun2106-lgtm.github.io/cultureeeee/**`
+- Site URL: `https://canardculture.com/`
+- Redirect URL: `https://canardculture.com/**`
+- Temporary fallback redirect: `https://alicebrun2106-lgtm.github.io/cultureeeee/**`
 
 ## Google Login
 
@@ -37,7 +38,7 @@ In Supabase:
 In Google Cloud OAuth:
 
 - Authorized JavaScript origin: `http://localhost:3456`
-- Authorized JavaScript origin: `https://alicebrun2106-lgtm.github.io`
+- Authorized JavaScript origin: `https://canardculture.com`
 - Authorized redirect URI: copy the callback URL shown by Supabase in the Google provider settings.
 
 ## Public User ID
