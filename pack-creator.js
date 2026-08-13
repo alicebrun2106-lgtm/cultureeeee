@@ -114,7 +114,7 @@
           <span class="pc-visibility-sub">Visible dans le social et partageable avec les autres joueurs.</span>
         </label>
       </div>
-      <p class="pc-safety-note">Les paquets publics sont filtrés automatiquement avant d'être visibles aux autres.</p>
+      <p class="pc-safety-note">Un paquet public reste privé dans ton compte tant qu'il n'a pas passé la modération côté serveur.</p>
 
       <label class="mock-label">CARTES</label>
       <div id="pc-cards" class="pc-cards"></div>
@@ -178,7 +178,7 @@
     const icon = cleanText(document.getElementById("pc-icon").value, 8).trim() || "📦";
     const desc = "";
     const visibilityInput = document.querySelector('input[name="pc-visibility"]:checked');
-    const visibility = visibilityInput && visibilityInput.value === "public" ? "public" : "private";
+    const requestedVisibility = visibilityInput && visibilityInput.value === "public" ? "public" : "private";
 
     if (!name) { toast("Donne un nom à ton paquet."); return; }
     const validCards = draft.cards.slice(0, MAX_CARDS_PER_PACK).map(cleanCard).filter(Boolean);
@@ -193,12 +193,14 @@
       difficulty: "perso",
       reversible: true,
       isUserPack: true,
-      visibility,
-      isPublic: visibility === "public",
+      visibility: "private",
+      requestedVisibility,
+      publicationStatus: requestedVisibility === "public" ? "pending" : "private",
+      isPublic: false,
       cards: validCards
     };
 
-    if (visibility === "public") {
+    if (requestedVisibility === "public") {
       const safetyResult = checkPublicSafety(pack);
       if (!safetyResult.ok) {
         const safety = window.CultureContentSafety;
@@ -220,7 +222,9 @@
     if (typeof window.addPack === "function") window.addPack(pack.id);
 
     closeModal();
-    toast(`Paquet "${name}" sauvegardé en ${visibility === "public" ? "public" : "privé"}.`);
+    toast(requestedVisibility === "public"
+      ? `Paquet "${name}" gardé privé en attendant la modération.`
+      : `Paquet "${name}" sauvegardé en privé.`);
     refreshPackViews();
   }
 
@@ -393,6 +397,7 @@
   }
   function normalizeVisibility(pack) {
     if (!pack) return "private";
+    if (pack.requestedVisibility === "public" && pack.publicationStatus === "pending") return "public";
     if (pack.visibility === "public" || pack.isPublic === true) return "public";
     return "private";
   }
@@ -404,8 +409,11 @@
     normalized.description = cleanText(normalized.description, 500).trim();
     normalized.difficulty = "perso";
     normalized.reversible = normalized.reversible !== false;
-    normalized.visibility = normalizeVisibility(normalized);
-    normalized.isPublic = normalized.visibility === "public";
+    const requestedVisibility = normalizeVisibility(normalized);
+    normalized.visibility = "private";
+    normalized.requestedVisibility = requestedVisibility;
+    normalized.publicationStatus = requestedVisibility === "public" ? "pending" : "private";
+    normalized.isPublic = false;
     normalized.isUserPack = true;
     normalized.cards = Array.isArray(normalized.cards) && normalized.cards.length
       ? normalized.cards.slice(0, MAX_CARDS_PER_PACK).map((card) => ({
@@ -419,7 +427,9 @@
   }
   function checkPublicSafety(pack) {
     const safety = window.CultureContentSafety;
-    if (!safety || typeof safety.checkPack !== "function") return { ok: true, reasons: [] };
+    if (!safety || typeof safety.checkPack !== "function") {
+      return { ok: false, reasons: [{ id: "filter_unavailable", label: "filtre de sécurité indisponible" }] };
+    }
     return safety.checkPack(pack);
   }
 

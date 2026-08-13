@@ -18,13 +18,14 @@
     "qpuc-prog-srs",
   ];
   const RAW_STRING_KEYS = new Set(["qpuc-social-my-name"]);
-  const SDK_URL = "https://esm.sh/@supabase/supabase-js@2.112.3";
   const SYNC_TABLE = "user_state";
   const PRODUCTION_ORIGIN = "https://canardculture.com";
   const MAX_BACKUP_BYTES = 1024 * 1024;
   const MAX_PACKS = 500;
   const MAX_CARDS_PER_PACK = 1000;
   const MAX_TEXT_LENGTH = 6000;
+  const LOCAL_OWNER_KEY = "qpuc-local-owner";
+  const ACCOUNT_CACHE_PREFIX = "qpuc-account-cache:";
 
   let clientPromise = null;
   let session = null;
@@ -45,13 +46,19 @@
     const cfg = getConfig();
     if (!cfg.ready) throw new Error("Supabase n'est pas encore configuré.");
     if (!clientPromise) {
-      clientPromise = import(SDK_URL).then(({ createClient }) => createClient(cfg.url, cfg.anonKey, {
-        auth: {
-          persistSession: true,
-          autoRefreshToken: true,
-          detectSessionInUrl: true,
-        },
-      }));
+      clientPromise = Promise.resolve().then(() => {
+        if (!window.supabase || typeof window.supabase.createClient !== "function") {
+          throw new Error("La bibliothèque de connexion locale n'a pas chargé.");
+        }
+        return window.supabase.createClient(cfg.url, cfg.anonKey, {
+          auth: {
+            persistSession: true,
+            autoRefreshToken: true,
+            detectSessionInUrl: true,
+            flowType: "pkce",
+          },
+        });
+      });
     }
     return clientPromise;
   }
@@ -109,7 +116,15 @@
       .map(sanitizeCard)
       .filter(Boolean);
     if (!cards.length) return null;
-    const visibility = pack.visibility === "public" ? "public" : "private";
+    const wantsPublic = pack.visibility === "public" || pack.isPublic === true;
+    const safety = window.CultureContentSafety;
+    const publicationAllowed = wantsPublic && safety && typeof safety.checkPack === "function" && safety.checkPack({
+      name: sanitizeText(pack.name, 60).trim(),
+      description: sanitizeText(pack.description, 500).trim(),
+      cards,
+    }).ok;
+    // Un fichier local ne constitue jamais une validation serveur.
+    const visibility = "private";
     return {
       id: sanitizeText(pack.id, 120).replace(/[^a-zA-Z0-9_-]/g, "-") || ("user-" + Date.now()),
       name: sanitizeText(pack.name, 60).trim() || "Paquet sans nom",
@@ -119,7 +134,9 @@
       reversible: pack.reversible !== false,
       isUserPack: true,
       visibility,
-      isPublic: visibility === "public",
+      requestedVisibility: publicationAllowed ? "public" : "private",
+      publicationStatus: publicationAllowed ? "pending" : "private",
+      isPublic: false,
       cards,
     };
   }
@@ -152,9 +169,31 @@
         clean.state[key] = extras;
       } else if (key === "qpuc-social-my-name") {
         clean.state[key] = sanitizeText(value, 32).trim();
-      } else if (value === null || typeof value === "string" || typeof value === "number" || typeof value === "boolean" || Array.isArray(value) || typeof value === "object") {
-        clean.state[key] = value;
+      } else {
+        clean.state[key] = sanitizeJsonValue(value);
       }
+    });
+    const encoded = new TextEncoder().encode(JSON.stringify(clean));
+    if (encoded.byteLength > MAX_BACKUP_BYTES) {
+      throw new Error("Sauvegarde refusée : elle dépasse la limite sécurisée de 1 Mo.");
+    }
+    return clean;
+  }
+
+  function sanitizeJsonValue(value, depth = 0) {
+    if (depth > 8) return null;
+    if (value === null || typeof value === "boolean") return value;
+    if (typeof value === "number") return Number.isFinite(value) ? value : 0;
+    if (typeof value === "string") return sanitizeText(value, MAX_TEXT_LENGTH);
+    if (Array.isArray(value)) {
+      return value.slice(0, 5000).map((item) => sanitizeJsonValue(item, depth + 1));
+    }
+    if (!value || typeof value !== "object") return null;
+    const clean = Object.create(null);
+    Object.entries(value).slice(0, 5000).forEach(([key, item]) => {
+      if (["__proto__", "prototype", "constructor"].includes(key)) return;
+      const safeKey = sanitizeText(key, 160);
+      if (safeKey) clean[safeKey] = sanitizeJsonValue(item, depth + 1);
     });
     return clean;
   }
@@ -166,6 +205,75 @@
         writeStoredValue(key, cleanSnapshot.state[key]);
       }
     });
+  }
+
+  function clearSnapshotStorage() {
+    SNAPSHOT_KEYS.forEach((key) => localStorage.removeItem(key));
+  }
+
+  function accountCacheKey(userId) {
+    return ACCOUNT_CACHE_PREFIX + sanitizeText(userId, 80).replace(/[^a-zA-Z0-9-]/g, "");
+  }
+
+  function cacheSnapshotForUser(userId, snapshot) {
+    if (!userId) return false;
+    try {
+      const clean = sanitizeSnapshot(snapshot || buildLocalSnapshot());
+      localStorage.setItem(accountCacheKey(userId), JSON.stringify(clean));
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  function readAccountCache(userId) {
+    if (!userId) return null;
+    try {
+      const raw = localStorage.getItem(accountCacheKey(userId));
+      return raw ? sanitizeSnapshot(JSON.parse(raw)) : null;
+    } catch {
+      localStorage.removeItem(accountCacheKey(userId));
+      return null;
+    }
+  }
+
+  function activateUserLocalContext(userId) {
+    if (!userId) return false;
+    const ownerId = localStorage.getItem(LOCAL_OWNER_KEY) || "";
+    if (ownerId === userId) return false;
+
+    let currentSnapshot = null;
+    let currentHasData = false;
+    try {
+      currentSnapshot = buildLocalSnapshot();
+      currentHasData = hasMeaningfulSnapshot(currentSnapshot);
+    } catch {
+      currentHasData = true;
+    }
+    if (ownerId && ownerId !== userId) {
+      if (currentHasData) cacheSnapshotForUser(ownerId, currentSnapshot);
+      clearSnapshotStorage();
+    }
+
+    let restored = false;
+    if (ownerId || !currentHasData) {
+      const cached = readAccountCache(userId);
+      if (cached && hasMeaningfulSnapshot(cached)) {
+        restoreSnapshot(cached);
+        restored = true;
+      }
+    }
+    localStorage.setItem(LOCAL_OWNER_KEY, userId);
+    return restored || (!!ownerId && ownerId !== userId);
+  }
+
+  function removeAllAccountCaches() {
+    const keys = [];
+    for (let i = 0; i < localStorage.length; i += 1) {
+      const key = localStorage.key(i);
+      if (key && key.startsWith(ACCOUNT_CACHE_PREFIX)) keys.push(key);
+    }
+    keys.forEach((key) => localStorage.removeItem(key));
   }
 
   function setStatus(message) {
@@ -267,10 +375,10 @@
             <label class="account-field-label" for="account-email">EMAIL</label>
             <input type="email" id="account-email" class="account-input" placeholder="ton@email.com" autocomplete="email" required>
             <label class="account-field-label" for="account-password">MOT DE PASSE</label>
-            <input type="password" id="account-password" class="account-input" placeholder="8 caractères minimum" autocomplete="${isSignup ? "new-password" : "current-password"}" minlength="8" required>
+            <input type="password" id="account-password" class="account-input" placeholder="${isSignup ? "10 caractères, majuscule, minuscule et chiffre" : "ton mot de passe"}" autocomplete="${isSignup ? "new-password" : "current-password"}" ${isSignup ? 'minlength="10"' : ""} required>
             ${isSignup ? `
               <label class="account-field-label" for="account-password-confirm">CONFIRMER LE MOT DE PASSE</label>
-              <input type="password" id="account-password-confirm" class="account-input" placeholder="retape ton mot de passe" autocomplete="new-password" minlength="8" required>
+              <input type="password" id="account-password-confirm" class="account-input" placeholder="retape ton mot de passe" autocomplete="new-password" minlength="10" required>
             ` : ""}
             <button class="btn btn-y account-submit-btn" type="submit" ${disabled}>${isSignup ? "CRÉER AVEC EMAIL + MOT DE PASSE" : "SE CONNECTER"}</button>
           </form>
@@ -285,6 +393,7 @@
             <div class="account-local-tools">
               <button type="button" class="btn" onclick="window.CultureAuth.exportLocalBackup()" ${disabled}>EXPORT LOCAL</button>
               <button type="button" class="btn" onclick="document.getElementById('account-import-backup').click()" ${disabled}>IMPORT</button>
+              <button type="button" class="btn" onclick="window.CultureAuth.clearDeviceData()" ${disabled}>EFFACER CET APPAREIL</button>
               <input id="account-import-backup" type="file" accept="application/json,.json" hidden>
             </div>
           </details>
@@ -309,6 +418,7 @@
           <div><span>Méthode de connexion</span><strong>${escapeHtml(provider)}</strong></div>
         </div>
         <p class="account-text">Le compte sert juste à garder tes paquets et ta progression entre tes appareils.</p>
+        <p class="account-method-note">À la déconnexion, les données de ce compte sont retirées de l'écran sur cet appareil.</p>
         <div class="account-actions account-main-actions">
           <button class="btn btn-y" onclick="window.CultureAuth.syncNow()" ${disabled}>SAUVEGARDER MA PROGRESSION</button>
           <button class="btn" onclick="window.CultureAuth.restoreFromCloud()" ${disabled}>RÉCUPÉRER LE CLOUD</button>
@@ -328,15 +438,17 @@
           <div class="account-local-tools">
             <button class="btn" onclick="window.CultureAuth.exportLocalBackup()" ${disabled}>EXPORT LOCAL</button>
             <button class="btn" onclick="document.getElementById('account-import-backup').click()" ${disabled}>IMPORT</button>
+            <button class="btn" onclick="window.CultureAuth.clearDeviceData()" ${disabled}>EFFACER CET APPAREIL</button>
           </div>
         </details>
         <details class="account-details">
           <summary>Connexion</summary>
           <div class="account-local-tools">
             <button class="btn" onclick="window.CultureAuth.signOut()" ${disabled}>DÉCONNEXION</button>
+            <button class="btn" onclick="window.CultureAuth.signOutEverywhere()" ${disabled}>DÉCONNECTER TOUS MES APPAREILS</button>
           </div>
           <form class="account-form account-form-stack account-password-update" id="account-change-password-form">
-            <input type="password" id="account-new-password" class="account-input" placeholder="nouveau mot de passe" autocomplete="new-password" minlength="8">
+            <input type="password" id="account-new-password" class="account-input" placeholder="10 caractères, majuscule, minuscule et chiffre" autocomplete="new-password" minlength="10">
             <button class="btn" type="submit" ${disabled}>CHANGER LE MOT DE PASSE</button>
           </form>
         </details>
@@ -471,6 +583,7 @@
     if (autoSyncedSessionId === session.user.id) return false;
     autoSyncedSessionId = session.user.id;
 
+    activateUserLocalContext(session.user.id);
     const localSnapshot = buildLocalSnapshot();
     if (!hasMeaningfulSnapshot(localSnapshot)) {
       statusMessage = defaultMessage;
@@ -486,6 +599,7 @@
 
       if (!hasMeaningfulSnapshot(cloudSnapshot)) {
         await saveSnapshotToCloud(client, localSnapshot);
+        cacheSnapshotForUser(session.user.id, localSnapshot);
         statusMessage = defaultMessage + " Tes données locales ont été sauvegardées dans ton compte.";
         return true;
       }
@@ -508,7 +622,9 @@
     const fields = getAuthFields();
     if (!requireCreationConfirmation()) return;
     if (!fields.email || !fields.password) return setStatus("Email et mot de passe obligatoires.");
-    if (fields.password.length < 8) return setStatus("Le mot de passe doit faire au moins 8 caractères.");
+    if (authMode === "signup" && !isStrongPassword(fields.password)) {
+      return setStatus("Choisis au moins 10 caractères avec une majuscule, une minuscule et un chiffre.");
+    }
     if (authMode === "signup" && fields.password !== fields.passwordConfirm) {
       return setStatus("Les deux mots de passe ne correspondent pas.");
     }
@@ -517,8 +633,11 @@
       const client = await getClient();
       if (authMode === "signup") {
         const handle = fields.handle || normalizeHandle(fields.email.split("@")[0]);
-        if (!handle) return setStatus("Choisis un identifiant public.");
+        if (!isValidHandle(handle)) return setStatus("Choisis un identifiant public de 2 à 24 lettres, chiffres ou underscores.");
         const displayName = handle;
+        if (!isSafePublicProfile(displayName, handle)) {
+          return setStatus("Cet identifiant public contient un terme non autorisé.");
+        }
         localStorage.setItem("qpuc-social-my-name", displayName);
         const { data, error } = await client.auth.signUp({
           email: fields.email,
@@ -531,6 +650,7 @@
         if (error) throw error;
         session = data && data.session;
         if (session) {
+          activateUserLocalContext(session.user.id);
           await ensureProfile(displayName, handle);
           await syncLocalAfterLogin("Compte créé.");
         } else {
@@ -544,6 +664,7 @@
         });
         if (error) throw error;
         session = data && data.session;
+        activateUserLocalContext(session.user.id);
         await ensureProfile();
         await loadProfile();
         await syncLocalAfterLogin("Connecté.");
@@ -624,7 +745,9 @@
   async function updatePassword(e) {
     e.preventDefault();
     const password = document.getElementById("account-new-password")?.value || "";
-    if (password.length < 8) return setStatus("Le nouveau mot de passe doit faire au moins 8 caractères.");
+    if (!isStrongPassword(password)) {
+      return setStatus("Choisis au moins 10 caractères avec une majuscule, une minuscule et un chiffre.");
+    }
     try {
       setBusy(true);
       const client = await getClient();
@@ -670,18 +793,22 @@
         "TOI",
         32
       ).trim() || "TOI";
-      const publicHandle =
+      const candidateHandle =
         normalizeHandle(handle) ||
         normalizeHandle(profile && profile.handle) ||
         normalizeHandle(session.user.user_metadata?.handle) ||
         normalizeHandle(session.user.email?.split("@")[0]) ||
         null;
+      const publicHandle = isValidHandle(candidateHandle) ? candidateHandle : null;
+      const safeProfile = isSafePublicProfile(name, publicHandle || "membre");
+      const safeName = safeProfile ? name : "Membre";
+      const safeHandle = safeProfile ? publicHandle : ("membre_" + session.user.id.replace(/-/g, "").slice(0, 8));
       const { data } = await client
         .from("profiles")
         .upsert({
           user_id: session.user.id,
-          display_name: name,
-          handle: publicHandle,
+          display_name: safeName,
+          handle: safeHandle,
           updated_at: new Date().toISOString(),
         }, { onConflict: "user_id" })
         .select("display_name, handle, avatar_url")
@@ -698,7 +825,10 @@
     const displayName = sanitizeText(document.getElementById("account-profile-name")?.value || "", 32).trim();
     const handle = normalizeHandle(document.getElementById("account-profile-handle")?.value || "");
     if (!displayName) return setStatus("Choisis un nom affiché.");
-    if (!handle) return setStatus("Choisis un identifiant public.");
+    if (!isValidHandle(handle)) return setStatus("Choisis un identifiant public de 2 à 24 lettres, chiffres ou underscores.");
+    if (!isSafePublicProfile(displayName, handle)) {
+      return setStatus("Ce profil public contient un terme ou un lien non autorisé.");
+    }
     try {
       setBusy(true);
       const client = await getClient();
@@ -742,6 +872,7 @@
         }
       }
       await saveSnapshotToCloud(client, snapshot);
+      cacheSnapshotForUser(session.user.id, snapshot);
       setStatus("Progression sauvegardée.");
     } catch (err) {
       setStatus((err && err.message) || "Sauvegarde impossible. Vérifie la table Supabase.");
@@ -772,6 +903,7 @@
         }
       }
       restoreSnapshot(data.state);
+      cacheSnapshotForUser(session.user.id, data.state);
       setStatus("Sauvegarde restaurée. La page va se rafraîchir.");
       setTimeout(() => window.location.reload(), 700);
     } catch (err) {
@@ -814,6 +946,7 @@
         const snapshot = JSON.parse(String(reader.result || ""));
         if (!hasMeaningfulSnapshot(snapshot)) throw new Error("Ce fichier ne contient pas de sauvegarde CULTURE valide.");
         restoreSnapshot(snapshot);
+        if (session && session.user) cacheSnapshotForUser(session.user.id, snapshot);
         setStatus("Import terminé. La page va se rafraîchir.");
         setTimeout(() => window.location.reload(), 600);
       } catch (err) {
@@ -828,13 +961,60 @@
     try {
       setBusy(true);
       const client = await getClient();
+      const userId = session && session.user ? session.user.id : "";
+      if (userId) cacheSnapshotForUser(userId);
       await client.auth.signOut({ scope: "local" });
+      clearSnapshotStorage();
+      localStorage.removeItem(LOCAL_OWNER_KEY);
       session = null;
       profile = null;
       autoSyncedSessionId = "";
-      setStatus("Déconnecté.");
+      window.location.reload();
     } catch (err) {
       setStatus((err && err.message) || "Déconnexion impossible.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function signOutEverywhere() {
+    if (!confirm("Déconnecter ce compte de tous les appareils ?")) return;
+    try {
+      setBusy(true);
+      const client = await getClient();
+      const userId = session && session.user ? session.user.id : "";
+      if (userId) cacheSnapshotForUser(userId);
+      const { error } = await client.auth.signOut({ scope: "global" });
+      if (error) throw error;
+      clearSnapshotStorage();
+      localStorage.removeItem(LOCAL_OWNER_KEY);
+      session = null;
+      profile = null;
+      autoSyncedSessionId = "";
+      window.location.reload();
+    } catch (err) {
+      setStatus((err && err.message) || "Déconnexion globale impossible.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function clearDeviceData() {
+    if (!confirm("Effacer de cet appareil les paquets, la progression et les caches de comptes ? Les données déjà sauvegardées dans le cloud resteront disponibles.")) return;
+    try {
+      setBusy(true);
+      if (session) {
+        const client = await getClient();
+        await client.auth.signOut({ scope: "local" });
+      }
+      clearSnapshotStorage();
+      removeAllAccountCaches();
+      localStorage.removeItem(LOCAL_OWNER_KEY);
+      session = null;
+      profile = null;
+      window.location.reload();
+    } catch (err) {
+      setStatus((err && err.message) || "Impossible d'effacer les données de cet appareil.");
     } finally {
       setBusy(false);
     }
@@ -848,6 +1028,7 @@
       const { data } = await client.auth.getSession();
       session = data && data.session;
       if (session) {
+        activateUserLocalContext(session.user.id);
         await ensureProfile();
         await loadProfile();
         await syncLocalAfterLogin("Connecté.");
@@ -858,6 +1039,7 @@
           statusMessage = "Choisis un nouveau mot de passe.";
           renderAccount();
         } else if (session) {
+          activateUserLocalContext(session.user.id);
           await ensureProfile();
           await loadProfile();
           await syncLocalAfterLogin("Connecté.");
@@ -893,6 +1075,21 @@
       .slice(0, 24);
   }
 
+  function isStrongPassword(value) {
+    const password = String(value || "");
+    return password.length >= 10 && /[a-z]/.test(password) && /[A-Z]/.test(password) && /\d/.test(password);
+  }
+
+  function isValidHandle(value) {
+    return /^[a-z0-9_]{2,24}$/.test(String(value || ""));
+  }
+
+  function isSafePublicProfile(displayName, handle) {
+    const safety = window.CultureContentSafety;
+    if (!safety || typeof safety.checkPack !== "function") return false;
+    return safety.checkPack({ name: displayName, description: handle, cards: [] }).ok;
+  }
+
   function getProviderLabel() {
     if (!session || !session.user) return "";
     const identities = session.user.identities || [];
@@ -913,6 +1110,8 @@
     restoreFromCloud,
     exportLocalBackup,
     signOut,
+    signOutEverywhere,
+    clearDeviceData,
     buildLocalSnapshot,
   };
 

@@ -1,5 +1,17 @@
 # Auth Setup
 
+## Protection des données
+
+Avant d'ouvrir le site au public, exécuter entièrement `docs/supabase-schema.sql`
+dans le SQL Editor du projet Supabase. Ce script active la sécurité ligne par
+ligne : un compte ne peut lire, modifier ou supprimer que son propre profil et
+sa propre progression. Les visiteurs non connectés n'ont aucun accès à ces
+tables.
+
+Ne jamais placer une `secret key`, une clé `service_role`, un mot de passe de
+base de données ou un secret Google dans les fichiers du site. Seule la
+`publishable key` Supabase peut être présente dans `supabase-config.js`.
+
 ## Local Redirects
 
 In Supabase `Authentication -> URL Configuration`:
@@ -34,12 +46,19 @@ In Supabase:
 1. Go to `Authentication -> Sign In / Providers`.
 2. Enable `Google`.
 3. Add the Google OAuth client ID and client secret.
+4. Keep email confirmation enabled.
+5. Enable CAPTCHA before a public launch and review Auth rate limits.
 
 In Google Cloud OAuth:
 
 - Authorized JavaScript origin: `http://localhost:3456`
 - Authorized JavaScript origin: `https://canardculture.com`
 - Authorized redirect URI: copy the callback URL shown by Supabase in the Google provider settings.
+
+Production URLs in `Authentication -> URL Configuration`:
+
+- Site URL: `https://canardculture.com/`
+- Redirect URL: `https://canardculture.com/**`
 
 ## Public User ID
 

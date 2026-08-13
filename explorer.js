@@ -3,6 +3,16 @@
   const SRS_KEY = "qpuc-srs";
   let currentCategory = null;
 
+  function escapeHtml(value) {
+    return String(value == null ? "" : value).replace(/[&<>"']/g, (char) => ({
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "'": "&#39;",
+    })[char]);
+  }
+
   function getCardKey(packId, idx) { return packId + ":" + idx; }
   function getMastery(packId, total) {
     const data = SRS.getData(SRS_KEY) || {};
@@ -200,9 +210,9 @@
     else if (started) cta = "Continuer →";
 
     row.innerHTML = `
-      <div class="pack-row-icon">${pack.icon || "📚"}</div>
+      <div class="pack-row-icon">${escapeHtml(pack.icon || "📚")}</div>
       <div class="pack-row-info">
-        <div class="pack-row-name">${pack.name}${badge}</div>
+        <div class="pack-row-name">${escapeHtml(pack.name)}${badge}</div>
         <div class="pack-row-meta">
           <span class="pack-row-diff" style="background:${dColor}33;color:${dColor}">${dLabel}</span>
           <span class="pack-row-cards">${total} cartes</span>

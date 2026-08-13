@@ -5,6 +5,15 @@
 
   const rules = [
     {
+      id: "active_content",
+      label: "code ou contenu actif",
+      rawPatterns: [
+        /<\s*\/?\s*[a-z][^>]*>/i,
+        /\bjavascript\s*:/i,
+        /\bon(?:error|load|click|focus)\s*=/i,
+      ],
+    },
+    {
       id: "violence",
       label: "menaces ou violence ciblée",
       patterns: [

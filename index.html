@@ -2,8 +2,8 @@
 <html lang="fr">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; frame-src 'none'; form-action 'self' https://formspree.io; script-src 'self' 'unsafe-inline' https://esm.sh; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob:; media-src 'self' blob:; connect-src 'self' https://zkhnlewpmbetwlauwooz.supabase.co wss://zkhnlewpmbetwlauwooz.supabase.co https://esm.sh https://formspree.io; manifest-src 'self'; worker-src 'self'; upgrade-insecure-requests">
-<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; frame-src 'none'; form-action 'self' https://formspree.io; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob:; media-src 'self' blob:; connect-src 'self' https://zkhnlewpmbetwlauwooz.supabase.co wss://zkhnlewpmbetwlauwooz.supabase.co https://formspree.io; manifest-src 'self'; worker-src 'self'; upgrade-insecure-requests">
+<meta name="referrer" content="no-referrer">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>CULTURE!!!</title>
 
@@ -457,9 +457,10 @@
           <button type="button" class="premium-choice" data-interest="peut-etre" onclick="premiumSelectInterest(this)">Peut-être</button>
           <button type="button" class="premium-choice" data-interest="non" onclick="premiumSelectInterest(this)">Pas pour moi</button>
         </div>
-        <input id="premium-feedback-email" class="mock-input" type="email" placeholder="ton email (optionnel)">
-        <textarea id="premium-feedback-message" class="mock-input premium-feedback-textarea" placeholder="Ton avis : idée prioritaire, document que tu uploaderais, animal que tu voudrais..."></textarea>
+        <input id="premium-feedback-email" class="mock-input" type="email" placeholder="ton email (optionnel)" maxlength="254" autocomplete="email">
+        <textarea id="premium-feedback-message" class="mock-input premium-feedback-textarea" placeholder="Ton avis : idée prioritaire, document que tu uploaderais, animal que tu voudrais..." maxlength="2000"></textarea>
         <button class="btn btn-y" type="submit">ENVOYER LE FEEDBACK</button>
+        <p class="premium-feedback-status">Le message et l'email éventuel sont envoyés à Alice via Formspree. Ils ne sont pas conservés sur cet appareil.</p>
         <p id="premium-feedback-status" class="premium-feedback-status" aria-live="polite"></p>
       </form>
     </div>
@@ -639,12 +640,13 @@
 <script src="culture-app.js?v=97"></script>
 <script src="duck.js?v=63"></script>
 <script src="canard-settings.js?v=64"></script>
-<script src="content-safety.js?v=1"></script>
+<script src="content-safety.js?v=2"></script>
 <script src="social.js?v=68"></script>
 <script src="pack-creator.js?v=80"></script>
+<script src="vendor/supabase.min.js?v=1" integrity="sha384-l8ah+VgaWtk1mvOe9VC+OirC6qHFF4yH7l7mKRidV9MSti3E9F463bMp6ZVN4kuC" crossorigin="anonymous"></script>
 <script src="supabase-config.js?v=77"></script>
-<script src="auth.js?v=91"></script>
-<script src="feedback-survey.js?v=64"></script>
+<script src="auth.js?v=93"></script>
+<script src="feedback-survey.js?v=65"></script>
 <script src="duck-notifications.js?v=62"></script>
 
 <!-- ───── PWA : registration silencieuse du service worker ───── -->

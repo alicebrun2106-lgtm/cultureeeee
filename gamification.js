@@ -144,7 +144,7 @@
   function showToast(text, opts = {}) {
     const el = document.createElement("div");
     el.className = "gam-toast " + (opts.className || "");
-    el.innerHTML = text;
+    el.textContent = text;
     document.body.appendChild(el);
     requestAnimationFrame(() => el.classList.add("gam-toast-show"));
     setTimeout(() => {
@@ -172,7 +172,7 @@
 
   function celebratePackMastered(packName) {
     fireConfetti();
-    showToast("🎉 <strong>Pack maîtrisé !</strong><br>" + packName, { className: "gam-toast-celebrate", duration: 3000 });
+    showToast("🎉 Pack maîtrisé ! · " + String(packName || ""), { className: "gam-toast-celebrate", duration: 3000 });
   }
 
   function showComboToast(combo) {
@@ -185,7 +185,7 @@
 
   function showDailyGoalToast() {
     fireConfetti();
-    showToast(`🎯 <strong>Objectif du jour atteint !</strong>`, { className: "gam-toast-celebrate", duration: 2500 });
+    showToast("🎯 Objectif du jour atteint !", { className: "gam-toast-celebrate", duration: 2500 });
   }
 
   // ---------- PUBLIC API ----------

@@ -5,7 +5,7 @@
 // Comportement :
 //   - Affiche un modal au clic sur une feature "coming soon"
 //   - question d'intérêt + commentaire
-//   - Sauvegarde dans localStorage (pour l'user) + POST vers Formspree (pour Alice)
+//   - Sauvegarde locale du choix uniquement + POST minimal vers Formspree
 //   - Toast "Merci !" puis fermeture
 
 (function () {
@@ -18,10 +18,22 @@
   function loadVotes() {
     try { return JSON.parse(localStorage.getItem(VOTES_KEY) || "[]"); } catch { return []; }
   }
+  function minimizeStoredVotes() {
+    const clean = loadVotes().slice(-50).map((vote) => ({
+      feature: cleanText(vote && vote.feature, 80),
+      reaction: cleanText(vote && (vote.reaction || vote.usage), 40),
+      timestamp: cleanText(vote && vote.timestamp, 40),
+    }));
+    localStorage.setItem(VOTES_KEY, JSON.stringify(clean));
+  }
   function saveVote(vote) {
     const all = loadVotes();
-    all.push(vote);
-    localStorage.setItem(VOTES_KEY, JSON.stringify(all));
+    all.push({
+      feature: cleanText(vote.feature, 80),
+      reaction: cleanText(vote.reaction, 40),
+      timestamp: vote.timestamp,
+    });
+    localStorage.setItem(VOTES_KEY, JSON.stringify(all.slice(-50)));
   }
 
   // ─── Ouverture du modal de sondage ───
@@ -59,7 +71,7 @@
 
         <div class="fb-question">
           <label class="fb-label">Une question ou un commentaire ?</label>
-          <textarea id="fb-comment" class="mock-input fb-textarea" placeholder="Ex : je veux tester avec mes cours / je veux plutôt une app mobile / cette idée ne me sert pas..."></textarea>
+          <textarea id="fb-comment" class="mock-input fb-textarea" maxlength="2000" placeholder="Ex : je veux tester avec mes cours / je veux plutôt une app mobile / cette idée ne me sert pas..."></textarea>
         </div>
 
         <div class="fb-actions">
@@ -91,7 +103,7 @@
     const modal = document.getElementById("fb-survey-modal");
     if (!modal) return;
     const reaction = modal.querySelector('.fb-opt[data-q="reaction"].on');
-    const comment = (modal.querySelector("#fb-comment") || {}).value || "";
+    const comment = cleanText((modal.querySelector("#fb-comment") || {}).value || "", 2000);
 
     if (!reaction) {
       toast("Choisis une réponse pour valider.");
@@ -103,10 +115,9 @@
       reaction: reaction.dataset.v,
       comment: comment.trim(),
       timestamp: new Date().toISOString(),
-      ua: navigator.userAgent
     };
 
-    // Sauvegarde locale (pour que l'user revoit ses votes)
+    // Seuls le choix et la date restent sur l'appareil. Le commentaire n'y est pas conservé.
     saveVote(vote);
 
     // POST vers Formspree (si configuré)
@@ -131,8 +142,8 @@
     const selected = document.querySelector(".premium-choice.on");
     return {
       interest: selected ? selected.dataset.interest : "",
-      email: (document.getElementById("premium-feedback-email")?.value || "").trim(),
-      message: (document.getElementById("premium-feedback-message")?.value || "").trim(),
+      email: cleanText(document.getElementById("premium-feedback-email")?.value || "", 254).trim(),
+      message: cleanText(document.getElementById("premium-feedback-message")?.value || "", 2000).trim(),
     };
   }
 
@@ -167,8 +178,6 @@
       email: fields.email,
       comment: fields.message,
       timestamp: new Date().toISOString(),
-      page: location.href,
-      ua: navigator.userAgent,
     };
     saveVote(vote);
     setPremiumFeedbackStatus("Envoi en cours...");
@@ -213,13 +222,19 @@
       return;
     }
     const txt = "VOTES LOCAUX (" + all.length + ") :\n\n" + all.map((v, i) =>
-      `[${i+1}] ${v.feature}\n  Réaction: ${v.reaction || v.usage || "?"}\n  ` + (v.comment ? `Commentaire: ${v.comment}\n  ` : "") + `Date: ${v.timestamp}`
+      `[${i+1}] ${v.feature}\n  Réaction: ${v.reaction || "?"}\n  Date: ${v.timestamp}`
     ).join("\n\n");
     alert(txt);
   }
 
   function escapeJs(s) {
     return String(s || "").replace(/\\/g, "\\\\").replace(/'/g, "\\'");
+  }
+
+  function cleanText(value, maxLength) {
+    return String(value == null ? "" : value)
+      .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, "")
+      .slice(0, maxLength);
   }
 
   function toast(msg) {
@@ -243,4 +258,5 @@
   window.fbShowAdminVotes = showAdminVotes;
   window.premiumSelectInterest = premiumSelectInterest;
   window.submitPremiumFeedback = submitPremiumFeedback;
+  minimizeStoredVotes();
 })();
