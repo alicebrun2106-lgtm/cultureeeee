@@ -31,7 +31,7 @@
   let profile = null;
   let statusMessage = "";
   let isBusy = false;
-  let authMode = "login";
+  let authMode = "signup";
   let autoSyncedSessionId = "";
 
   function getConfig() {
@@ -170,12 +170,22 @@
 
   function setStatus(message) {
     statusMessage = message || "";
-    renderAccount();
+    const status = document.querySelector("#account-content .account-status");
+    if (status) status.textContent = statusMessage;
+    else renderAccount();
   }
 
   function setBusy(value) {
     isBusy = !!value;
-    renderAccount();
+    const panel = document.querySelector("#account-content .account-panel");
+    if (panel) {
+      panel.setAttribute("aria-busy", isBusy ? "true" : "false");
+      panel.querySelectorAll("button, input").forEach((control) => {
+        control.disabled = isBusy;
+      });
+    } else {
+      renderAccount();
+    }
   }
 
   function configuredNotice() {
@@ -224,24 +234,51 @@
         <div class="account-panel frame">
           <div class="account-kicker">COMPTE</div>
           <div class="account-tabs" role="tablist" aria-label="Compte">
-            <button type="button" class="account-tab ${!isSignup ? "on" : ""}" onclick="window.CultureAuth.setMode('login')" ${disabled}>CONNEXION</button>
-            <button type="button" class="account-tab ${isSignup ? "on" : ""}" onclick="window.CultureAuth.setMode('signup')" ${disabled}>CRÉER UN COMPTE</button>
+            <button type="button" class="account-tab ${isSignup ? "on" : ""}" onclick="window.CultureAuth.setMode('signup')" ${disabled}>CRÉER MON COMPTE</button>
+            <button type="button" class="account-tab ${!isSignup ? "on" : ""}" onclick="window.CultureAuth.setMode('login')" ${disabled}>J'AI DÉJÀ UN COMPTE</button>
           </div>
-          <h3 class="account-title">${isSignup ? "Créer ton compte" : "Connecte-toi"}</h3>
-          <p class="account-text">${isSignup ? "Choisis un identifiant public, puis ajoute ton email et ton mot de passe." : "Connecte-toi avec Google, ou avec ton email et ton mot de passe."}</p>
-          <button type="button" class="btn account-google-btn" onclick="window.CultureAuth.signInWithGoogle()" ${disabled}>CONTINUER AVEC GOOGLE</button>
-          <div class="account-divider"><span>OU</span></div>
+          <h3 class="account-title">${isSignup ? "Crée ton compte" : "Bon retour !"}</h3>
+          <p class="account-text">${isSignup
+            ? "Choisis comment créer ton compte. Il gardera tes paquets et ta progression sur tous tes appareils."
+            : "Utilise la même méthode que lors de la création de ton compte."}</p>
+          ${isSignup ? `
+            <label class="account-create-confirm">
+              <input type="checkbox" id="account-create-confirm">
+              <span>Je confirme vouloir créer un compte Canard Culture.</span>
+            </label>
+          ` : `
+            <label class="account-create-confirm account-google-confirm">
+              <input type="checkbox" id="account-google-confirm">
+              <span>Je comprends que Google créera mon compte si cette adresse n'existe pas encore.</span>
+            </label>
+          `}
+          <button type="button" class="btn account-google-btn" onclick="window.CultureAuth.signInWithGoogle()" ${disabled}>
+            ${isSignup ? "CRÉER AVEC GOOGLE" : "SE CONNECTER AVEC GOOGLE"}
+          </button>
+          <p class="account-method-note">${isSignup
+            ? "Avec Google, le compte est créé automatiquement après ton autorisation. Tu n'as pas de mot de passe supplémentaire à choisir."
+            : "Pour un compte créé avec Google."}</p>
+          <div class="account-divider"><span>${isSignup ? "OU CRÉER AVEC TON EMAIL" : "OU AVEC TON EMAIL"}</span></div>
           <form class="account-form account-form-stack" id="account-password-form">
-            ${isSignup ? `<input type="text" id="account-handle" class="account-input" placeholder="identifiant public, ex : alice" autocomplete="username" maxlength="24" required>` : ""}
+            ${isSignup ? `
+              <label class="account-field-label" for="account-handle">IDENTIFIANT PUBLIC</label>
+              <input type="text" id="account-handle" class="account-input" placeholder="ex : alice" autocomplete="username" maxlength="24" required>
+            ` : ""}
+            <label class="account-field-label" for="account-email">EMAIL</label>
             <input type="email" id="account-email" class="account-input" placeholder="ton@email.com" autocomplete="email" required>
-            <input type="password" id="account-password" class="account-input" placeholder="mot de passe" autocomplete="${isSignup ? "new-password" : "current-password"}" minlength="8" required>
-            ${isSignup ? `<input type="password" id="account-password-confirm" class="account-input" placeholder="confirmer le mot de passe" autocomplete="new-password" minlength="8" required>` : ""}
-            <button class="btn btn-y" type="submit" ${disabled}>${isSignup ? "CRÉER LE COMPTE" : "SE CONNECTER"}</button>
+            <label class="account-field-label" for="account-password">MOT DE PASSE</label>
+            <input type="password" id="account-password" class="account-input" placeholder="8 caractères minimum" autocomplete="${isSignup ? "new-password" : "current-password"}" minlength="8" required>
+            ${isSignup ? `
+              <label class="account-field-label" for="account-password-confirm">CONFIRMER LE MOT DE PASSE</label>
+              <input type="password" id="account-password-confirm" class="account-input" placeholder="retape ton mot de passe" autocomplete="new-password" minlength="8" required>
+            ` : ""}
+            <button class="btn btn-y account-submit-btn" type="submit" ${disabled}>${isSignup ? "CRÉER AVEC EMAIL + MOT DE PASSE" : "SE CONNECTER"}</button>
           </form>
           <div class="account-secondary-actions">
             ${!isSignup ? `<button type="button" class="account-link-btn" onclick="window.CultureAuth.resetPassword()" ${disabled}>MOT DE PASSE OUBLIÉ</button>` : ""}
-            <button type="button" class="account-link-btn" onclick="window.CultureAuth.sendMagicLink()" ${disabled}>RECEVOIR UN LIEN MAGIQUE</button>
+            <button type="button" class="account-link-btn" onclick="window.CultureAuth.sendMagicLink()" ${disabled}>${isSignup ? "CRÉER AVEC UN LIEN EMAIL" : "ME CONNECTER AVEC UN LIEN EMAIL"}</button>
           </div>
+          <p class="account-method-note">Le lien email permet d'utiliser le compte sans mot de passe.</p>
           <details class="account-details account-backup-login">
             <summary>Sauvegarde locale</summary>
             <p class="account-text account-details-text">À utiliser seulement si tu veux déplacer une sauvegarde à la main.</p>
@@ -269,6 +306,7 @@
         <div class="account-profile-card">
           <div><span>Email</span><strong>${escapeHtml(email)}</strong></div>
           <div><span>Identifiant public</span><strong>${escapeHtml(profile && profile.handle ? "@" + profile.handle : "à choisir")}</strong></div>
+          <div><span>Méthode de connexion</span><strong>${escapeHtml(provider)}</strong></div>
         </div>
         <p class="account-text">Le compte sert juste à garder tes paquets et ta progression entre tes appareils.</p>
         <div class="account-actions account-main-actions">
@@ -333,6 +371,23 @@
       passwordConfirm: document.getElementById("account-password-confirm")?.value || "",
       handle: normalizeHandle(document.getElementById("account-handle")?.value || ""),
     };
+  }
+
+  function creationConfirmed() {
+    return !!document.getElementById("account-create-confirm")?.checked;
+  }
+
+  function requireCreationConfirmation() {
+    if (authMode !== "signup" || creationConfirmed()) return true;
+    setStatus("Confirme d'abord que tu veux créer un compte Canard Culture.");
+    return false;
+  }
+
+  function requireGoogleConfirmation() {
+    if (authMode === "signup") return requireCreationConfirmation();
+    if (document.getElementById("account-google-confirm")?.checked) return true;
+    setStatus("Confirme le fonctionnement de Google avant de continuer.");
+    return false;
   }
 
   function getRedirectTo() {
@@ -451,6 +506,7 @@
   async function handlePasswordAuth(e) {
     e.preventDefault();
     const fields = getAuthFields();
+    if (!requireCreationConfirmation()) return;
     if (!fields.email || !fields.password) return setStatus("Email et mot de passe obligatoires.");
     if (fields.password.length < 8) return setStatus("Le mot de passe doit faire au moins 8 caractères.");
     if (authMode === "signup" && fields.password !== fields.passwordConfirm) {
@@ -501,6 +557,7 @@
 
   async function sendMagicLink(e) {
     if (e && e.preventDefault) e.preventDefault();
+    if (!requireCreationConfirmation()) return;
     const email = getAuthFields().email;
     if (!email) return setStatus("Entre ton email avant de demander un lien magique.");
     try {
@@ -508,10 +565,15 @@
       const client = await getClient();
       const { error } = await client.auth.signInWithOtp({
         email,
-        options: { emailRedirectTo: getRedirectTo() },
+        options: {
+          emailRedirectTo: getRedirectTo(),
+          shouldCreateUser: authMode === "signup",
+        },
       });
       if (error) throw error;
-      setStatus("Lien envoyé. Ouvre ton email sur ce téléphone ou cet ordinateur.");
+      setStatus(authMode === "signup"
+        ? "Lien de création envoyé. Ouvre ton email pour terminer la création du compte."
+        : "Lien de connexion envoyé. Ouvre ton email sur ce téléphone ou cet ordinateur.");
     } catch (err) {
       setStatus(err.message || "Impossible d'envoyer le lien.");
     } finally {
@@ -520,6 +582,7 @@
   }
 
   async function signInWithGoogle() {
+    if (!requireGoogleConfirmation()) return;
     try {
       setBusy(true);
       statusMessage = "Vérification de Supabase...";
@@ -531,7 +594,9 @@
         options: { redirectTo: getRedirectTo() },
       });
       if (error) throw error;
-      setStatus("Redirection vers Google...");
+      setStatus(authMode === "signup"
+        ? "Redirection vers Google pour créer le compte..."
+        : "Redirection vers Google pour te connecter...");
     } catch (err) {
       setStatus((err && err.message) || "Connexion Google indisponible. Vérifie le provider Google dans Supabase.");
       setBusy(false);
