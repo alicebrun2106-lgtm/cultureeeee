@@ -283,13 +283,59 @@
         <h3 class="duck-h">UN CANARD QUI RESTE SUR TON ÉCRAN</h3>
         <p class="duck-launch-sub">Pas sur le site. Sur ton bureau. Il continue de flotter même quand tu quittes la page.</p>
         <div class="duck-launch-actions">
-          <button class="btn btn-y btn-big" id="btn-launch-desktop-duck">JE VEUX LE CANARD SUR MON ÉCRAN</button>
+          <a class="btn btn-y btn-big" id="btn-download-desktop-duck"
+             href="https://github.com/alicebrun2106-lgtm/cultureeeee/releases/download/v1.0.0/Canard.de.bureau-1.0.0-arm64.dmg">
+            TÉLÉCHARGER LE CANARD
+          </a>
+          <button class="btn btn-big" id="btn-launch-desktop-duck">J'AI DÉJÀ L'APP : OUVRIR</button>
         </div>
         <div class="duck-launch-hint" id="duck-launch-hint" style="display:none">
-          Si rien ne se passe, le navigateur intégré peut bloquer l'ouverture. Ouvre
-          <strong>Finder → Applications → "Canard de bureau"</strong>,
-          ou tape <strong>Cmd+Espace</strong> puis "canard".
+          Le téléchargement est lancé. Installe <strong>Canard de bureau</strong>, puis reviens ici et clique
+          sur <strong>J'AI DÉJÀ L'APP : OUVRIR</strong>.
         </div>
+
+        <div class="duck-download-row" aria-label="Choisir une version du Canard de bureau">
+          <div class="duck-download-title">CHOISIR UNE AUTRE VERSION</div>
+          <div class="duck-download-grid">
+            <a class="btn duck-dl-btn" href="https://github.com/alicebrun2106-lgtm/cultureeeee/releases/download/v1.0.0/Canard.de.bureau-1.0.0-arm64.dmg">
+              <span class="duck-dl-info">
+                <strong>MAC RÉCENT</strong>
+                <small>Puces Apple M1, M2, M3, M4 et suivantes</small>
+              </span>
+            </a>
+            <a class="btn duck-dl-btn" href="https://github.com/alicebrun2106-lgtm/cultureeeee/releases/download/v1.0.0/Canard.de.bureau-1.0.0.dmg">
+              <span class="duck-dl-info">
+                <strong>ANCIEN MAC INTEL</strong>
+                <small>Mac commercialisé avant les puces Apple</small>
+              </span>
+            </a>
+            <a class="btn duck-dl-btn" href="https://github.com/alicebrun2106-lgtm/cultureeeee/releases/download/v1.0.0/Canard.de.bureau-1.0.0-win-x64.zip">
+              <span class="duck-dl-info">
+                <strong>WINDOWS 10 / 11</strong>
+                <small>PC 64 bits</small>
+              </span>
+            </a>
+          </div>
+        </div>
+
+        <details class="duck-install-help">
+          <summary>PREMIÈRE INSTALLATION</summary>
+          <div class="duck-install-os">
+            <strong>MAC</strong>
+            <ol class="duck-install-steps">
+              <li>Ouvre le fichier <code>.dmg</code> téléchargé.</li>
+              <li>Glisse <strong>Canard de bureau</strong> dans <strong>Applications</strong>.</li>
+              <li>Au premier lancement, fais un clic droit sur l'app puis <strong>Ouvrir</strong>.</li>
+            </ol>
+          </div>
+          <div class="duck-install-os">
+            <strong>WINDOWS</strong>
+            <ol class="duck-install-steps">
+              <li>Décompresse le fichier <code>.zip</code>.</li>
+              <li>Ouvre le dossier puis lance <strong>Canard de bureau.exe</strong>.</li>
+            </ol>
+          </div>
+        </details>
 
       </div>
     </div>
@@ -639,7 +685,7 @@
 <script src="schemas.js?v=62"></script>
 <script src="culture-app.js?v=97"></script>
 <script src="duck.js?v=63"></script>
-<script src="canard-settings.js?v=64"></script>
+<script src="canard-settings.js?v=65"></script>
 <script src="content-safety.js?v=2"></script>
 <script src="social.js?v=68"></script>
 <script src="pack-creator.js?v=80"></script>

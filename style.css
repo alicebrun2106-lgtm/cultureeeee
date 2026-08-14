@@ -2458,6 +2458,7 @@
   /* ─── Banner launch desktop duck ─── */
   .duck-launch-banner {
     background: var(--yellow);
+    color: #080808;
     border: 4px solid var(--ink);
     box-shadow: 8px 8px 0 var(--pink-d);
     padding: 26px 28px;
@@ -3488,7 +3489,8 @@ html.dark .account-method-note {
   margin-top: 6px;
 }
 #btn-download-desktop-duck {
-  background: var(--mint);
+  background: var(--yellow);
+  color: #080808;
   text-decoration: none;
   display: inline-flex; align-items: center; gap: 10px;
 }
@@ -3496,10 +3498,14 @@ html.dark .account-method-note {
   transform: translate(2px, 2px);
   box-shadow: 2px 2px 0 var(--ink);
 }
+#btn-download-desktop-duck.duck-download-started {
+  background: var(--lime);
+}
 
 .duck-install-help {
   margin-top: 14px;
-  background: var(--paper);
+  background: #fffdf5;
+  color: #080808;
   border: 2px solid var(--ink);
   box-shadow: 3px 3px 0 var(--ink);
   padding: 10px 14px;
@@ -3539,7 +3545,8 @@ html.dark .account-method-note {
 .duck-download-row {
   margin-top: 20px;
   padding: 14px 16px;
-  background: var(--mint);
+  background: #fffdf5;
+  color: #080808;
   border: 3px solid var(--ink);
   box-shadow: 5px 5px 0 var(--ink);
 }
@@ -3560,11 +3567,13 @@ html.dark .account-method-note {
   gap: 12px;
   padding: 10px 12px;
   background: #fff;
+  color: #080808;
   text-decoration: none;
   text-transform: none;
   letter-spacing: 0;
   font-size: 12px;
   text-align: left;
+  min-height: 72px;
 }
 .duck-dl-btn::before { display: none; } /* enlève le triangle play */
 .duck-dl-emoji {
@@ -3585,7 +3594,7 @@ html.dark .account-method-note {
 }
 .duck-dl-info small {
   font-size: 11px;
-  color: #555;
+  color: #333;
   text-transform: none;
   letter-spacing: 0;
 }
@@ -3598,6 +3607,27 @@ html.dark .account-method-note {
   display: block;
   margin-top: 8px;
   margin-bottom: 4px;
+}
+
+html.dark .duck-launch-banner .duck-h,
+html.dark .duck-launch-banner .duck-launch-sub {
+  color: #080808 !important;
+}
+html.dark .duck-download-row,
+html.dark .duck-install-help {
+  background: #fffdf5 !important;
+  color: #080808 !important;
+  border-color: #080808 !important;
+  box-shadow: 5px 5px 0 #080808 !important;
+}
+html.dark .duck-download-row .duck-dl-btn {
+  background: #fff !important;
+  color: #080808 !important;
+  border-color: #080808 !important;
+  box-shadow: 4px 4px 0 #080808 !important;
+}
+html.dark .duck-download-row .duck-dl-info small {
+  color: #333 !important;
 }
 
 /* ===== PWA INSTALL BUTTON (Android/Chrome/Edge) ===== */

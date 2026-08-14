@@ -5,6 +5,30 @@
   const LEGACY_DESKTOP_ACTIVE_KEY = "qpuc-desktop-active";
   const DESKTOP_LAUNCH_AT_KEY = "qpuc-desktop-launch-at";
   const RECENT_LAUNCH_MS = 2 * 60 * 1000;
+  const DOWNLOADS = {
+    macArm: "https://github.com/alicebrun2106-lgtm/cultureeeee/releases/download/v1.0.0/Canard.de.bureau-1.0.0-arm64.dmg",
+    macIntel: "https://github.com/alicebrun2106-lgtm/cultureeeee/releases/download/v1.0.0/Canard.de.bureau-1.0.0.dmg",
+    windows: "https://github.com/alicebrun2106-lgtm/cultureeeee/releases/download/v1.0.0/Canard.de.bureau-1.0.0-win-x64.zip"
+  };
+
+  function detectedDownload() {
+    const platform = String(
+      (navigator.userAgentData && navigator.userAgentData.platform) ||
+      navigator.platform ||
+      navigator.userAgent ||
+      ""
+    ).toLowerCase();
+
+    if (platform.includes("win")) {
+      return { url: DOWNLOADS.windows, label: "TÉLÉCHARGER POUR WINDOWS" };
+    }
+
+    if (platform.includes("mac")) {
+      return { url: DOWNLOADS.macArm, label: "TÉLÉCHARGER POUR MAC" };
+    }
+
+    return { url: DOWNLOADS.macArm, label: "TÉLÉCHARGER LE CANARD" };
+  }
 
   // Déclencheur fiable du protocole canard:// — l'iframe est bloquée par
   // certains navigateurs depuis HTTPS, donc on clique sur un <a> caché.
@@ -29,7 +53,7 @@
   function setLaunchButtonIdle(btn) {
     btn.textContent = getRecentLaunchAttempt()
       ? "RELANCER LE CANARD SUR LE BUREAU"
-      : "JE VEUX LE CANARD SUR MON ÉCRAN";
+      : "J'AI DÉJÀ L'APP : OUVRIR";
     btn.classList.toggle("duck-launching", getRecentLaunchAttempt());
     btn.classList.remove("duck-launched");
     btn.disabled = false;
@@ -184,7 +208,21 @@
 
   window.refreshDuckUI = refresh;
 
-  // Bouton launch → lance l'app desktop + cache le canard web
+  function setupDownloadButton() {
+    const btn = document.getElementById("btn-download-desktop-duck");
+    if (!btn) return;
+    const download = detectedDownload();
+    btn.href = download.url;
+    btn.textContent = download.label;
+    btn.onclick = () => {
+      const hint = document.getElementById("duck-launch-hint");
+      if (hint) hint.style.display = "";
+      btn.classList.add("duck-download-started");
+      setTimeout(() => btn.classList.remove("duck-download-started"), 1800);
+    };
+  }
+
+  // Ce bouton sert uniquement après installation ; le bouton principal télécharge l'app.
   function setupLaunchButton() {
     const btn = document.getElementById("btn-launch-desktop-duck");
     if (!btn) return;
@@ -228,9 +266,13 @@
   };
 
   if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", () => { setTimeout(refresh, 200); setupLaunchButton(); });
+    document.addEventListener("DOMContentLoaded", () => {
+      setTimeout(refresh, 200);
+      setupDownloadButton();
+      setupLaunchButton();
+    });
   } else {
-    setTimeout(() => { refresh(); setupLaunchButton(); }, 200);
+    setTimeout(() => { refresh(); setupDownloadButton(); setupLaunchButton(); }, 200);
   }
-  setTimeout(() => { setupLaunchButton(); refresh(); }, 1000);
+  setTimeout(() => { setupDownloadButton(); setupLaunchButton(); refresh(); }, 1000);
 })();
