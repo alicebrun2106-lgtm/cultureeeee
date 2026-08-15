@@ -3730,6 +3730,7 @@ html.dark .duck-download-row .duck-dl-info small {
 }
 .admin-toolbar span { font-family: 'Space Mono', monospace; font-size: 12px; }
 .admin-block {
+  min-width: 0;
   padding: 18px;
   border: 3px solid var(--ink);
   background: var(--paper);
@@ -3837,13 +3838,15 @@ html.dark .admin-table td:first-child small { color: #333; }
   .admin-metrics { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
 @media (max-width: 700px) {
-  .admin-toolbar { align-items: flex-start; }
+  .admin-toolbar { align-items: flex-start; flex-wrap: wrap; }
+  .admin-toolbar > div { min-width: 0; }
   .admin-toolbar strong,
   .admin-block h3 { font-size: 11px; }
   .admin-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .admin-metric { min-height: 104px; padding: 11px; }
   .admin-metric strong { font-size: 21px; }
   .admin-block { padding: 13px; }
+  .admin-table-wrap { max-width: 100%; }
 }
 
 .pwa-section {
