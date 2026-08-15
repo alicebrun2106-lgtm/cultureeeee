@@ -25,7 +25,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=VT323&family=Press+Start+2P&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=105">
+<link rel="stylesheet" href="style.css?v=106">
 <script>
   (function () {
     var standalone = window.matchMedia && window.matchMedia("(display-mode: standalone)").matches;
@@ -288,8 +288,7 @@
         <h3 class="duck-h">UN CANARD QUI RESTE SUR TON ÉCRAN</h3>
         <p class="duck-launch-sub">Pas sur le site. Sur ton bureau. Il continue de flotter même quand tu quittes la page.</p>
         <div class="duck-launch-actions">
-          <a class="btn btn-y btn-big" id="btn-download-desktop-duck"
-             href="https://github.com/alicebrun2106-lgtm/cultureeeee/releases/download/v1.0.0/Canard.de.bureau-1.0.0-arm64.dmg">
+          <a class="btn btn-y btn-big" id="btn-download-desktop-duck">
             TÉLÉCHARGER LE CANARD
           </a>
           <button class="btn btn-big" id="btn-launch-desktop-duck">J'AI DÉJÀ L'APP : OUVRIR</button>
@@ -298,22 +297,26 @@
           Le téléchargement est lancé. Installe <strong>Canard de bureau</strong>, puis reviens ici et clique
           sur <strong>J'AI DÉJÀ L'APP : OUVRIR</strong>.
         </div>
+        <div class="duck-mac-certification" id="duck-mac-certification" hidden>
+          <strong>VERSION MAC EN COURS DE CERTIFICATION APPLE</strong>
+          <span>L'ancien fichier était bloqué par macOS. Le téléchargement reviendra dès que la nouvelle version sera signée et validée par Apple.</span>
+        </div>
 
         <div class="duck-download-row" aria-label="Choisir une version du Canard de bureau">
           <div class="duck-download-title">CHOISIR UNE AUTRE VERSION</div>
           <div class="duck-download-grid">
-            <a class="btn duck-dl-btn" href="https://github.com/alicebrun2106-lgtm/cultureeeee/releases/download/v1.0.0/Canard.de.bureau-1.0.0-arm64.dmg">
+            <span class="btn duck-dl-btn duck-dl-disabled" aria-disabled="true">
               <span class="duck-dl-info">
-                <strong>MAC RÉCENT</strong>
-                <small>Puces Apple M1, M2, M3, M4 et suivantes</small>
+                <strong>MAC RÉCENT · BIENTÔT</strong>
+                <small>Certification Apple en cours</small>
               </span>
-            </a>
-            <a class="btn duck-dl-btn" href="https://github.com/alicebrun2106-lgtm/cultureeeee/releases/download/v1.0.0/Canard.de.bureau-1.0.0.dmg">
+            </span>
+            <span class="btn duck-dl-btn duck-dl-disabled" aria-disabled="true">
               <span class="duck-dl-info">
-                <strong>ANCIEN MAC INTEL</strong>
-                <small>Mac commercialisé avant les puces Apple</small>
+                <strong>MAC INTEL · BIENTÔT</strong>
+                <small>Certification Apple en cours</small>
               </span>
-            </a>
+            </span>
             <a class="btn duck-dl-btn" href="https://github.com/alicebrun2106-lgtm/cultureeeee/releases/download/v1.0.0/Canard.de.bureau-1.0.0-win-x64.zip">
               <span class="duck-dl-info">
                 <strong>WINDOWS 10 / 11</strong>
@@ -327,11 +330,7 @@
           <summary>PREMIÈRE INSTALLATION</summary>
           <div class="duck-install-os">
             <strong>MAC</strong>
-            <ol class="duck-install-steps">
-              <li>Ouvre le fichier <code>.dmg</code> téléchargé.</li>
-              <li>Glisse <strong>Canard de bureau</strong> dans <strong>Applications</strong>.</li>
-              <li>Au premier lancement, fais un clic droit sur l'app puis <strong>Ouvrir</strong>.</li>
-            </ol>
+            <p class="duck-install-note">Le téléchargement Mac est suspendu jusqu'à la validation de la nouvelle version par Apple.</p>
           </div>
           <div class="duck-install-os">
             <strong>WINDOWS</strong>
@@ -704,7 +703,7 @@
 <script src="schemas.js?v=62"></script>
 <script src="culture-app.js?v=97"></script>
 <script src="duck.js?v=63"></script>
-<script src="canard-settings.js?v=65"></script>
+<script src="canard-settings.js?v=66"></script>
 <script src="content-safety.js?v=2"></script>
 <script src="social.js?v=68"></script>
 <script src="pack-creator.js?v=80"></script>

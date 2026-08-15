@@ -3501,6 +3501,24 @@ html.dark .account-method-note {
 #btn-download-desktop-duck.duck-download-started {
   background: var(--lime);
 }
+.duck-mac-certification {
+  display: grid;
+  gap: 6px;
+  margin-top: 14px;
+  padding: 12px 14px;
+  background: var(--yellow);
+  color: #080808;
+  border: 2px solid var(--ink);
+  font-family: 'Space Mono', monospace;
+  font-size: 12px;
+  line-height: 1.45;
+}
+.duck-mac-certification[hidden] { display: none; }
+.duck-mac-certification strong {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 9px;
+  line-height: 1.5;
+}
 
 .duck-install-help {
   margin-top: 14px;
@@ -3576,6 +3594,13 @@ html.dark .account-method-note {
   min-height: 72px;
 }
 .duck-dl-btn::before { display: none; } /* enlève le triangle play */
+.duck-dl-disabled,
+#btn-download-desktop-duck[aria-disabled="true"] {
+  opacity: .58;
+  cursor: not-allowed;
+  pointer-events: none;
+  box-shadow: 2px 2px 0 var(--ink);
+}
 .duck-dl-emoji {
   font-size: 26px;
   line-height: 1;
