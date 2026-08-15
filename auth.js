@@ -63,6 +63,27 @@
     return clientPromise;
   }
 
+  async function rpc(functionName, args) {
+    const client = await getClient();
+    return client.rpc(functionName, args || {});
+  }
+
+  async function trackUserActivity() {
+    if (!session || !session.user) return;
+    try {
+      const client = await getClient();
+      await client.rpc("record_user_activity");
+    } catch {
+      // The site remains usable while the optional analytics schema is deploying.
+    }
+  }
+
+  function notifyAuthChanged() {
+    window.dispatchEvent(new CustomEvent("culture:auth-changed", {
+      detail: { signedIn: !!(session && session.user) },
+    }));
+  }
+
   function readStoredValue(key, fallback) {
     try {
       const raw = localStorage.getItem(key);
@@ -1032,6 +1053,7 @@
         await ensureProfile();
         await loadProfile();
         await syncLocalAfterLogin("Connecté.");
+        await trackUserActivity();
       }
       client.auth.onAuthStateChange(async (event, nextSession) => {
         session = nextSession;
@@ -1043,13 +1065,16 @@
           await ensureProfile();
           await loadProfile();
           await syncLocalAfterLogin("Connecté.");
+          await trackUserActivity();
           renderAccount();
         } else {
           profile = null;
           renderAccount();
         }
+        notifyAuthChanged();
       });
       renderAccount();
+      notifyAuthChanged();
     } catch (err) {
       setStatus(err.message || "Connexion indisponible.");
     }
@@ -1113,6 +1138,7 @@
     signOutEverywhere,
     clearDeviceData,
     buildLocalSnapshot,
+    rpc,
   };
 
   if (document.readyState === "loading") {

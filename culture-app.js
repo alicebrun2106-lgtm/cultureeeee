@@ -321,7 +321,7 @@
     };
     tab = aliases[tab] || tab;
     if (tab === "canard" && isStandaloneApp()) tab = "trouver";
-    // tabs: trouver / mes-paquets / social / premium / account / canard / session / result
+    // tabs: trouver / mes-paquets / social / premium / account / admin / canard / session / result
     document.querySelectorAll(".page-section").forEach((s) => s.classList.remove("active"));
     document.querySelectorAll(".screen").forEach((s) => s.classList.remove("active"));
     const map = {
@@ -330,6 +330,7 @@
       "social": "page-social",
       "premium": "page-premium",
       "account": "page-account",
+      "admin": "page-admin",
       "canard": "page-canard",
       "session": "page-session",
       "result": "page-result",
@@ -345,6 +346,7 @@
     else if (tab === "mes-paquets") renderMesPaquets();
     else if (tab === "social" && typeof window.renderSocial === "function") window.renderSocial();
     else if (tab === "account" && window.CultureAuth && typeof window.CultureAuth.render === "function") window.CultureAuth.render();
+    else if (tab === "admin" && window.CultureAdmin && typeof window.CultureAdmin.render === "function") window.CultureAdmin.render();
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 

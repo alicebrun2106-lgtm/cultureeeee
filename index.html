@@ -25,7 +25,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=VT323&family=Press+Start+2P&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=103">
+<link rel="stylesheet" href="style.css?v=104">
 <script>
   (function () {
     var standalone = window.matchMedia && window.matchMedia("(display-mode: standalone)").matches;
@@ -52,6 +52,7 @@
       <a href="#" data-tab="social" onclick="goToTab('social'); return false;">SOCIAL</a>
       <a href="#" data-tab="premium" onclick="goToTab('premium'); return false;">PREMIUM</a>
       <a href="#" data-tab="account" onclick="goToTab('account'); return false;">COMPTE</a>
+      <a href="#" data-tab="admin" data-admin-link hidden style="display:none" onclick="goToTab('admin'); return false;">ADMIN</a>
       <a href="#" data-tab="canard" class="site-only" onclick="goToTab('canard'); return false;">🦆 CANARD</a>
     </div>
     <span class="nav-stats-hidden" id="nav-stats" style="display:none">— PAQUETS</span>
@@ -152,6 +153,10 @@
   <a href="#" data-tab="account" class="mtab" onclick="goToTab('account'); return false;">
     <span class="mtab-icon">☻</span>
     <span class="mtab-label">COMPTE</span>
+  </a>
+  <a href="#" data-tab="admin" data-admin-link hidden style="display:none" class="mtab" onclick="goToTab('admin'); return false;">
+    <span class="mtab-icon">▥</span>
+    <span class="mtab-label">ADMIN</span>
   </a>
   <a href="#" data-tab="canard" class="mtab site-only" onclick="goToTab('canard'); return false;">
     <span class="mtab-icon">🦆</span>
@@ -552,6 +557,20 @@
   </section>
 </section>
 
+<!-- ============================================================
+     PAGE: ADMIN (access controlled by Supabase)
+============================================================ -->
+<section id="page-admin" class="page-section">
+  <section class="container admin-container">
+    <div class="section-banner">
+      <h2>ADMIN</h2>
+      <div class="bar"></div>
+      <span class="fig">STATISTIQUES PRIVÉES</span>
+    </div>
+    <div id="admin-content" class="admin-content"></div>
+  </section>
+</section>
+
 
 <!-- ============================================================
      PAGE: SESSION FLASHCARD
@@ -691,7 +710,8 @@
 <script src="pack-creator.js?v=80"></script>
 <script src="vendor/supabase.min.js?v=1" integrity="sha384-l8ah+VgaWtk1mvOe9VC+OirC6qHFF4yH7l7mKRidV9MSti3E9F463bMp6ZVN4kuC" crossorigin="anonymous"></script>
 <script src="supabase-config.js?v=77"></script>
-<script src="auth.js?v=93"></script>
+<script src="auth.js?v=94"></script>
+<script src="admin.js?v=1"></script>
 <script src="feedback-survey.js?v=65"></script>
 <script src="duck-notifications.js?v=62"></script>
 
